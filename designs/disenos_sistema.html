@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseños del Sistema de Inventario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --lavender: #d4c5d8;
+            --mint: #c5e0d8;
+            --sage: #d4ddc5;
+            --teal: #5a7c7a;
+            --teal-dark: #3d5c5a;
+            --peach: #d4a98a;
+            --blush: #e8cfc8;
+            --cream: #faf8f5;
+            --soft-white: #f9f7f4;
+            --warm-gray: #4a4542;
+            --text-dark: #2d2a27;
+            --text-muted: #7a7673;
+            --border: rgba(90, 124, 122, 0.18);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Lora', serif;
+            background: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.85;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 10% 15%, rgba(212,197,216,.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 70%, rgba(197,224,216,.08) 0%, transparent 45%),
+                radial-gradient(circle at 50% 90%, rgba(232,207,200,.07) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── SIDEBAR NAV ── */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: var(--soft-white);
+            border-right: 1px solid var(--border);
+            padding: 2.5rem 1.5rem;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 2px 0 16px rgba(90,124,122,.06);
+        }
+
+        .sidebar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 0.4rem;
+        }
+
+        .sidebar-sub {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .nav-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--peach);
+            margin: 1.5rem 0 0.6rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: .45rem .8rem;
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: all .25s;
+            margin-bottom: .2rem;
+        }
+
+        .nav-link:hover {
+            background: rgba(90,124,122,.08);
+            color: var(--teal);
+        }
+
+        .nav-link.active {
+            background: rgba(90,124,122,.12);
+            color: var(--teal-dark);
+            font-weight: 600;
+        }
+
+        .nav-link.sub {
+            padding-left: 1.6rem;
+            font-size: 0.83rem;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            margin-left: 260px;
+            padding: 5rem 4rem 6rem;
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+        }
+
+        /* ── HEADER ── */
+        header {
+            border-bottom: 1px solid rgba(90,124,122,.2);
+            padding-bottom: 3rem;
+            margin-bottom: 5rem;
+            animation: slideDown .7s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .82rem;
+            color: var(--peach);
+            letter-spacing: .08em;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 4.5vw, 4rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -.02em;
+            line-height: 1.18;
+            margin-bottom: 1.2rem;
+        }
+
+        h1 em {
+            color: var(--teal);
+            font-style: italic;
+        }
+
+        .header-desc {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 680px;
+        }
+
+        .header-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-chip {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            background: var(--soft-white);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: .4rem 1rem;
+            font-size: .85rem;
+            color: var(--teal);
+        }
+
+        .meta-chip span { color: var(--text-muted); }
+
+        /* ── SECTIONS ── */
+        .section {
+            margin-bottom: 6rem;
+            animation: fadeUp .7s ease-out backwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-number {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .82rem;
+            color: var(--peach);
+            letter-spacing: .1em;
+            margin-bottom: .6rem;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 1rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 55px; height: 2px;
+            background: linear-gradient(90deg, var(--peach), transparent);
+        }
+
+        h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+            font-weight: 600;
+            color: var(--warm-gray);
+            margin: 3rem 0 1.2rem;
+        }
+
+        h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--teal-dark);
+            margin: 2rem 0 .8rem;
+        }
+
+        h5 {
+            font-family: 'Lora', serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--warm-gray);
+            margin: 1.5rem 0 .5rem;
+        }
+
+        p {
+            color: var(--text-dark);
+            margin-bottom: 1.2rem;
+            font-size: 1.02rem;
+        }
+
+        /* ── SUMMARY CARDS ── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .summary-card {
+            background: var(--soft-white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.6rem 1.4rem;
+            text-align: center;
+            box-shadow: 0 2px 14px rgba(90,124,122,.06);
+            transition: transform .3s, box-shadow .3s;
+        }
+
+        .summary-card:nth-child(1) { border-top: 3px solid var(--lavender); }
+        .summary-card:nth-child(2) { border-top: 3px solid var(--mint); }
+        .summary-card:nth-child(3) { border-top: 3px solid var(--blush); }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 28px rgba(90,124,122,.12);
+        }
+
+        .summary-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: var(--teal);
+            line-height: 1;
+            margin-bottom: .4rem;
+        }
+
+        .summary-label {
+            font-size: .9rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .summary-items {
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .summary-items li {
+            font-size: .85rem;
+            color: var(--text-muted);
+            padding: .25rem 0;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .summary-items li::before {
+            content: '✦';
+            color: var(--peach);
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+
+        /* ── DIAGRAM BOXES ── */
+        .diagram-box {
+            background: var(--soft-white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+            margin: 2.5rem 0;
+            box-shadow: 0 4px 20px rgba(90,124,122,.07);
+            overflow-x: auto;
+        }
+
+        /* ── USE CASE DIAGRAM ── */
+        .uc-diagram {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+            min-width: 700px;
+        }
+
+        .uc-actor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .actor-icon {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            border: 2px solid var(--teal);
+        }
+
+        .actor-icon.user  { background: rgba(212,197,216,.3); }
+        .actor-icon.sys   { background: rgba(197,224,216,.3); }
+        .actor-icon.db    { background: rgba(232,207,200,.3); }
+
+        .actor-name {
+            font-family: 'Playfair Display', serif;
+            font-size: .9rem;
+            font-weight: 600;
+            color: var(--teal-dark);
+            text-align: center;
+        }
+
+        .uc-middle {
+            display: flex;
+            flex-direction: column;
+            gap: .7rem;
+        }
+
+        .uc-node {
+            background: #f9f7f4;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: .55rem 1rem;
+            font-size: .88rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            transition: all .25s;
+        }
+
+        .uc-node:hover {
+            border-color: var(--teal);
+            background: rgba(90,124,122,.04);
+        }
+
+        .uc-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .uc-dot.main   { background: var(--teal); }
+        .uc-dot.include { background: var(--lavender); }
+        .uc-dot.extend  { background: var(--peach); }
+
+        .uc-badge {
+            margin-left: auto;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .72rem;
+            padding: .15rem .5rem;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        .badge-include {
+            background: rgba(212,197,216,.35);
+            color: #8060a0;
+        }
+
+        .badge-extend {
+            background: rgba(212,169,138,.3);
+            color: #8b5e35;
+        }
+
+        .uc-legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            font-size: .83rem;
+            color: var(--text-muted);
+        }
+
+        /* ── UML CLASS DIAGRAM ── */
+        .uml-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .uml-class {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .8rem;
+            background: var(--soft-white);
+            transition: box-shadow .3s, transform .3s;
+        }
+
+        .uml-class:hover {
+            box-shadow: 0 6px 20px rgba(90,124,122,.12);
+            transform: translateY(-3px);
+        }
+
+        .uml-header {
+            padding: .7rem 1rem;
+            font-weight: 600;
+            font-size: .88rem;
+            color: white;
+        }
+
+        .uml-header.config  { background: var(--teal); }
+        .uml-header.model   { background: #8b6a5a; }
+        .uml-header.util    { background: #7a6b8a; }
+        .uml-header.ctrl    { background: #5a7a5a; }
+
+        .uml-stereotype {
+            font-style: italic;
+            font-weight: 400;
+            font-size: .75rem;
+            opacity: .85;
+        }
+
+        .uml-section {
+            border-top: 1px solid var(--border);
+            padding: .6rem 1rem;
+        }
+
+        .uml-item {
+            padding: .18rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: .4rem;
+            color: var(--text-dark);
+            line-height: 1.4;
+        }
+
+        .uml-visibility {
+            color: var(--teal);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .uml-private { color: var(--peach); }
+
+        /* ── ER DIAGRAM ── */
+        .er-diagram {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+            min-width: 600px;
+        }
+
+        .er-table {
+            background: var(--soft-white);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            min-width: 220px;
+            box-shadow: 0 3px 12px rgba(90,124,122,.08);
+        }
+
+        .er-header {
+            padding: .75rem 1.2rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            text-align: center;
+        }
+
+        .er-header.usuarios   { background: var(--teal); }
+        .er-header.productos  { background: #8b6a5a; }
+        .er-header.logs       { background: #7a6b8a; }
+
+        .er-field {
+            display: flex;
+            align-items: center;
+            padding: .45rem 1rem;
+            border-bottom: 1px solid rgba(90,124,122,.1);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .78rem;
+            gap: .5rem;
+        }
+
+        .er-field:last-child { border-bottom: none; }
+
+        .er-key {
+            font-size: .65rem;
+            padding: .1rem .35rem;
+            border-radius: 4px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .key-pk  { background: rgba(90,124,122,.2); color: var(--teal-dark); }
+        .key-fk  { background: rgba(212,169,138,.3); color: #8b5e35; }
+        .key-uk  { background: rgba(212,197,216,.4); color: #6a4a7a; }
+
+        .er-field-name { color: var(--text-dark); flex: 1; }
+        .er-field-type { color: var(--text-muted); font-size: .74rem; }
+
+        .er-relation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+        }
+
+        .er-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .2rem;
+        }
+
+        .er-arrow-line {
+            width: 2px;
+            height: 60px;
+            background: var(--teal);
+        }
+
+        .er-arrow-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .78rem;
+            color: var(--teal);
+            background: rgba(90,124,122,.1);
+            padding: .2rem .6rem;
+            border-radius: 10px;
+        }
+
+        .er-cardinality {
+            font-size: .75rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ── TABLES ── */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: .92rem;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, rgba(197,224,216,.35), rgba(212,221,197,.35));
+            color: var(--text-dark);
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            padding: .9rem 1.2rem;
+            text-align: left;
+            border-bottom: 2px solid rgba(90,124,122,.2);
+        }
+
+        .data-table td {
+            padding: .8rem 1.2rem;
+            border-bottom: 1px solid rgba(90,124,122,.1);
+            color: var(--text-dark);
+        }
+
+        .data-table td:first-child {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .82rem;
+            color: var(--teal-dark);
+            font-weight: 500;
+        }
+
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover { background: rgba(197,224,216,.07); }
+
+        /* ── CODE BLOCKS ── */
+        pre {
+            background: linear-gradient(135deg, rgba(212,197,216,.07), rgba(197,224,216,.07));
+            border: 1px solid rgba(90,124,122,.15);
+            border-left: 4px solid var(--teal);
+            border-radius: 8px;
+            padding: 1.8rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        pre code {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .85rem;
+            line-height: 1.7;
+            color: var(--warm-gray);
+        }
+
+        .sql-keyword  { color: var(--teal-dark); font-weight: 600; }
+        .sql-string   { color: #7a5a35; }
+        .sql-comment  { color: var(--text-muted); font-style: italic; }
+        .sql-type     { color: var(--teal); }
+
+        /* ── INFO CARDS ── */
+        .info-card {
+            background: var(--soft-white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 2rem 2.2rem;
+            margin: 2rem 0;
+            box-shadow: 0 3px 14px rgba(90,124,122,.06);
+            transition: transform .3s, box-shadow .3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 28px rgba(90,124,122,.1);
+        }
+
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .info-card-icon {
+            width: 42px; height: 42px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .info-card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--teal-dark);
+        }
+
+        /* ── LISTS ── */
+        ul.styled, ol.styled {
+            padding-left: 0;
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        ul.styled li, ol.styled li {
+            padding: .4rem 0 .4rem 1.8rem;
+            position: relative;
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+
+        ul.styled li::before {
+            content: '○';
+            position: absolute; left: 0;
+            color: var(--peach);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        ol.styled { counter-reset: ol-counter; }
+        ol.styled li { counter-increment: ol-counter; }
+        ol.styled li::before {
+            content: counter(ol-counter);
+            position: absolute; left: 0;
+            background: linear-gradient(135deg, var(--mint), var(--teal));
+            color: white;
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .75rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            top: .55rem;
+        }
+
+        /* ── BADGES ── */
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .7rem;
+            margin: 1rem 0;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            border-radius: 20px;
+            padding: .35rem 1rem;
+            font-size: .82rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .pill-teal   { background: rgba(90,124,122,.12); color: var(--teal-dark); border-color: rgba(90,124,122,.2); }
+        .pill-peach  { background: rgba(212,169,138,.2); color: #7a4e2d; border-color: rgba(212,169,138,.3); }
+        .pill-purple { background: rgba(212,197,216,.3); color: #6a4a80; border-color: rgba(212,197,216,.5); }
+        .pill-sage   { background: rgba(212,221,197,.3); color: #4a6030; border-color: rgba(212,221,197,.5); }
+
+        /* ── CHECK ROWS ── */
+        .check-row {
+            display: flex;
+            align-items: flex-start;
+            gap: .7rem;
+            margin: .5rem 0;
+            font-size: .97rem;
+            color: var(--text-dark);
+        }
+
+        .check-icon { flex-shrink: 0; margin-top: .1rem; }
+
+        /* ── PRINCIPLE CARDS ── */
+        .principle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+
+        .principle-card {
+            background: var(--soft-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.4rem;
+            transition: transform .25s, box-shadow .25s;
+        }
+
+        .principle-card:nth-child(1) { border-top: 3px solid var(--lavender); }
+        .principle-card:nth-child(2) { border-top: 3px solid var(--mint); }
+        .principle-card:nth-child(3) { border-top: 3px solid var(--blush); }
+        .principle-card:nth-child(4) { border-top: 3px solid var(--sage); }
+
+        .principle-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 22px rgba(90,124,122,.1);
+        }
+
+        .principle-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .72rem;
+            color: var(--peach);
+            margin-bottom: .5rem;
+        }
+
+        .principle-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--teal-dark);
+            margin-bottom: .6rem;
+        }
+
+        .principle-desc {
+            font-size: .9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ── FLOW DIAGRAM ── */
+        .flow-layers {
+            display: flex;
+            flex-direction: column;
+            gap: .8rem;
+            margin: 2rem 0;
+        }
+
+        .flow-layer {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .flow-layer-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .75rem;
+            color: var(--peach);
+            min-width: 90px;
+            text-align: right;
+        }
+
+        .flow-layer-content {
+            flex: 1;
+        }
+
+        .flow-layer-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--teal-dark);
+        }
+
+        .flow-layer-items {
+            font-size: .85rem;
+            color: var(--text-muted);
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: var(--teal);
+            font-size: 1.2rem;
+            opacity: .6;
+        }
+
+        /* ── NORMALIZATION ── */
+        .norm-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+
+        .norm-card {
+            background: var(--soft-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.4rem;
+            text-align: center;
+        }
+
+        .norm-form {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--teal);
+        }
+
+        .norm-name {
+            font-size: .82rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* ── UC FLOW TABLE ── */
+        .flow-table {
+            width: 100%;
+            margin: 1.2rem 0;
+        }
+
+        .flow-step {
+            display: flex;
+            gap: 1rem;
+            padding: .6rem 0;
+            border-bottom: 1px dashed rgba(90,124,122,.15);
+            font-size: .94rem;
+            align-items: flex-start;
+        }
+
+        .flow-step:last-child { border-bottom: none; }
+
+        .step-num {
+            width: 26px; height: 26px;
+            background: var(--teal);
+            color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .78rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-top: .05rem;
+        }
+
+        .step-text { color: var(--text-dark); }
+
+        /* ── DIVIDER ── */
+        .divider {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 3rem 0;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid rgba(90,124,122,.2);
+            padding: 2.5rem 4rem;
+            margin-left: 260px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: var(--teal);
+        }
+
+        .footer-meta {
+            font-size: .85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main    { margin-left: 0; padding: 3rem 1.5rem; }
+            footer   { margin-left: 0; padding: 2rem 1.5rem; }
+            .norm-grid { grid-template-columns: 1fr; }
+            .uc-diagram { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── SIDEBAR ── -->
+    <nav class="sidebar">
+        <div class="sidebar-brand">Sistema de Inventario</div>
+        <div class="sidebar-sub">Documentación de Diseño</div>
+
+        <div class="nav-section-title">Contenido</div>
+        <a href="#overview" class="nav-link">Resumen General</a>
+
+        <div class="nav-section-title">1 · Casos de Uso</div>
+        <a href="#uc-diagram" class="nav-link">Diagrama</a>
+        <a href="#uc-actors" class="nav-link sub">Actores</a>
+        <a href="#uc-main" class="nav-link sub">Casos Principales</a>
+        <a href="#uc-relations" class="nav-link sub">Relaciones</a>
+
+        <div class="nav-section-title">2 · UML de Clases</div>
+        <a href="#uml-diagram" class="nav-link">Diagrama</a>
+        <a href="#uml-config" class="nav-link sub">Configuración</a>
+        <a href="#uml-models" class="nav-link sub">Modelos</a>
+        <a href="#uml-utils" class="nav-link sub">Utilidades</a>
+        <a href="#uml-controllers" class="nav-link sub">Controladores</a>
+        <a href="#uml-principles" class="nav-link sub">Principios SOLID</a>
+
+        <div class="nav-section-title">3 · Base de Datos</div>
+        <a href="#db-diagram" class="nav-link">Diagrama ER</a>
+        <a href="#db-sql" class="nav-link sub">Esquema SQL</a>
+        <a href="#db-tables" class="nav-link sub">Tablas</a>
+        <a href="#db-normalization" class="nav-link sub">Normalización</a>
+        <a href="#db-indexes" class="nav-link sub">Índices</a>
+    </nav>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main">
+
+        <!-- HEADER -->
+        <header>
+            <div class="header-tag">DOCUMENTACIÓN TÉCNICA · FEBRERO 2026</div>
+            <h1>Diseños del<br><em>Sistema de Inventario</em></h1>
+            <p class="header-desc">Este documento describe los tres diseños principales del sistema: Casos de Uso, Diagrama UML de Clases y Diseño de Base de Datos.</p>
+            <div class="header-meta">
+                <div class="meta-chip">📐 <span>3 Diseños</span></div>
+                <div class="meta-chip">🏗️ <span>Patrón MVC</span></div>
+                <div class="meta-chip">🗄️ <span>3FN · InnoDB</span></div>
+                <div class="meta-chip">⚡ <span>PHP · MySQL</span></div>
+            </div>
+        </header>
+
+        <!-- OVERVIEW -->
+        <section class="section" id="overview">
+            <div class="section-number">RESUMEN</div>
+            <h2>Visión General</h2>
+            <p>El sistema de inventario implementa una arquitectura MVC con algoritmos de búsqueda y ordenamiento codificados desde cero, una base de datos en Tercera Forma Normal y un modelo de seguridad basado en sesiones y hashing bcrypt.</p>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-num">7</div>
+                    <div class="summary-label">Casos de uso</div>
+                    <ul class="summary-items">
+                        <li>3 actores del sistema</li>
+                        <li>Relaciones include/extend</li>
+                        <li>Flujos detallados por caso</li>
+                        <li>Excepciones documentadas</li>
+                    </ul>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-num">11</div>
+                    <div class="summary-label">Clases UML</div>
+                    <ul class="summary-items">
+                        <li>4 capas arquitectónicas</li>
+                        <li>Principios SOLID aplicados</li>
+                        <li>Patrón MVC implementado</li>
+                        <li>Singleton en Database</li>
+                    </ul>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-num">3</div>
+                    <div class="summary-label">Tablas BD</div>
+                    <ul class="summary-items">
+                        <li>Normalización en 3FN</li>
+                        <li>12 índices de optimización</li>
+                        <li>2 Foreign Keys con cascada</li>
+                        <li>Motor InnoDB · ACID</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ═══════════════════════════════════════════
+             SECTION 1 — CASOS DE USO
+        ═══════════════════════════════════════════ -->
+        <section class="section" id="uc-diagram">
+            <div class="section-number">01 · DISEÑO</div>
+            <h2>Diagrama de Casos de Uso</h2>
+
+            <div class="diagram-box" id="uc-diagram">
+                <div class="uc-diagram">
+                    <!-- Left actor -->
+                    <div class="uc-actor">
+                        <div class="actor-icon user">👤</div>
+                        <div class="actor-name">Usuario Autenticado</div>
+                        <div style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-top:.3rem;">Realiza todas<br>las operaciones</div>
+                    </div>
+
+                    <!-- Use cases -->
+                    <div class="uc-middle">
+                        <div class="uc-node"><div class="uc-dot main"></div>UC1 — Iniciar Sesión</div>
+                        <div class="uc-node"><div class="uc-dot main"></div>UC2 — Insertar Producto
+                            <span class="uc-badge badge-include">incluye ×3</span>
+                        </div>
+                        <div class="uc-node" style="padding-left:2rem; font-size:.82rem;"><div class="uc-dot include"></div>UC2A — Validar Datos</div>
+                        <div class="uc-node" style="padding-left:2rem; font-size:.82rem;"><div class="uc-dot include"></div>UC2B — Verificar Código Único</div>
+                        <div class="uc-node" style="padding-left:2rem; font-size:.82rem;"><div class="uc-dot include"></div>UC2C — Actualizar Posiciones</div>
+                        <div class="uc-node"><div class="uc-dot main"></div>UC3 — Eliminar Producto</div>
+                        <div class="uc-node"><div class="uc-dot main"></div>UC4 — Buscar Producto
+                            <span class="uc-badge badge-extend">extiende ×2</span>
+                        </div>
+                        <div class="uc-node" style="padding-left:2rem; font-size:.82rem;"><div class="uc-dot extend"></div>UC4A — Búsqueda Lineal · O(n)</div>
+                        <div class="uc-node" style="padding-left:2rem; font-size:.82rem;"><div class="uc-dot extend"></div>UC4B — Búsqueda Binaria · O(log n)</div>
+                        <div class="uc-node"><div class="uc-dot main"></div>UC5 — Ordenar Productos
+                            <span class="uc-badge badge-extend">extiende ×2</span>
+                        </div>
+                        <div class="uc-node" style="padding-left:2rem; font-size:.82rem;"><div class="uc-dot extend"></div>UC5A — Bubble Sort · O(n²)</div>
+                        <div class="uc-node" style="padding-left:2rem; font-size:.82rem;"><div class="uc-dot extend"></div>UC5B — Quick Sort · O(n log n)</div>
+                        <div class="uc-node"><div class="uc-dot main"></div>UC6 — Visualizar Inventario</div>
+                        <div class="uc-node"><div class="uc-dot main"></div>UC7 — Cerrar Sesión</div>
+                    </div>
+
+                    <!-- Right actors -->
+                    <div style="display:flex;flex-direction:column;gap:2rem;align-items:center;">
+                        <div class="uc-actor">
+                            <div class="actor-icon sys">⚙️</div>
+                            <div class="actor-name">Sistema</div>
+                            <div style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-top:.3rem;">Valida y coordina<br>operaciones</div>
+                        </div>
+                        <div class="uc-actor">
+                            <div class="actor-icon db">🗄️</div>
+                            <div class="actor-name">Base de Datos</div>
+                            <div style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-top:.3rem;">MySQL · Persiste<br>información</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uc-legend">
+                    <div class="legend-item"><div class="uc-dot main" style="width:10px;height:10px;"></div> Caso principal</div>
+                    <div class="legend-item"><div class="uc-dot include" style="width:10px;height:10px;"></div> Relación «include» (obligatoria)</div>
+                    <div class="legend-item"><div class="uc-dot extend" style="width:10px;height:10px;"></div> Relación «extend» (opcional)</div>
+                </div>
+            </div>
+
+            <!-- Actors -->
+            <h3 id="uc-actors">Actores del Sistema</h3>
+            <div class="principle-grid">
+                <div class="principle-card">
+                    <div class="principle-tag">ACTOR 01</div>
+                    <div class="principle-title">👤 Usuario Autenticado</div>
+                    <div class="principle-desc">Persona que ha iniciado sesión. Puede realizar todas las operaciones CRUD y consultas sobre el inventario.</div>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-tag">ACTOR 02</div>
+                    <div class="principle-title">⚙️ Sistema</div>
+                    <div class="principle-desc">Componente que procesa la lógica de negocio. Valida datos, ejecuta algoritmos y coordina operaciones.</div>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-tag">ACTOR 03</div>
+                    <div class="principle-title">🗄️ Base de Datos</div>
+                    <div class="principle-desc">Almacenamiento persistente en MySQL. Guarda, recupera y elimina datos bajo instrucciones del sistema.</div>
+                </div>
+            </div>
+
+            <!-- UC details -->
+            <h3 id="uc-main">Casos de Uso Principales</h3>
+
+            <!-- UC1 -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-card-icon" style="background:rgba(197,224,216,.3);">🔐</div>
+                    <div class="info-card-title">UC1 — Iniciar Sesión</div>
+                </div>
+                <div class="badge-row">
+                    <span class="pill pill-teal">Actor: Usuario</span>
+                    <span class="pill pill-sage">Precondición: credenciales válidas</span>
+                </div>
+                <h5>Flujo Principal</h5>
+                <div class="flow-step"><div class="step-num">1</div><div class="step-text">Usuario ingresa nombre de usuario y NIP</div></div>
+                <div class="flow-step"><div class="step-num">2</div><div class="step-text">Sistema valida credenciales contra BD</div></div>
+                <div class="flow-step"><div class="step-num">3</div><div class="step-text">Sistema verifica hash de contraseña</div></div>
+                <div class="flow-step"><div class="step-num">4</div><div class="step-text">Sistema crea sesión</div></div>
+                <div class="flow-step"><div class="step-num">5</div><div class="step-text">Sistema redirige a dashboard</div></div>
+                <p style="margin-top:1rem;font-size:.9rem;"><strong>Postcondición:</strong> Usuario autenticado con sesión activa &nbsp;·&nbsp; <strong>Excepción:</strong> Credenciales inválidas → Mostrar error</p>
+            </div>
+
+            <!-- UC2 -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-card-icon" style="background:rgba(212,197,216,.3);">➕</div>
+                    <div class="info-card-title">UC2 — Insertar Producto</div>
+                </div>
+                <div class="badge-row">
+                    <span class="pill pill-teal">Actor: Usuario Autenticado</span>
+                    <span class="pill pill-purple">Incluye: UC2A · UC2B · UC2C</span>
+                </div>
+                <h5>Flujo Principal</h5>
+                <div class="flow-step"><div class="step-num">1</div><div class="step-text">Usuario ingresa código, nombre, precio</div></div>
+                <div class="flow-step"><div class="step-num">2</div><div class="step-text">Usuario selecciona tipo de inserción (inicio / final / posición)</div></div>
+                <div class="flow-step"><div class="step-num">3</div><div class="step-text">Sistema valida datos (UC2A)</div></div>
+                <div class="flow-step"><div class="step-num">4</div><div class="step-text">Sistema verifica código único (UC2B)</div></div>
+                <div class="flow-step"><div class="step-num">5</div><div class="step-text">Sistema actualiza posiciones si es necesario (UC2C)</div></div>
+                <div class="flow-step"><div class="step-num">6</div><div class="step-text">Sistema inserta producto en BD y registra log</div></div>
+                <div class="flow-step"><div class="step-num">7</div><div class="step-text">Sistema muestra confirmación</div></div>
+                <h5 style="margin-top:1.2rem;">Casos de Uso Incluidos</h5>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin-top:.8rem;">
+                    <div class="principle-card" style="border-top:2px solid var(--lavender);">
+                        <div class="principle-tag">UC2A</div>
+                        <div class="principle-title" style="font-size:1rem;">Validar Datos</div>
+                        <div class="principle-desc">Código numérico · Nombre no vacío · Precio ≥ 0</div>
+                    </div>
+                    <div class="principle-card" style="border-top:2px solid var(--mint);">
+                        <div class="principle-tag">UC2B</div>
+                        <div class="principle-title" style="font-size:1rem;">Verificar Código Único</div>
+                        <div class="principle-desc">Consulta BD y retorna error si ya existe</div>
+                    </div>
+                    <div class="principle-card" style="border-top:2px solid var(--blush);">
+                        <div class="principle-tag">UC2C</div>
+                        <div class="principle-title" style="font-size:1rem;">Actualizar Posiciones</div>
+                        <div class="principle-desc">Incrementa posiciones al insertar al inicio o posición específica</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UC3-UC7 compact -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;margin:1.5rem 0;">
+                <div class="info-card" style="padding:1.4rem;">
+                    <div class="info-card-header" style="margin-bottom:.8rem;">
+                        <div class="info-card-icon" style="background:rgba(232,207,200,.3);">🗑️</div>
+                        <div class="info-card-title">UC3 — Eliminar Producto</div>
+                    </div>
+                    <ul class="styled">
+                        <li>Inicio / Final / Por código</li>
+                        <li>Requiere confirmación del usuario</li>
+                        <li>Registra log de la operación</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="padding:1.4rem;">
+                    <div class="info-card-header" style="margin-bottom:.8rem;">
+                        <div class="info-card-icon" style="background:rgba(197,224,216,.3);">🔍</div>
+                        <div class="info-card-title">UC4 — Buscar Producto</div>
+                    </div>
+                    <ul class="styled">
+                        <li>Búsqueda por código o nombre</li>
+                        <li>UC4A: Lineal · O(n)</li>
+                        <li>UC4B: Binaria · O(log n)</li>
+                        <li>Mide tiempo de ejecución</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="padding:1.4rem;">
+                    <div class="info-card-header" style="margin-bottom:.8rem;">
+                        <div class="info-card-icon" style="background:rgba(212,221,197,.3);">↕️</div>
+                        <div class="info-card-title">UC5 — Ordenar Productos</div>
+                    </div>
+                    <ul class="styled">
+                        <li>Por precio, nombre o código</li>
+                        <li>UC5A: Bubble Sort · O(n²)</li>
+                        <li>UC5B: Quick Sort · O(n log n)</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="padding:1.4rem;">
+                    <div class="info-card-header" style="margin-bottom:.8rem;">
+                        <div class="info-card-icon" style="background:rgba(212,197,216,.3);">📋</div>
+                        <div class="info-card-title">UC6 — Visualizar Inventario</div>
+                    </div>
+                    <ul class="styled">
+                        <li>Consulta productos por posición</li>
+                        <li>Tabla completa con contador</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="padding:1.4rem;">
+                    <div class="info-card-header" style="margin-bottom:.8rem;">
+                        <div class="info-card-icon" style="background:rgba(232,207,200,.3);">🚪</div>
+                        <div class="info-card-title">UC7 — Cerrar Sesión</div>
+                    </div>
+                    <ul class="styled">
+                        <li>Destruye la sesión PHP</li>
+                        <li>Redirige a página de login</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Relations -->
+            <h3 id="uc-relations">Relaciones entre Casos de Uso</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+                <div class="info-card" style="border-left:4px solid var(--lavender);">
+                    <h5>«include» — Relación Obligatoria</h5>
+                    <p style="font-size:.95rem;">UC2 <strong>incluye</strong> UC2A, UC2B, UC2C. Siempre se ejecutan como parte de insertar producto.</p>
+                </div>
+                <div class="info-card" style="border-left:4px solid var(--peach);">
+                    <h5>«extend» — Relación Opcional</h5>
+                    <p style="font-size:.95rem;">UC4 se extiende a UC4A o UC4B. UC5 se extiende a UC5A o UC5B. El usuario elige cuál ejecutar.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ═══════════════════════════════════════════
+             SECTION 2 — UML CLASES
+        ═══════════════════════════════════════════ -->
+        <section class="section" id="uml-diagram">
+            <div class="section-number">02 · DISEÑO</div>
+            <h2>Diagrama UML de Clases</h2>
+
+            <p>El sistema sigue el patrón <strong>MVC (Model-View-Controller)</strong> con capas adicionales de utilidades y configuración.</p>
+
+            <!-- Architecture flow -->
+            <div class="diagram-box">
+                <div class="flow-layers">
+                    <div class="flow-layer" style="background:rgba(212,197,216,.1);border-color:rgba(212,197,216,.4);">
+                        <div class="flow-layer-label">VISTA</div>
+                        <div class="flow-layer-content">
+                            <div class="flow-layer-title">Capa de Presentación</div>
+                            <div class="flow-layer-items">HTML · CSS · JavaScript — No aparece en UML backend</div>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">▼ HTTP / JSON</div>
+                    <div class="flow-layer" style="background:rgba(197,224,216,.1);border-color:rgba(197,224,216,.4);">
+                        <div class="flow-layer-label">CONTROLADORES</div>
+                        <div class="flow-layer-content">
+                            <div class="flow-layer-title">ProductoController · AuthController</div>
+                            <div class="flow-layer-items">Lógica de negocio · Gestión de sesiones · Auditoría</div>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">▼</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+                        <div class="flow-layer" style="background:rgba(212,221,197,.1);border-color:rgba(212,221,197,.4);">
+                            <div class="flow-layer-content">
+                                <div class="flow-layer-title" style="font-size:.9rem;">Modelos</div>
+                                <div class="flow-layer-items">Producto · Usuario</div>
+                            </div>
+                        </div>
+                        <div class="flow-layer" style="background:rgba(212,197,216,.1);border-color:rgba(212,197,216,.4);">
+                            <div class="flow-layer-content">
+                                <div class="flow-layer-title" style="font-size:.9rem;">Utilidades</div>
+                                <div class="flow-layer-items">Ordenamiento · Búsqueda · Validación</div>
+                            </div>
+                        </div>
+                        <div class="flow-layer" style="background:rgba(232,207,200,.1);border-color:rgba(232,207,200,.4);">
+                            <div class="flow-layer-content">
+                                <div class="flow-layer-title" style="font-size:.9rem;">Configuración</div>
+                                <div class="flow-layer-items">Database (Singleton)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UML class cards -->
+            <div class="uml-grid">
+                <!-- Database -->
+                <div class="uml-class" id="uml-config">
+                    <div class="uml-header config">Database<br><span class="uml-stereotype">«Singleton»</span></div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>PDO conn</div>
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>string host</div>
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>string db_name</div>
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>string username</div>
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>string password</div>
+                    </div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>getConnection() : PDO</div>
+                    </div>
+                </div>
+
+                <!-- Producto -->
+                <div class="uml-class" id="uml-models">
+                    <div class="uml-header model">Producto</div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>int id</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>int posicion</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>int codigo</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>string nombre</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>float precio</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>datetime fecha_creacion</div>
+                    </div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>__construct()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>toArray() : array</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>fromArray() : Producto</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>validar() : array</div>
+                    </div>
+                </div>
+
+                <!-- Usuario -->
+                <div class="uml-class">
+                    <div class="uml-header model">Usuario</div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>int id</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>string nombre_usuario</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>string password_hash</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>string nombre_completo</div>
+                    </div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>verificarPassword() : bool</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>toArray() : array</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>fromArray() : Usuario</div>
+                    </div>
+                </div>
+
+                <!-- Ordenamiento -->
+                <div class="uml-class" id="uml-utils">
+                    <div class="uml-header util">Ordenamiento<br><span class="uml-stereotype">«static»</span></div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>bubbleSortPorPrecio()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>bubbleSortPorNombre()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>quickSortPorPrecio()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>quickSortPorNombre()</div>
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>particionPrecio()</div>
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>particionNombre()</div>
+                    </div>
+                </div>
+
+                <!-- Busqueda -->
+                <div class="uml-class">
+                    <div class="uml-header util">Busqueda<br><span class="uml-stereotype">«static»</span></div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>busquedaLinealPorCodigo()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>busquedaLinealPorNombre()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>busquedaBinariaPorCodigo()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>busquedaBinariaPorNombre()</div>
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>ordenarPorCodigo()</div>
+                    </div>
+                </div>
+
+                <!-- Validacion -->
+                <div class="uml-class">
+                    <div class="uml-header util">Validacion<br><span class="uml-stereotype">«static»</span></div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>validarEntero() : bool</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>validarDecimal() : bool</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>validarTexto() : bool</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>sanitizarTexto() : string</div>
+                    </div>
+                </div>
+
+                <!-- ProductoController -->
+                <div class="uml-class" id="uml-controllers" style="grid-column: span 2;">
+                    <div class="uml-header ctrl">ProductoController</div>
+                    <div class="uml-section" style="display:grid;grid-template-columns:1fr 1fr;gap:0 1rem;">
+                        <div>
+                            <div class="uml-item"><span class="uml-visibility uml-private">−</span>PDO conn</div>
+                            <div style="margin-top:.4rem;font-size:.75rem;color:var(--text-muted);padding:.1rem 0;">Inserción</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>insertarInicio()</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>insertarFinal()</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>insertarPosicion()</div>
+                            <div style="margin-top:.4rem;font-size:.75rem;color:var(--text-muted);padding:.1rem 0;">Eliminación</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>eliminarInicio()</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>eliminarFinal()</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>eliminarPorCodigo()</div>
+                        </div>
+                        <div>
+                            <div style="margin-top:.4rem;font-size:.75rem;color:var(--text-muted);padding:.1rem 0;">Consulta</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>obtenerTodos()</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>buscarPorCodigo()</div>
+                            <div class="uml-item"><span class="uml-visibility">+</span>contarProductos()</div>
+                            <div style="margin-top:.4rem;font-size:.75rem;color:var(--text-muted);padding:.1rem 0;">Privados</div>
+                            <div class="uml-item"><span class="uml-visibility uml-private">−</span>codigoExiste()</div>
+                            <div class="uml-item"><span class="uml-visibility uml-private">−</span>registrarLog()</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AuthController -->
+                <div class="uml-class">
+                    <div class="uml-header ctrl">AuthController</div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>PDO conn</div>
+                    </div>
+                    <div class="uml-section">
+                        <div class="uml-item"><span class="uml-visibility">+</span>login()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>logout()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>verificarSesion()</div>
+                        <div class="uml-item"><span class="uml-visibility">+</span>obtenerUsuarioActual()</div>
+                        <div class="uml-item"><span class="uml-visibility uml-private">−</span>registrarLog()</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Principles -->
+            <h3 id="uml-principles">Principios de Diseño Aplicados</h3>
+            <div class="principle-grid">
+                <div class="principle-card">
+                    <div class="principle-tag">SRP</div>
+                    <div class="principle-title">Single Responsibility</div>
+                    <div class="principle-desc">Cada clase tiene una única responsabilidad. <code>Producto</code> solo representa datos; <code>Ordenamiento</code> solo ordena.</div>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-tag">OCP</div>
+                    <div class="principle-title">Open / Closed</div>
+                    <div class="principle-desc">Abiertas para extensión, cerradas para modificación. Fácil agregar nuevos algoritmos sin romper lo existente.</div>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-tag">DIP</div>
+                    <div class="principle-title">Dependency Inversion</div>
+                    <div class="principle-desc">Controladores dependen de la abstracción PDO, no de implementaciones concretas de BD.</div>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-tag">DRY</div>
+                    <div class="principle-title">Don't Repeat Yourself</div>
+                    <div class="principle-desc">Algoritmos centralizados en clases de utilidades. Validación reutilizable. Conexión única con Singleton.</div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ═══════════════════════════════════════════
+             SECTION 3 — BASE DE DATOS
+        ═══════════════════════════════════════════ -->
+        <section class="section" id="db-diagram">
+            <div class="section-number">03 · DISEÑO</div>
+            <h2>Diseño de Base de Datos</h2>
+
+            <!-- ER Diagram -->
+            <div class="diagram-box">
+                <div class="er-diagram">
+                    <!-- Usuarios -->
+                    <div class="er-table">
+                        <div class="er-header usuarios">USUARIOS</div>
+                        <div class="er-field">
+                            <span class="er-key key-pk">PK</span>
+                            <span class="er-field-name">id</span>
+                            <span class="er-field-type">INT AI</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-key key-uk">UK</span>
+                            <span class="er-field-name">nombre_usuario</span>
+                            <span class="er-field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">password_hash</span>
+                            <span class="er-field-type">VARCHAR(255)</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">nombre_completo</span>
+                            <span class="er-field-type">VARCHAR(100)</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">fecha_creacion</span>
+                            <span class="er-field-type">TIMESTAMP</span>
+                        </div>
+                    </div>
+
+                    <!-- Relation: Users → Logs -->
+                    <div class="er-relation">
+                        <span class="er-cardinality">1</span>
+                        <div class="er-arrow">
+                            <div class="er-arrow-line"></div>
+                            <span class="er-arrow-label">genera</span>
+                            <div class="er-arrow-line"></div>
+                        </div>
+                        <span class="er-cardinality">N</span>
+                    </div>
+
+                    <!-- Logs -->
+                    <div class="er-table">
+                        <div class="er-header logs">LOGS</div>
+                        <div class="er-field">
+                            <span class="er-key key-pk">PK</span>
+                            <span class="er-field-name">id</span>
+                            <span class="er-field-type">INT AI</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-key key-fk">FK</span>
+                            <span class="er-field-name">usuario_id</span>
+                            <span class="er-field-type">INT</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">operacion</span>
+                            <span class="er-field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">detalles</span>
+                            <span class="er-field-type">TEXT NULL</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-key key-fk">FK</span>
+                            <span class="er-field-name">producto_id</span>
+                            <span class="er-field-type">INT NULL</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">fecha</span>
+                            <span class="er-field-type">TIMESTAMP</span>
+                        </div>
+                    </div>
+
+                    <!-- Relation: Products → Logs -->
+                    <div class="er-relation">
+                        <span class="er-cardinality">N</span>
+                        <div class="er-arrow">
+                            <div class="er-arrow-line"></div>
+                            <span class="er-arrow-label">afecta</span>
+                            <div class="er-arrow-line"></div>
+                        </div>
+                        <span class="er-cardinality">1</span>
+                    </div>
+
+                    <!-- Productos -->
+                    <div class="er-table">
+                        <div class="er-header productos">PRODUCTOS</div>
+                        <div class="er-field">
+                            <span class="er-key key-pk">PK</span>
+                            <span class="er-field-name">id</span>
+                            <span class="er-field-type">INT AI</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">posicion</span>
+                            <span class="er-field-type">INT IDX</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-key key-uk">UK</span>
+                            <span class="er-field-name">codigo</span>
+                            <span class="er-field-type">INT IDX</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">nombre</span>
+                            <span class="er-field-type">VARCHAR(100)</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">precio</span>
+                            <span class="er-field-type">DECIMAL(10,2)</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">fecha_creacion</span>
+                            <span class="er-field-type">TIMESTAMP</span>
+                        </div>
+                        <div class="er-field">
+                            <span class="er-field-name" style="padding-left:.5rem;">fecha_modificacion</span>
+                            <span class="er-field-type">TIMESTAMP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SQL Schema -->
+            <h3 id="db-sql">Esquema SQL Completo</h3>
+            <pre><code><span class="sql-comment">-- Base de Datos: inventario_db</span>
+<span class="sql-keyword">CREATE DATABASE IF NOT EXISTS</span> inventario_db
+  <span class="sql-keyword">CHARACTER SET</span> utf8mb4
+  <span class="sql-keyword">COLLATE</span> utf8mb4_unicode_ci;
+
+<span class="sql-keyword">USE</span> inventario_db;
+
+<span class="sql-comment">-- Tabla: usuarios</span>
+<span class="sql-keyword">CREATE TABLE IF NOT EXISTS</span> usuarios (
+    id              <span class="sql-type">INT AUTO_INCREMENT PRIMARY KEY</span>,
+    nombre_usuario  <span class="sql-type">VARCHAR(50) NOT NULL UNIQUE</span>,
+    password_hash   <span class="sql-type">VARCHAR(255) NOT NULL</span>,
+    nombre_completo <span class="sql-type">VARCHAR(100) NOT NULL</span>,
+    fecha_creacion  <span class="sql-type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    INDEX idx_nombre_usuario (nombre_usuario)
+) ENGINE=InnoDB <span class="sql-keyword">DEFAULT CHARSET</span>=utf8mb4;
+
+<span class="sql-comment">-- Tabla: productos</span>
+<span class="sql-keyword">CREATE TABLE IF NOT EXISTS</span> productos (
+    id                 <span class="sql-type">INT AUTO_INCREMENT PRIMARY KEY</span>,
+    posicion           <span class="sql-type">INT NOT NULL DEFAULT 0</span>,
+    codigo             <span class="sql-type">INT NOT NULL UNIQUE</span>,
+    nombre             <span class="sql-type">VARCHAR(100) NOT NULL</span>,
+    precio             <span class="sql-type">DECIMAL(10,2) NOT NULL</span>,
+    fecha_creacion     <span class="sql-type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    fecha_modificacion <span class="sql-type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</span>,
+    INDEX idx_posicion (posicion),
+    INDEX idx_codigo   (codigo),
+    INDEX idx_nombre   (nombre),
+    INDEX idx_precio   (precio)
+) ENGINE=InnoDB <span class="sql-keyword">DEFAULT CHARSET</span>=utf8mb4;
+
+<span class="sql-comment">-- Tabla: logs</span>
+<span class="sql-keyword">CREATE TABLE IF NOT EXISTS</span> logs (
+    id          <span class="sql-type">INT AUTO_INCREMENT PRIMARY KEY</span>,
+    usuario_id  <span class="sql-type">INT NOT NULL</span>,
+    operacion   <span class="sql-type">VARCHAR(50) NOT NULL</span>,
+    detalles    <span class="sql-type">TEXT</span>,
+    producto_id <span class="sql-type">INT NULL</span>,
+    fecha       <span class="sql-type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    <span class="sql-keyword">FOREIGN KEY</span> (usuario_id)  <span class="sql-keyword">REFERENCES</span> usuarios(id)  <span class="sql-keyword">ON DELETE CASCADE</span>,
+    <span class="sql-keyword">FOREIGN KEY</span> (producto_id) <span class="sql-keyword">REFERENCES</span> productos(id) <span class="sql-keyword">ON DELETE SET NULL</span>,
+    INDEX idx_usuario_id (usuario_id),
+    INDEX idx_fecha      (fecha),
+    INDEX idx_operacion  (operacion)
+) ENGINE=InnoDB <span class="sql-keyword">DEFAULT CHARSET</span>=utf8mb4;</code></pre>
+
+            <!-- Tables detail -->
+            <h3 id="db-tables">Detalle de Tablas</h3>
+
+            <h4>Tabla: usuarios</h4>
+            <table class="data-table">
+                <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+                <tbody>
+                    <tr><td>`id`</td><td>INT AUTO_INCREMENT</td><td>Clave primaria única</td></tr>
+                    <tr><td>`nombre_usuario`</td><td>VARCHAR(50) UNIQUE</td><td>Username para login, debe ser único</td></tr>
+                    <tr><td>`password_hash`</td><td>VARCHAR(255)</td><td>Contraseña hasheada con bcrypt</td></tr>
+                    <tr><td>`nombre_completo`</td><td>VARCHAR(100)</td><td>Nombre real del usuario</td></tr>
+                    <tr><td>`fecha_creacion`</td><td>TIMESTAMP</td><td>Fecha de registro automática</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Tabla: productos</h4>
+            <table class="data-table">
+                <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+                <tbody>
+                    <tr><td>`id`</td><td>INT AUTO_INCREMENT</td><td>Clave primaria única</td></tr>
+                    <tr><td>`posicion`</td><td>INT NOT NULL</td><td>Posición en la lista — simula lista enlazada</td></tr>
+                    <tr><td>`codigo`</td><td>INT UNIQUE</td><td>Código único del producto</td></tr>
+                    <tr><td>`nombre`</td><td>VARCHAR(100)</td><td>Nombre descriptivo</td></tr>
+                    <tr><td>`precio`</td><td>DECIMAL(10,2)</td><td>Precio con 2 decimales exactos</td></tr>
+                    <tr><td>`fecha_creacion`</td><td>TIMESTAMP</td><td>Fecha de creación automática</td></tr>
+                    <tr><td>`fecha_modificacion`</td><td>TIMESTAMP</td><td>Actualización automática ON UPDATE</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Tabla: logs — Auditoría</h4>
+            <table class="data-table">
+                <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+                <tbody>
+                    <tr><td>`id`</td><td>INT AUTO_INCREMENT</td><td>Clave primaria única</td></tr>
+                    <tr><td>`usuario_id`</td><td>INT FK</td><td>Referencia a usuario que realizó la acción</td></tr>
+                    <tr><td>`operacion`</td><td>VARCHAR(50)</td><td>Tipo: INSERT_INICIO, DELETE_CODIGO, LOGIN…</td></tr>
+                    <tr><td>`detalles`</td><td>TEXT</td><td>Información adicional en JSON o texto</td></tr>
+                    <tr><td>`producto_id`</td><td>INT FK NULL</td><td>Referencia a producto afectado (si aplica)</td></tr>
+                    <tr><td>`fecha`</td><td>TIMESTAMP</td><td>Momento exacto de la operación</td></tr>
+                </tbody>
+            </table>
+
+            <div class="badge-row" style="margin:1.5rem 0;">
+                <span class="pill pill-teal">LOGIN</span>
+                <span class="pill pill-teal">LOGOUT</span>
+                <span class="pill pill-peach">INSERT_INICIO</span>
+                <span class="pill pill-peach">INSERT_FINAL</span>
+                <span class="pill pill-peach">INSERT_POSICION</span>
+                <span class="pill pill-purple">DELETE_INICIO</span>
+                <span class="pill pill-purple">DELETE_FINAL</span>
+                <span class="pill pill-purple">DELETE_CODIGO</span>
+            </div>
+
+            <!-- Normalization -->
+            <h3 id="db-normalization">Normalización — 3FN</h3>
+            <div class="norm-grid">
+                <div class="norm-card">
+                    <div class="norm-form">1FN</div>
+                    <div class="norm-name">Primera Forma Normal</div>
+                    <ul class="styled">
+                        <li>Atributos atómicos</li>
+                        <li>Sin grupos repetitivos</li>
+                        <li>Un valor por campo</li>
+                    </ul>
+                </div>
+                <div class="norm-card">
+                    <div class="norm-form">2FN</div>
+                    <div class="norm-name">Segunda Forma Normal</div>
+                    <ul class="styled">
+                        <li>Cumple 1FN</li>
+                        <li>Sin dependencias parciales</li>
+                        <li>Depende de la PK completa</li>
+                    </ul>
+                </div>
+                <div class="norm-card" style="border-top:3px solid var(--teal);">
+                    <div class="norm-form" style="color:var(--peach);">3FN ✦</div>
+                    <div class="norm-name">Tercera Forma Normal</div>
+                    <ul class="styled">
+                        <li>Cumple 2FN</li>
+                        <li>Sin dependencias transitivas</li>
+                        <li>Solo depende de la PK</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Indexes -->
+            <h3 id="db-indexes">Estrategia de Índices</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem;margin:1.5rem 0;">
+                <div class="info-card" style="border-left:4px solid var(--teal);">
+                    <h5>PRIMARY KEY</h5>
+                    <p style="font-size:.9rem;margin:0;"><code>usuarios.id</code> · <code>productos.id</code> · <code>logs.id</code></p>
+                </div>
+                <div class="info-card" style="border-left:4px solid var(--lavender);">
+                    <h5>UNIQUE INDEX</h5>
+                    <p style="font-size:.9rem;margin:0;"><code>usuarios.nombre_usuario</code> · <code>productos.codigo</code></p>
+                </div>
+                <div class="info-card" style="border-left:4px solid var(--peach);">
+                    <h5>SECONDARY INDEX</h5>
+                    <p style="font-size:.9rem;margin:0;"><code>posicion</code> · <code>nombre</code> · <code>precio</code> · <code>usuario_id</code> · <code>fecha</code> · <code>operacion</code></p>
+                </div>
+            </div>
+
+            <!-- Design decisions -->
+            <h3>Consideraciones de Diseño</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;">
+                <div class="info-card">
+                    <h5>¿Por qué INT para código?</h5>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Más eficiente en búsquedas</div>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Índices más pequeños y rápidos</div>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Compatibilidad con código C++ original</div>
+                    <div class="check-row"><span class="check-icon" style="color:#c0392b;">❌</span> No soporta códigos alfanuméricos</div>
+                </div>
+                <div class="info-card">
+                    <h5>¿Por qué DECIMAL(10,2)?</h5>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Precisión exacta sin redondeos</div>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Estándar para valores monetarios</div>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Hasta 99,999,999.99</div>
+                </div>
+                <div class="info-card">
+                    <h5>¿Por qué InnoDB?</h5>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Transacciones ACID</div>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Foreign Keys soportadas</div>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Recuperación ante fallos</div>
+                </div>
+                <div class="info-card">
+                    <h5>¿Por qué ON DELETE SET NULL?</h5>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Preserva historial de operaciones</div>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Útil para auditoría post-eliminación</div>
+                    <div class="check-row"><span class="check-icon" style="color:var(--teal);">✅</span> Sin logs huérfanos inconsistentes</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="footer-brand">Sistema de Inventario · Documentación de Diseño</div>
+        <div class="footer-meta">Documento creado para: Sistema de Inventario · Febrero 2026</div>
+    </footer>
+
+    <script>
+        // Highlight active nav link on scroll
+        const sections = document.querySelectorAll('[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-30% 0px -60% 0px' });
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

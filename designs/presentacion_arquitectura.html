@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura del Sistema de Inventario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --lavender: #d4c5d8;
+            --mint: #c5e0d8;
+            --sage: #d4ddc5;
+            --teal: #5a7c7a;
+            --peach: #d4a98a;
+            --blush: #e8cfc8;
+            --cream: #faf8f5;
+            --soft-white: #f9f7f4;
+            --warm-gray: #4a4542;
+            --text-dark: #2d2a27;
+            --text-muted: #7a7673;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        /* Soft decorative background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(212, 197, 216, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 60%, rgba(197, 224, 216, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 50% 80%, rgba(232, 207, 200, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid rgba(90, 124, 122, 0.2);
+            padding-bottom: 3rem;
+            margin-bottom: 5rem;
+            position: relative;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        header::before {
+            content: 'Sistema de Inventario';
+            position: absolute;
+            top: -1rem;
+            left: 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            font-style: italic;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 400;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        h1 span {
+            font-style: italic;
+            color: var(--teal);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+            line-height: 1.7;
+            max-width: 700px;
+        }
+
+        /* Section */
+        section {
+            margin-bottom: 6rem;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        section:nth-child(2) { animation-delay: 0.1s; }
+        section:nth-child(3) { animation-delay: 0.2s; }
+        section:nth-child(4) { animation-delay: 0.3s; }
+        section:nth-child(5) { animation-delay: 0.4s; }
+        section:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--teal);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--peach), transparent);
+        }
+
+        h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--warm-gray);
+            margin: 3rem 0 1.5rem 0;
+        }
+
+        p {
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            max-width: 900px;
+            font-size: 1.05rem;
+        }
+
+        strong {
+            color: var(--teal);
+            font-weight: 600;
+        }
+
+        /* Tech Stack Table */
+        .tech-table {
+            width: 100%;
+            background: var(--soft-white);
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 2rem 0;
+            box-shadow: 0 2px 20px rgba(90, 124, 122, 0.08);
+        }
+
+        .tech-table th,
+        .tech-table td {
+            padding: 1.3rem 1.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(90, 124, 122, 0.1);
+        }
+
+        .tech-table th {
+            background: linear-gradient(135deg, var(--lavender) 0%, var(--mint) 100%);
+            color: var(--text-dark);
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+        }
+
+        .tech-table td:first-child {
+            color: var(--teal);
+            font-weight: 600;
+            font-family: 'Lora', serif;
+        }
+
+        .tech-table td:nth-child(2) {
+            color: var(--peach);
+            font-weight: 600;
+            font-family: 'Lora', serif;
+        }
+
+        .tech-table td:nth-child(3) {
+            color: var(--text-muted);
+        }
+
+        .tech-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tech-table tr:hover {
+            background: rgba(212, 197, 216, 0.05);
+        }
+
+        /* Card System */
+        .card {
+            background: var(--soft-white);
+            border: 1px solid rgba(90, 124, 122, 0.15);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(90, 124, 122, 0.06);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--lavender), var(--mint), var(--blush));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            border-color: var(--teal);
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(90, 124, 122, 0.12);
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            padding-left: 2rem;
+        }
+
+        li {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 1.8rem;
+            font-size: 1.02rem;
+        }
+
+        li::before {
+            content: '○';
+            position: absolute;
+            left: 0;
+            color: var(--peach);
+            font-weight: 400;
+            font-size: 1.3rem;
+            line-height: 1.5;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: linear-gradient(135deg, rgba(212, 197, 216, 0.08), rgba(197, 224, 216, 0.08));
+            border: 1px solid rgba(90, 124, 122, 0.15);
+            border-left: 4px solid var(--teal);
+            border-radius: 8px;
+            padding: 1.8rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .code-block code {
+            color: var(--warm-gray);
+        }
+
+        /* Directory tree */
+        .directory-tree {
+            background: var(--soft-white);
+            border: 1px solid rgba(90, 124, 122, 0.15);
+            border-radius: 12px;
+            padding: 2.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.9;
+            overflow-x: auto;
+            margin: 2.5rem 0;
+            box-shadow: 0 4px 16px rgba(90, 124, 122, 0.06);
+        }
+
+        .directory-tree pre {
+            color: var(--warm-gray);
+            margin: 0;
+        }
+
+        /* Grid layout for layers */
+        .layers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .layer-card {
+            background: var(--soft-white);
+            border: 1px solid rgba(90, 124, 122, 0.15);
+            border-radius: 14px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 12px rgba(90, 124, 122, 0.06);
+        }
+
+        .layer-card:nth-child(1) { border-top: 3px solid var(--lavender); }
+        .layer-card:nth-child(2) { border-top: 3px solid var(--mint); }
+        .layer-card:nth-child(3) { border-top: 3px solid var(--blush); }
+        .layer-card:nth-child(4) { border-top: 3px solid var(--sage); }
+
+        .layer-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(90, 124, 122, 0.12);
+        }
+
+        .layer-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--peach), var(--blush));
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .layer-title {
+            color: var(--teal);
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(212, 197, 216, 0.08), rgba(232, 207, 200, 0.08));
+            border-left: 4px solid var(--teal);
+            border-radius: 10px;
+            padding: 2rem 2.5rem;
+            margin: 2.5rem 0;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(90, 124, 122, 0.2);
+            padding: 3rem 0 2rem 0;
+            margin-top: 6rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        footer p:first-child {
+            font-family: 'Playfair Display', serif;
+            font-weight: 500;
+            color: var(--teal);
+            font-size: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .tech-table {
+                font-size: 0.85rem;
+            }
+
+            .tech-table th,
+            .tech-table td {
+                padding: 1rem;
+            }
+
+            .layers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Arquitectura del Sistema<br><span>de Inventario</span></h1>
+            <p class="subtitle">Documentación técnica completa del sistema de gestión de inventario — Un enfoque moderno con algoritmos implementados desde cero</p>
+        </header>
+
+        <section id="vision">
+            <h2>Visión General</h2>
+            <p>
+                Este documento describe la arquitectura técnica del <strong>Sistema de Gestión de Inventario</strong>. 
+                El sistema está diseñado para funcionar en un entorno local utilizando el paquete <strong>XAMPP</strong> en Windows, 
+                implementando algoritmos de ordenamiento y búsqueda desde cero para demostrar conocimientos de análisis de algoritmos.
+            </p>
+            <div class="highlight-box">
+                <p><strong>Objetivo Principal:</strong> Desarrollar un sistema completo que implemente manualmente algoritmos de ordenamiento (Bubble Sort, Quick Sort) y búsqueda (Lineal, Binaria) sin usar funciones nativas, aplicando arquitectura MVC y API REST.</p>
+            </div>
+        </section>
+
+        <section id="stack">
+            <h2>Stack Tecnológico</h2>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Capa</th>
+                        <th>Tecnología</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Servidor Web</td>
+                        <td>Apache</td>
+                        <td>Procesa las peticiones HTTP/HTTPS (vía XAMPP)</td>
+                    </tr>
+                    <tr>
+                        <td>Lenguaje Backend</td>
+                        <td>PHP 7.4+</td>
+                        <td>Ejecuta la lógica de negocio y algoritmos personalizados</td>
+                    </tr>
+                    <tr>
+                        <td>Base de Datos</td>
+                        <td>MySQL</td>
+                        <td>Almacenamiento relacional (Productos, Usuarios, Logs)</td>
+                    </tr>
+                    <tr>
+                        <td>Frontend</td>
+                        <td>HTML5, CSS3, JS</td>
+                        <td>Interfaz responsiva con Vanilla JavaScript</td>
+                    </tr>
+                    <tr>
+                        <td>Algoritmos</td>
+                        <td>Implementación Manual</td>
+                        <td>Bubble Sort, Quick Sort, Búsqueda Lineal, Búsqueda Binaria</td>
+                    </tr>
+                    <tr>
+                        <td>Arquitectura</td>
+                        <td>MVC + REST API</td>
+                        <td>Separación de responsabilidades y comunicación desacoplada</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="arquitectura">
+            <h2>Arquitectura de Software</h2>
+            <p>
+                El sistema sigue el patrón <strong>MVC (Model-View-Controller)</strong> con una capa adicional de 
+                <strong>API REST</strong> para la comunicación entre frontend y backend.
+            </p>
+
+            <h3>Estructura de Capas</h3>
+            <div class="layers-grid">
+                <div class="layer-card">
+                    <div class="layer-number">1</div>
+                    <div class="layer-title">Capa de Presentación</div>
+                    <ul>
+                        <li>Archivos HTML en <code>public/</code></li>
+                        <li>JavaScript para interactividad</li>
+                        <li>CSS para estilos responsivos</li>
+                        <li>Comunicación vía Fetch API</li>
+                    </ul>
+                </div>
+
+                <div class="layer-card">
+                    <div class="layer-number">2</div>
+                    <div class="layer-title">Capa de API REST</div>
+                    <ul>
+                        <li>Endpoints en <code>api/</code></li>
+                        <li>Formato JSON para peticiones/respuestas</li>
+                        <li>Métodos HTTP (GET, POST, DELETE)</li>
+                        <li>Validación de sesión</li>
+                    </ul>
+                </div>
+
+                <div class="layer-card">
+                    <div class="layer-number">3</div>
+                    <div class="layer-title">Capa de Lógica (MVC)</div>
+                    <ul>
+                        <li><code>controllers/</code>: ProductoController, AuthController</li>
+                        <li><code>models/</code>: Producto, Usuario</li>
+                        <li><code>utils/</code>: Ordenamiento, Búsqueda, Validación</li>
+                    </ul>
+                </div>
+
+                <div class="layer-card">
+                    <div class="layer-number">4</div>
+                    <div class="layer-title">Capa de Datos</div>
+                    <ul>
+                        <li><code>config/database.php</code>: Singleton PDO</li>
+                        <li>MySQL con InnoDB</li>
+                        <li>Tablas: productos, usuarios, logs</li>
+                        <li>Índices para optimización</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="directorios">
+            <h2>Estructura de Directorios</h2>
+            <div class="directory-tree">
+                <pre>Sistema_Inventario/
+├── config/                  # Configuración
+│   └── database.php        # Conexión BD (Singleton)
+├── models/                 # Modelos (Entidades)
+│   ├── Producto.php       # Modelo de Producto
+│   └── Usuario.php        # Modelo de Usuario
+├── controllers/           # Controladores (Lógica)
+│   ├── AuthController.php
+│   └── ProductoController.php
+├── utils/                 # Algoritmos ⭐
+│   ├── Ordenamiento.php  # Bubble Sort, Quick Sort
+│   ├── Busqueda.php      # Lineal, Binaria
+│   └── Validacion.php    # Validaciones
+├── api/                   # APIs REST
+│   ├── productos.php     # CRUD de productos
+│   ├── buscar.php        # Búsqueda
+│   ├── ordenar.php       # Ordenamiento
+│   └── login.php         # Autenticación
+├── public/                # Frontend
+│   ├── css/styles.css
+│   ├── js/
+│   │   ├── auth.js
+│   │   ├── main.js
+│   │   └── productos.js
+│   ├── index.html        # Login
+│   └── dashboard.html    # Dashboard
+└── sql/                   # Base de Datos
+    └── schema.sql        # Esquema completo</pre>
+            </div>
+        </section>
+
+        <section id="patrones">
+            <h2>Patrones de Diseño</h2>
+
+            <div class="card">
+                <h3>1. MVC (Model-View-Controller)</h3>
+                <p><strong>Propósito:</strong> Separar la lógica de negocio, la presentación y los datos.</p>
+                <ul>
+                    <li><strong>Model:</strong> Producto, Usuario — Representan entidades del dominio</li>
+                    <li><strong>View:</strong> HTML/CSS/JS — Interfaz de usuario</li>
+                    <li><strong>Controller:</strong> ProductoController, AuthController — Coordinan operaciones</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>2. Singleton (Database)</h3>
+                <p>Garantiza una única instancia de conexión a la base de datos, evitando múltiples conexiones innecesarias y mejorando el rendimiento.</p>
+            </div>
+
+            <div class="card">
+                <h3>3. REST API</h3>
+                <p>Arquitectura de servicios web que usa HTTP para comunicación:</p>
+                <div class="code-block">
+                    <code>GET    /api/productos.php  → Obtener productos
+POST   /api/productos.php  → Insertar producto
+DELETE /api/productos.php  → Eliminar producto
+GET    /api/buscar.php     → Buscar producto
+POST   /api/ordenar.php    → Ordenar productos</code>
+                </div>
+            </div>
+        </section>
+
+        <section id="decisiones">
+            <h2>Decisiones de Diseño</h2>
+
+            <h3>¿Por qué MVC?</h3>
+            <div class="highlight-box">
+                <ul>
+                    <li><strong>Separación de responsabilidades:</strong> Cada componente tiene un propósito claro</li>
+                    <li><strong>Mantenibilidad:</strong> Cambios en una capa no afectan a las demás</li>
+                    <li><strong>Testabilidad:</strong> Cada capa puede probarse independientemente</li>
+                    <li><strong>Escalabilidad:</strong> Fácil agregar nuevas funcionalidades</li>
+                    <li><strong>Trabajo en equipo:</strong> Diferentes desarrolladores en diferentes capas</li>
+                </ul>
+            </div>
+
+            <h3>¿Por qué API REST?</h3>
+            <div class="highlight-box">
+                <ul>
+                    <li><strong>Desacoplamiento:</strong> Frontend y backend independientes</li>
+                    <li><strong>Reutilización:</strong> Misma API para web, móvil, desktop</li>
+                    <li><strong>Estándar:</strong> Protocolo HTTP ampliamente conocido</li>
+                    <li><strong>Escalabilidad:</strong> Fácil distribuir en múltiples servidores</li>
+                    <li><strong>Mejor UX:</strong> Actualizaciones sin recargar página completa</li>
+                </ul>
+            </div>
+
+            <h3>¿Por qué Implementación Manual de Algoritmos?</h3>
+            <div class="card">
+                <p><strong>Objetivo Académico:</strong> Demostrar comprensión profunda de análisis de algoritmos, no solo usar funciones nativas de PHP como <code>sort()</code> o <code>array_search()</code>.</p>
+                <p>Esto permite:</p>
+                <ul>
+                    <li>Contar operaciones reales y validar complejidades teóricas</li>
+                    <li>Comprender el funcionamiento interno de los algoritmos</li>
+                    <li>Comparar empíricamente diferentes enfoques (O(n²) vs O(n log n))</li>
+                    <li>Aplicar conocimientos de la materia de Análisis de Algoritmos</li>
+                </ul>
+            </div>
+
+            <h3>Campo <code>posicion</code> en Base de Datos</h3>
+            <div class="card">
+                <p><strong>Problema:</strong> SQL INSERT no garantiza orden específico de inserción.</p>
+                <p><strong>Solución:</strong> Campo <code>posicion</code> que simula lista enlazada en BD relacional.</p>
+                <ul>
+                    <li>Permite inserción al inicio/final independiente del ID auto-incremental</li>
+                    <li>Mantiene orden deseado por el usuario</li>
+                    <li>Facilita operaciones de lista enlazada en contexto relacional</li>
+                    <li>Índice en <code>posicion</code> para consultas eficientes</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="algoritmos">
+            <h2>Algoritmos Implementados</h2>
+
+            <h3>Ordenamiento</h3>
+            <div class="layers-grid">
+                <div class="layer-card">
+                    <div class="layer-title">Bubble Sort</div>
+                    <p><strong>Complejidad:</strong> O(n²)</p>
+                    <ul>
+                        <li>Algoritmo simple e intuitivo</li>
+                        <li>Útil para conjuntos pequeños</li>
+                        <li>Implementado por precio y nombre</li>
+                        <li>Optimización con bandera</li>
+                    </ul>
+                </div>
+
+                <div class="layer-card">
+                    <div class="layer-title">Quick Sort</div>
+                    <p><strong>Complejidad:</strong> O(n log n)</p>
+                    <ul>
+                        <li>Divide y Conquista</li>
+                        <li>Muy eficiente en promedio</li>
+                        <li>Implementado por precio y nombre</li>
+                        <li>Recursivo con partición</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Búsqueda</h3>
+            <div class="layers-grid">
+                <div class="layer-card">
+                    <div class="layer-title">Búsqueda Lineal</div>
+                    <p><strong>Complejidad:</strong> O(n)</p>
+                    <ul>
+                        <li>Recorrido secuencial</li>
+                        <li>Funciona con datos desordenados</li>
+                        <li>Implementado por código y nombre</li>
+                        <li>Simple y universal</li>
+                    </ul>
+                </div>
+
+                <div class="layer-card">
+                    <div class="layer-title">Búsqueda Binaria</div>
+                    <p><strong>Complejidad:</strong> O(log n)</p>
+                    <ul>
+                        <li>Divide espacio a la mitad</li>
+                        <li>Requiere datos ordenados</li>
+                        <li>Implementado por código y nombre</li>
+                        <li>Extremadamente eficiente</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Sistema de Gestión de Inventario</p>
+            <p>Documentación de Arquitectura — Ingeniería de Software 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

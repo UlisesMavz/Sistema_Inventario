@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exposición: MVC y API REST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --lavender: #d4c5d8;
+            --mint: #c5e0d8;
+            --sage: #d4ddc5;
+            --teal: #5a7c7a;
+            --peach: #d4a98a;
+            --blush: #e8cfc8;
+            --cream: #faf8f5;
+            --soft-white: #f9f7f4;
+            --warm-gray: #4a4542;
+            --text-dark: #2d2a27;
+            --text-muted: #7a7673;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        /* Soft decorative background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(212, 197, 216, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 60%, rgba(197, 224, 216, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 50% 80%, rgba(232, 207, 200, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid rgba(90, 124, 122, 0.2);
+            padding-bottom: 3rem;
+            margin-bottom: 5rem;
+            position: relative;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        header::before {
+            content: 'Patrones de Arquitectura';
+            position: absolute;
+            top: -1rem;
+            left: 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            font-style: italic;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 400;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        h1 span {
+            font-style: italic;
+            color: var(--teal);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+            line-height: 1.7;
+            max-width: 700px;
+        }
+
+        /* Section */
+        section {
+            margin-bottom: 6rem;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        section:nth-child(2) { animation-delay: 0.1s; }
+        section:nth-child(3) { animation-delay: 0.2s; }
+        section:nth-child(4) { animation-delay: 0.3s; }
+        section:nth-child(5) { animation-delay: 0.4s; }
+        section:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--teal);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--peach), transparent);
+        }
+
+        h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--warm-gray);
+            margin: 3rem 0 1.5rem 0;
+        }
+
+        h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--teal);
+            margin: 2rem 0 1rem 0;
+        }
+
+        p {
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            max-width: 900px;
+            font-size: 1.05rem;
+        }
+
+        strong {
+            color: var(--teal);
+            font-weight: 600;
+        }
+
+        /* Card System */
+        .card {
+            background: var(--soft-white);
+            border: 1px solid rgba(90, 124, 122, 0.15);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(90, 124, 122, 0.06);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--lavender), var(--mint), var(--blush));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            border-color: var(--teal);
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(90, 124, 122, 0.12);
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            padding-left: 2rem;
+        }
+
+        li {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 1.8rem;
+            font-size: 1.02rem;
+        }
+
+        li::before {
+            content: '○';
+            position: absolute;
+            left: 0;
+            color: var(--peach);
+            font-weight: 400;
+            font-size: 1.3rem;
+            line-height: 1.5;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: linear-gradient(135deg, rgba(212, 197, 216, 0.08), rgba(197, 224, 216, 0.08));
+            border: 1px solid rgba(90, 124, 122, 0.15);
+            border-left: 4px solid var(--teal);
+            border-radius: 8px;
+            padding: 1.8rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .code-block code {
+            color: var(--warm-gray);
+        }
+
+        /* Grid layout for components */
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .component-card {
+            background: var(--soft-white);
+            border: 1px solid rgba(90, 124, 122, 0.15);
+            border-radius: 14px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 12px rgba(90, 124, 122, 0.06);
+        }
+
+        .component-card:nth-child(1) { border-top: 3px solid var(--lavender); }
+        .component-card:nth-child(2) { border-top: 3px solid var(--mint); }
+        .component-card:nth-child(3) { border-top: 3px solid var(--blush); }
+
+        .component-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(90, 124, 122, 0.12);
+        }
+
+        .component-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--peach), var(--blush));
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .component-title {
+            color: var(--teal);
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Analogy box */
+        .analogy-box {
+            background: linear-gradient(135deg, rgba(212, 197, 216, 0.12), rgba(232, 207, 200, 0.12));
+            border: 1px solid rgba(90, 124, 122, 0.2);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin: 2.5rem 0;
+            box-shadow: 0 4px 16px rgba(90, 124, 122, 0.06);
+        }
+
+        .analogy-box::before {
+            content: '💡';
+            display: block;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .analogy-box h4 {
+            color: var(--peach);
+            margin-top: 0;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(212, 197, 216, 0.08), rgba(232, 207, 200, 0.08));
+            border-left: 4px solid var(--teal);
+            border-radius: 10px;
+            padding: 2rem 2.5rem;
+            margin: 2.5rem 0;
+        }
+
+        /* Table */
+        .tech-table {
+            width: 100%;
+            background: var(--soft-white);
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 2rem 0;
+            box-shadow: 0 2px 20px rgba(90, 124, 122, 0.08);
+        }
+
+        .tech-table th,
+        .tech-table td {
+            padding: 1.3rem 1.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(90, 124, 122, 0.1);
+        }
+
+        .tech-table th {
+            background: linear-gradient(135deg, var(--lavender) 0%, var(--mint) 100%);
+            color: var(--text-dark);
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+        }
+
+        .tech-table td:first-child {
+            color: var(--teal);
+            font-weight: 600;
+            font-family: 'Lora', serif;
+        }
+
+        .tech-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tech-table tr:hover {
+            background: rgba(212, 197, 216, 0.05);
+        }
+
+        /* Flow diagram */
+        .flow-box {
+            background: var(--soft-white);
+            border: 1px solid rgba(90, 124, 122, 0.15);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin: 2.5rem 0;
+            box-shadow: 0 4px 16px rgba(90, 124, 122, 0.06);
+        }
+
+        .flow-step {
+            background: linear-gradient(135deg, rgba(212, 197, 216, 0.08), rgba(197, 224, 216, 0.08));
+            border-left: 4px solid var(--peach);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .flow-step::before {
+            content: '↓';
+            position: absolute;
+            bottom: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--teal);
+            font-size: 1.5rem;
+        }
+
+        .flow-step:last-child::before {
+            display: none;
+        }
+
+        .flow-step strong {
+            color: var(--teal);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(90, 124, 122, 0.2);
+            padding: 3rem 0 2rem 0;
+            margin-top: 6rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        footer p:first-child {
+            font-family: 'Playfair Display', serif;
+            font-weight: 500;
+            color: var(--teal);
+            font-size: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .components-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MVC y <span>API REST</span></h1>
+            <p class="subtitle">Patrones fundamentales de arquitectura para desarrollo web moderno — Una guía elegante sobre separación de responsabilidades y comunicación cliente-servidor</p>
+        </header>
+
+        <section id="mvc">
+            <h2>El Patrón MVC</h2>
+            
+            <div class="highlight-box">
+                <p><strong>MVC (Model-View-Controller)</strong> es un patrón de arquitectura de software que separa una aplicación en tres componentes principales: Model (datos), View (presentación) y Controller (lógica).</p>
+            </div>
+
+            <h3>Componentes del MVC</h3>
+            
+            <div class="components-grid">
+                <div class="component-card">
+                    <div class="component-icon">M</div>
+                    <div class="component-title">Model (Modelo)</div>
+                    <p><strong>Responsabilidad:</strong> Gestionar los datos y la lógica de negocio</p>
+                    <ul>
+                        <li>Representa las entidades del dominio</li>
+                        <li>Valida datos</li>
+                        <li>Interactúa con la base de datos</li>
+                        <li>No conoce la interfaz de usuario</li>
+                    </ul>
+                    <div class="code-block">
+                        <code>Producto.php
+Usuario.php</code>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-icon">V</div>
+                    <div class="component-title">View (Vista)</div>
+                    <p><strong>Responsabilidad:</strong> Presentar los datos al usuario</p>
+                    <ul>
+                        <li>Interfaz de usuario (HTML/CSS/JS)</li>
+                        <li>Muestra información del Model</li>
+                        <li>Captura entrada del usuario</li>
+                        <li>No contiene lógica de negocio</li>
+                    </ul>
+                    <div class="code-block">
+                        <code>dashboard.html
+productos.js</code>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-icon">C</div>
+                    <div class="component-title">Controller (Controlador)</div>
+                    <p><strong>Responsabilidad:</strong> Coordinar Model y View</p>
+                    <ul>
+                        <li>Recibe peticiones del usuario</li>
+                        <li>Procesa lógica de aplicación</li>
+                        <li>Actualiza el Model</li>
+                        <li>Selecciona la View apropiada</li>
+                    </ul>
+                    <div class="code-block">
+                        <code>ProductoController.php
+AuthController.php</code>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Analogía del Restaurante</h3>
+            
+            <div class="analogy-box">
+                <h4>Entendiendo MVC con un Restaurante</h4>
+                <p>Imagina que estás en un restaurante:</p>
+                <ul>
+                    <li><strong>View = Mesero:</strong> El mesero (interfaz) toma tu orden y te presenta la comida. No cocina, solo interactúa contigo.</li>
+                    <li><strong>Controller = Gerente:</strong> El gerente coordina: recibe la orden del mesero, la envía a la cocina, y devuelve el platillo.</li>
+                    <li><strong>Model = Cocina:</strong> La cocina prepara la comida (procesa datos). No sabe quién la ordenó ni cómo se presenta.</li>
+                </ul>
+            </div>
+
+            <h3>Flujo de Datos en MVC</h3>
+            
+            <div class="flow-box">
+                <div class="flow-step">
+                    <strong>1. Usuario interactúa con VIEW</strong>
+                    <p>Hace clic en "Insertar Producto"</p>
+                </div>
+                <div class="flow-step">
+                    <strong>2. VIEW envía petición a CONTROLLER</strong>
+                    <p>Envía datos del formulario</p>
+                </div>
+                <div class="flow-step">
+                    <strong>3. CONTROLLER procesa la petición</strong>
+                    <p>Valida datos, aplica lógica de negocio</p>
+                </div>
+                <div class="flow-step">
+                    <strong>4. CONTROLLER actualiza MODEL</strong>
+                    <p>Inserta producto en base de datos</p>
+                </div>
+                <div class="flow-step">
+                    <strong>5. MODEL notifica cambios</strong>
+                    <p>Confirma operación exitosa</p>
+                </div>
+                <div class="flow-step">
+                    <strong>6. CONTROLLER actualiza VIEW</strong>
+                    <p>Envía respuesta con resultado</p>
+                </div>
+                <div class="flow-step">
+                    <strong>7. VIEW muestra resultado al usuario</strong>
+                    <p>Actualiza tabla de productos</p>
+                </div>
+            </div>
+
+            <h3>¿Por qué usar MVC?</h3>
+            
+            <div class="card">
+                <ul>
+                    <li><strong>Separación de Responsabilidades:</strong> Cada componente tiene un propósito claro y único</li>
+                    <li><strong>Mantenibilidad:</strong> Cambios en una capa no afectan a las demás</li>
+                    <li><strong>Escalabilidad:</strong> Fácil agregar nuevas funcionalidades sin romper código existente</li>
+                    <li><strong>Testabilidad:</strong> Cada capa puede probarse independientemente</li>
+                    <li><strong>Trabajo en Equipo:</strong> Diferentes desarrolladores pueden trabajar en diferentes capas simultáneamente</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="api-rest">
+            <h2>API REST</h2>
+            
+            <div class="highlight-box">
+                <p><strong>REST (Representational State Transfer)</strong> es un estilo de arquitectura para servicios web que usa HTTP para comunicación entre cliente y servidor.</p>
+            </div>
+
+            <h3>¿Qué es una API?</h3>
+            
+            <div class="analogy-box">
+                <h4>API como un Mesero en un Restaurante</h4>
+                <p>Una <strong>API (Application Programming Interface)</strong> es como un mesero que:</p>
+                <ul>
+                    <li>Toma tu orden (petición del cliente)</li>
+                    <li>La lleva a la cocina (servidor backend)</li>
+                    <li>Trae tu comida (respuesta del servidor)</li>
+                </ul>
+                <p>Tú no necesitas saber cómo se cocina, solo pides y recibes. La API es el intermediario que facilita la comunicación.</p>
+            </div>
+
+            <h3>Métodos HTTP en REST</h3>
+            
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>Propósito</th>
+                        <th>Ejemplo en Nuestro Sistema</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET</td>
+                        <td>Obtener recursos</td>
+                        <td>GET /api/productos.php — Listar todos los productos</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>Crear recursos</td>
+                        <td>POST /api/productos.php — Insertar nuevo producto</td>
+                    </tr>
+                    <tr>
+                        <td>PUT</td>
+                        <td>Actualizar recursos</td>
+                        <td>PUT /api/productos.php?id=5 — Actualizar producto</td>
+                    </tr>
+                    <tr>
+                        <td>DELETE</td>
+                        <td>Eliminar recursos</td>
+                        <td>DELETE /api/productos.php?id=5 — Eliminar producto</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Estructura de Petición y Respuesta</h3>
+            
+            <h4>Petición HTTP</h4>
+            <div class="code-block">
+                <code>POST /api/productos.php HTTP/1.1
+Host: localhost
+Content-Type: application/json
+
+{
+    "codigo": 101,
+    "nombre": "Laptop Dell",
+    "precio": 15000,
+    "tipo": "inicio"
+}</code>
+            </div>
+
+            <h4>Respuesta HTTP</h4>
+            <div class="code-block">
+                <code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "exito": true,
+    "mensaje": "Producto insertado al inicio correctamente",
+    "producto": {
+        "id": 14,
+        "codigo": 101,
+        "nombre": "Laptop Dell",
+        "precio": 15000,
+        "posicion": 1
+    }
+}</code>
+            </div>
+
+            <h3>Códigos de Estado HTTP</h3>
+            
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Significado</th>
+                        <th>Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>200</td>
+                        <td>OK</td>
+                        <td>Petición exitosa</td>
+                    </tr>
+                    <tr>
+                        <td>201</td>
+                        <td>Created</td>
+                        <td>Recurso creado exitosamente</td>
+                    </tr>
+                    <tr>
+                        <td>400</td>
+                        <td>Bad Request</td>
+                        <td>Datos inválidos en la petición</td>
+                    </tr>
+                    <tr>
+                        <td>401</td>
+                        <td>Unauthorized</td>
+                        <td>Usuario no autenticado</td>
+                    </tr>
+                    <tr>
+                        <td>404</td>
+                        <td>Not Found</td>
+                        <td>Recurso no encontrado</td>
+                    </tr>
+                    <tr>
+                        <td>500</td>
+                        <td>Internal Server Error</td>
+                        <td>Error del servidor</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="integracion">
+            <h2>Integración MVC + REST API</h2>
+            
+            <div class="highlight-box">
+                <p>En nuestro sistema, <strong>MVC</strong> organiza el backend y <strong>REST API</strong> permite la comunicación con el frontend de manera desacoplada y eficiente.</p>
+            </div>
+
+            <h3>Flujo Completo: Insertar Producto</h3>
+            
+            <div class="card">
+                <h4>Paso 1: Frontend (View)</h4>
+                <div class="code-block">
+                    <code>// JavaScript captura datos del formulario
+const producto = {
+    codigo: document.getElementById('codigo').value,
+    nombre: document.getElementById('nombre').value,
+    precio: document.getElementById('precio').value,
+    tipo: 'inicio'
+};
+
+// Enviar petición a API
+const response = await fetch('/api/productos.php', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(producto)
+});</code>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>Paso 2: API REST</h4>
+                <div class="code-block">
+                    <code>// api/productos.php
+$method = $_SERVER['REQUEST_METHOD'];
+
+if ($method === 'POST') {
+    $json = file_get_contents('php://input');
+    $datos = json_decode($json, true);
+    
+    // Llamar a Controller
+    $controller = new ProductoController();
+    $resultado = $controller->insertarInicio($datos);
+    
+    // Enviar respuesta JSON
+    echo json_encode($resultado);
+}</code>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>Paso 3: Controller</h4>
+                <div class="code-block">
+                    <code>// controllers/ProductoController.php
+public function insertarInicio($datos) {
+    // Crear Model
+    $producto = new Producto(
+        $datos['codigo'],
+        $datos['nombre'],
+        $datos['precio']
+    );
+    
+    // Validar
+    $errores = $producto->validar();
+    if (!empty($errores)) {
+        return ['exito' => false, 'errores' => $errores];
+    }
+    
+    // Insertar en BD
+    $this->conn->exec("UPDATE productos SET posicion = posicion + 1");
+    $query = "INSERT INTO productos (codigo, nombre, precio, posicion) 
+              VALUES (:codigo, :nombre, :precio, 1)";
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+        ':codigo' => $producto->codigo,
+        ':nombre' => $producto->nombre,
+        ':precio' => $producto->precio
+    ]);
+    
+    return ['exito' => true, 'mensaje' => 'Producto insertado'];
+}</code>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>Paso 4: Model</h4>
+                <div class="code-block">
+                    <code>// models/Producto.php
+class Producto {
+    public $codigo;
+    public $nombre;
+    public $precio;
+    
+    public function validar() {
+        $errores = [];
+        
+        if (!is_numeric($this->codigo)) {
+            $errores[] = "El código debe ser numérico";
+        }
+        
+        if (empty($this->nombre)) {
+            $errores[] = "El nombre no puede estar vacío";
+        }
+        
+        if ($this->precio < 0) {
+            $errores[] = "El precio debe ser mayor o igual a 0";
+        }
+        
+        return $errores;
+    }
+}</code>
+                </div>
+            </div>
+        </section>
+
+        <section id="ventajas">
+            <h2>Ventajas de MVC + REST API</h2>
+
+            <div class="components-grid">
+                <div class="component-card">
+                    <div class="component-title">Separación de Responsabilidades</div>
+                    <p>Cada componente tiene un propósito claro. El Model gestiona datos, la View presenta información, y el Controller coordina ambos.</p>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-title">Mantenibilidad</div>
+                    <p>Cambios en una capa no afectan a las demás. Puedes modificar la interfaz sin tocar la lógica de negocio.</p>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-title">Escalabilidad</div>
+                    <p>Fácil agregar nuevas funcionalidades. La arquitectura modular permite crecimiento ordenado del sistema.</p>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-title">Reutilización</div>
+                    <p>La misma API puede usarse desde web, móvil, desktop. El backend es independiente del frontend.</p>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-title">Testabilidad</div>
+                    <p>Cada capa puede probarse independientemente. Facilita la detección y corrección de errores.</p>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-title">Trabajo en Equipo</div>
+                    <p>Diferentes desarrolladores pueden trabajar en diferentes capas simultáneamente sin conflictos.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion">
+            <h2>Conclusión</h2>
+            
+            <div class="highlight-box">
+                <p><strong>MVC</strong> y <strong>REST API</strong> son patrones fundamentales en el desarrollo web moderno. MVC organiza el código en capas lógicas, mientras que REST API permite comunicación eficiente entre cliente y servidor.</p>
+            </div>
+
+            <p>En nuestro Sistema de Inventario:</p>
+            <ul>
+                <li>MVC separa datos (Model), presentación (View) y lógica (Controller)</li>
+                <li>REST API permite que el frontend JavaScript se comunique con el backend PHP</li>
+                <li>Esta arquitectura facilita el mantenimiento, escalabilidad y trabajo en equipo</li>
+                <li>Preparamos para el desarrollo profesional usando estándares de la industria</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>Exposición: MVC y API REST</p>
+            <p>Sistema de Gestión de Inventario — Ingeniería de Software 2026</p>
+        </footer>
+    </div>
+</body>
+</html>
