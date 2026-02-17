@@ -1,12 +1,12 @@
-# 📐 Diseños del Sistema de Inventario
+# 📐 Diseños y Explicación Técnica Avanzada del Sistema
 
-Este documento contiene los tres diseños principales del sistema: Casos de Uso, Diagrama UML de Clases, y Diseño de Base de Datos.
+Este documento contiene los tres diseños principales del sistema: Casos de Uso, Diagrama UML de Clases, y Diseño de Base de Datos, acompañados de una explicación técnica profunda y profesional orientada a desarrolladores senior y arquitectos de software.
 
 ---
 
 ## 1. Diagrama de Casos de Uso
 
-### Diagrama
+### **Diagrama**
 
 ```mermaid
 graph TB
@@ -50,147 +50,11 @@ graph TB
     UC5 -.extiende.-> UC5B[Quick Sort]
 ```
 
-### Explicación del Diagrama de Casos de Uso
-
-#### Actores del Sistema
-
-**1. Usuario Autenticado**
-- **Descripción**: Persona que ha iniciado sesión en el sistema
-- **Responsabilidades**: Gestionar el inventario de productos
-- **Acciones**: Puede realizar todas las operaciones CRUD y consultas
-
-**2. Sistema**
-- **Descripción**: Componente que procesa la lógica de negocio
-- **Responsabilidades**: Validar datos, ejecutar algoritmos, coordinar operaciones
-- **Interacciones**: Intermediario entre usuario y base de datos
-
-**3. Base de Datos**
-- **Descripción**: Almacenamiento persistente de información
-- **Responsabilidades**: Guardar, recuperar y eliminar datos
-- **Tecnología**: MySQL
-
-#### Casos de Uso Principales
-
-##### UC1: Iniciar Sesión
-- **Actor**: Usuario
-- **Precondición**: Usuario tiene credenciales válidas
-- **Flujo Principal**:
-  1. Usuario ingresa nombre de usuario y NIP
-  2. Sistema valida credenciales contra BD
-  3. Sistema verifica hash de contraseña
-  4. Sistema crea sesión
-  5. Sistema redirige a dashboard
-- **Postcondición**: Usuario autenticado con sesión activa
-- **Excepciones**: Credenciales inválidas → Mostrar error
-
-##### UC2: Insertar Producto
-- **Actor**: Usuario Autenticado
-- **Precondición**: Usuario tiene sesión activa
-- **Flujo Principal**:
-  1. Usuario ingresa código, nombre, precio
-  2. Usuario selecciona tipo de inserción (inicio/final/posición)
-  3. Sistema valida datos (UC2A)
-  4. Sistema verifica código único (UC2B)
-  5. Sistema actualiza posiciones si es necesario (UC2C)
-  6. Sistema inserta producto en BD
-  7. Sistema registra log de operación
-  8. Sistema muestra confirmación
-- **Postcondición**: Producto insertado en la posición correcta
-- **Excepciones**: 
-  - Código duplicado → Rechazar inserción
-  - Datos inválidos → Mostrar errores de validación
-
-**Casos de Uso Incluidos:**
-- **UC2A: Validar Datos**
-  - Verificar que código sea numérico
-  - Verificar que nombre no esté vacío
-  - Verificar que precio sea >= 0
-  
-- **UC2B: Verificar Código Único**
-  - Consultar BD para verificar si código existe
-  - Retornar error si ya existe
-  
-- **UC2C: Actualizar Posiciones**
-  - Si inserción al inicio: incrementar posición de todos
-  - Si inserción en posición específica: ajustar posiciones afectadas
-
-##### UC3: Eliminar Producto
-- **Actor**: Usuario Autenticado
-- **Precondición**: Existen productos en el inventario
-- **Flujo Principal**:
-  1. Usuario selecciona tipo de eliminación (inicio/final/código)
-  2. Sistema solicita confirmación
-  3. Usuario confirma
-  4. Sistema elimina producto de BD
-  5. Sistema registra log
-  6. Sistema actualiza vista
-- **Postcondición**: Producto eliminado del inventario
-- **Excepciones**: 
-  - Inventario vacío → Mostrar mensaje
-  - Código no existe → Mostrar error
-
-##### UC4: Buscar Producto
-- **Actor**: Usuario Autenticado
-- **Precondición**: Usuario tiene sesión activa
-- **Flujo Principal**:
-  1. Usuario ingresa criterio de búsqueda (código o nombre)
-  2. Usuario selecciona algoritmo (lineal o binaria)
-  3. Sistema ejecuta búsqueda
-  4. Sistema mide tiempo de ejecución
-  5. Sistema muestra resultado y tiempo
-- **Postcondición**: Producto encontrado o mensaje de no encontrado
-- **Extensiones**:
-  - **UC4A: Búsqueda Lineal** - O(n), funciona con datos desordenados
-  - **UC4B: Búsqueda Binaria** - O(log n), requiere ordenamiento previo
-
-##### UC5: Ordenar Productos
-- **Actor**: Usuario Autenticado
-- **Precondición**: Existen productos en el inventario
-- **Flujo Principal**:
-  1. Usuario selecciona criterio (precio, nombre, código)
-  2. Usuario selecciona algoritmo (Bubble Sort o Quick Sort)
-  3. Sistema ejecuta ordenamiento
-  4. Sistema mide tiempo de ejecución
-  5. Sistema muestra productos ordenados y tiempo
-- **Postcondición**: Productos mostrados en orden especificado
-- **Extensiones**:
-  - **UC5A: Bubble Sort** - O(n²), simple pero lento
-  - **UC5B: Quick Sort** - O(n log n), rápido para grandes volúmenes
-
-##### UC6: Visualizar Inventario
-- **Actor**: Usuario Autenticado
-- **Precondición**: Usuario tiene sesión activa
-- **Flujo Principal**:
-  1. Sistema consulta productos ordenados por posición
-  2. Sistema muestra tabla con todos los productos
-  3. Sistema muestra contador total
-- **Postcondición**: Usuario ve inventario completo
-
-##### UC7: Cerrar Sesión
-- **Actor**: Usuario Autenticado
-- **Precondición**: Usuario tiene sesión activa
-- **Flujo Principal**:
-  1. Usuario hace clic en "Cerrar Sesión"
-  2. Sistema destruye sesión
-  3. Sistema redirige a página de login
-- **Postcondición**: Sesión terminada
-
-#### Relaciones entre Casos de Uso
-
-**Include (Incluye)**: Relación obligatoria
-- UC2 **incluye** UC2A, UC2B, UC2C
-- Siempre se ejecutan como parte de insertar producto
-
-**Extend (Extiende)**: Relación opcional
-- UC4 **se extiende** a UC4A o UC4B
-- UC5 **se extiende** a UC5A o UC5B
-- El usuario elige cuál ejecutar
-
 ---
 
-## 2. Diagrama UML de Clases
+## 2. Diagrama UML de Clases y Análisis POO Profundo
 
-### Diagrama
+### **Diagrama**
 
 ```mermaid
 classDiagram
@@ -201,6 +65,9 @@ classDiagram
         -string db_name
         -string username
         -string password
+        -static Database instance
+        - __construct()
+        +static getInstance() Database
         +getConnection() PDO
     }
     
@@ -215,7 +82,7 @@ classDiagram
         +datetime fecha_modificacion
         +__construct(codigo, nombre, precio, id)
         +toArray() array
-        +fromArray(data) Producto
+        +static fromArray(data) Producto
         +validar() array
     }
     
@@ -227,41 +94,29 @@ classDiagram
         +datetime fecha_creacion
         +__construct(nombre_usuario, password_hash, nombre_completo)
         +toArray() array
-        +fromArray(data) Usuario
-        +verificarPassword(password) bool
+        +static fromArray(data) Usuario
     }
     
     %% Capa de Utilidades
     class Ordenamiento {
         <<static>>
-        +bubbleSortPorPrecio(productos) array
-        +bubbleSortPorNombre(productos) array
-        +quickSortPorPrecio(productos, low, high) array
-        +quickSortPorNombre(productos, low, high) array
-        -particionPrecio(productos, low, high) int
-        -particionNombre(productos, low, high) int
+        +static bubbleSortPorPrecio(productos) array
+        +static bubbleSortPorNombre(productos) array
+        +static quickSortPorPrecio(productos) array
+        +static quickSortPorNombre(productos) array
     }
     
     class Busqueda {
         <<static>>
-        +busquedaLinealPorCodigo(productos, codigo) Producto
-        +busquedaLinealPorNombre(productos, nombre) Producto
-        +busquedaBinariaPorCodigo(productos, codigo) Producto
-        +busquedaBinariaPorNombre(productos, nombre) Producto
-        -ordenarPorCodigo(productos) array
-    }
-    
-    class Validacion {
-        <<static>>
-        +validarEntero(valor) bool
-        +validarDecimal(valor) bool
-        +validarTexto(valor, min, max) bool
-        +sanitizarTexto(texto) string
+        +static busquedaLinealPorCodigo(productos, codigo) Producto
+        +static busquedaLinealPorNombre(productos, nombre) Producto
+        +static busquedaBinariaPorCodigo(productos, codigo) Producto
     }
     
     %% Capa de Controladores
     class ProductoController {
         -PDO conn
+        -Database db
         +__construct()
         +insertarInicio(producto) array
         +insertarFinal(producto) array
@@ -270,621 +125,167 @@ classDiagram
         +eliminarFinal() array
         +eliminarPorCodigo(codigo) array
         +obtenerTodos() array
-        +buscarPorCodigo(codigo) Producto
-        +contarProductos() int
         -codigoExiste(codigo) bool
-        -registrarLog(operacion, detalles) void
+        -registrarLog(accion, descripcion) void
     }
     
     class AuthController {
         -PDO conn
         +__construct()
-        +login(nombre_usuario, password) array
+        +login(username, password) array
         +logout() void
-        +verificarSesion() bool
-        +obtenerUsuarioActual() Usuario
-        -registrarLog(operacion, detalles) void
     }
     
     %% Relaciones
-    Database <-- ProductoController : usa
-    Database <-- AuthController : usa
+    Database <-- ProductoController : Composición (tiene instancia)
+    Database <-- AuthController : Composición
+    ProductoController ..> Producto : Dependencia (Usa)
+    ProductoController ..> Ordenamiento : Dependencia (Usa)
+    ProductoController ..> Busqueda : Dependencia (Usa)
     
-    ProductoController --> Producto : gestiona
-    ProductoController --> Ordenamiento : utiliza
-    ProductoController --> Busqueda : utiliza
-    ProductoController --> Validacion : utiliza
-    
-    AuthController --> Usuario : gestiona
-    AuthController --> Validacion : utiliza
-    
-    Producto ..> Validacion : valida con
-    Usuario ..> Validacion : valida con
-    
-    note for Database "Patrón Singleton\nUna sola instancia de conexión"
-    note for Ordenamiento "Algoritmos implementados\ndesde cero: O(n²) y O(n log n)"
-    note for Busqueda "Algoritmos implementados\ndesde cero: O(n) y O(log n)"
+    note for Database "Patrón Singleton\nGarantiza conexión única"
 ```
 
-### Explicación del Diagrama UML
+### **Explicación Detallada desde la Programación Orientada a Objetos (POO)**
 
-#### Arquitectura General
+A continuación, analizamos el diseño clase por clase, desglosando cómo se aplican los pilares fundamentales de la POO: Encapsulamiento, Abstracción, Herencia y Polimorfismo.
 
-El sistema sigue el patrón **MVC (Model-View-Controller)** con capas adicionales de utilidades:
+#### **1. Clase `Database` (Patrón Singleton)**
 
-```
-┌─────────────────────────────────────────────────┐
-│              CAPA DE VISTA                      │
-│         (HTML/CSS/JavaScript)                   │
-│         No aparece en UML backend               │
-└────────────────┬────────────────────────────────┘
-                 │ HTTP/JSON
-┌────────────────▼────────────────────────────────┐
-│         CAPA DE CONTROLADORES                   │
-│    ProductoController | AuthController          │
-└────────────────┬────────────────────────────────┘
-                 │
-    ┌────────────┼────────────┐
-    │            │            │
-┌───▼────┐  ┌───▼────┐  ┌───▼────────┐
-│MODELOS │  │UTILIDAD│  │CONFIGURACIÓN│
-│Producto│  │Ordenam.│  │  Database  │
-│Usuario │  │Búsqueda│  └────────────┘
-└────────┘  │Validac.│
-            └────────┘
-```
+*   **Concepto Clave**: **Singleton Pattern**.
+*   **Encapsulamiento**:
+    *   Los atributos `$host`, `$db_name`, `$username`, `$password` y `$conn` se declaran como `private`. Esto impide que cualquier código externo acceda o modifique las credenciales de conexión, protegiendo la seguridad y la integridad del estado de la conexión.
+    *   El constructor `__construct()` también debe ser `private` o `protected` para prohibir la instanciación directa (`new Database()`) desde fuera de la clase.
+*   **Métodos Estáticos**:
+    *   `getInstance()`: Es el único punto de acceso global. Controla que solo exista una instancia de `Database` en toda la ejecución del script.
+*   **Abstracción**:
+    *   `getConnection()`: Oculta la complejidad de crear una conexión PDO (DSN, manejo de errores de conexión). El cliente solo pide la conexión y la recibe lista para usar.
 
-#### Capa de Configuración
+#### **2. Clase `Producto` (Entidad de Dominio / DTO)**
 
-##### Database
-- **Patrón**: Singleton
-- **Responsabilidad**: Gestionar conexión única a MySQL
-- **Atributos**:
-  - `conn`: Objeto PDO de conexión
-  - `host`, `db_name`, `username`, `password`: Credenciales
-- **Método Principal**:
-  - `getConnection()`: Retorna conexión PDO reutilizable
-- **¿Por qué Singleton?**
-  - Evita múltiples conexiones innecesarias
-  - Ahorra recursos del servidor
-  - Punto centralizado de configuración
+*   **Rol**: Entidad de Datos y Validación.
+*   **Atributos**:
+    *   Representan el estado del objeto (`id`, `nombre`, `precio`, `codigo`).
+    *   En un diseño estricto, serían `private` con métodos `getters` y `setters` para controlar el acceso. Aquí se usan `public` para simplificar el acceso como un **DTO (Data Transfer Object)**.
+*   **Encapsulamiento de Reglas**:
+    *   El método `validar()` encapsula las reglas de negocio (ej. "precio no puede ser negativo"). El controlador no necesita saber *cómo* se valida, solo llama a `validar()`.
+*   **Método de Fábrica**:
+    *   `fromArray()` actúa como un constructor alternativo o método de fábrica estático, permitiendo crear instancias desde datos crudos de la base de datos sin acoplar la lógica de mapeo en todas partes.
 
-#### Capa de Modelos (Entidades)
+#### **3. Clase `ProductoController` (Controlador / Gestor)**
 
-##### Producto
-- **Responsabilidad**: Representar un producto del inventario
-- **Atributos**:
-  - `id`: Identificador único auto-incremental
-  - `posicion`: Posición en la lista (para ordenamiento)
-  - `codigo`: Código único del producto (INT)
-  - `nombre`: Nombre descriptivo
-  - `precio`: Precio en formato decimal
-  - `fecha_creacion`, `fecha_modificacion`: Timestamps
-- **Métodos**:
-  - `__construct()`: Inicializa producto
-  - `toArray()`: Convierte a array para JSON
-  - `fromArray()`: Crea objeto desde array de BD
-  - `validar()`: Valida reglas de negocio
-- **Validaciones**:
-  - Código debe ser numérico
-  - Nombre no puede estar vacío
-  - Precio debe ser >= 0
+*   **Principio SRP (Single Responsibility Principle)**:
+    *   Esta clase tiene la única responsabilidad de orquestar las operaciones relacionadas con productos. No maneja usuarios (eso es `AuthController`) ni dibuja HTML (eso es la Vista).
+*   **Encapsulamiento**:
+    *   Atributos `$conn` y `$db` son `private`. El controlador maneja su propia conexión internamente.
+*   **Composición**:
+    *   El controlador *tiene una* conexión a base de datos. La relación es "parte-todo" esencial para su funcionamiento.
+*   **Dependencia**:
+    *   El controlador *depende de* `Producto` (para recibir datos), `Ordenamiento` (para ordenar) y `Busqueda` (para buscar).
+*   **Abstracción de Procesos**:
+    *   El método `insertarInicio($producto)` abstrae un proceso complejo: 
+        1. Validar producto.
+        2. Verificar unicidad de código.
+        3. Desplazar todos los elementos existentes (UPDATE posicion = posicion + 1).
+        4. Insertar el nuevo elemento.
+    *   Para el resto del sistema, esto es una simple operación atómica.
 
-##### Usuario
-- **Responsabilidad**: Representar un usuario del sistema
-- **Atributos**:
-  - `id`: Identificador único
-  - `nombre_usuario`: Username para login
-  - `password_hash`: Contraseña hasheada con bcrypt
-  - `nombre_completo`: Nombre real del usuario
-  - `fecha_creacion`: Timestamp de registro
-- **Métodos**:
-  - `verificarPassword()`: Compara password con hash
-  - `toArray()`, `fromArray()`: Conversión de datos
-- **Seguridad**:
-  - Nunca almacena password en texto plano
-  - Usa `password_hash()` y `password_verify()`
+#### **4. Clases `Ordenamiento` y `Busqueda` (Utilidades Estáticas)**
 
-#### Capa de Utilidades
+*   **Concepto**: **Clases de Servicios sin Estado (Stateless)**.
+*   **Polimorfismo (Paramétrico)**:
+    *   Los métodos como `quickSortPorPrecio($arr)` aceptan un array genérico de productos. El algoritmo es agnóstico a la fuente de los datos, siempre que tengan la propiedad `precio`.
+*   **Diseño Estático**:
+    *   No se instancian (`new Ordenamiento()` es innecesario). Son colecciones de funciones puras agrupadas lógicamente bajo un namespace de clase. Esto favorece la organización y reutilización del código.
 
-##### Ordenamiento
-- **Tipo**: Clase estática (no requiere instanciación)
-- **Responsabilidad**: Algoritmos de ordenamiento desde cero
-- **Métodos Públicos**:
-  - `bubbleSortPorPrecio()`: O(n²) - Simple, lento
-  - `bubbleSortPorNombre()`: O(n²) - Ordenamiento alfabético
-  - `quickSortPorPrecio()`: O(n log n) - Rápido, recursivo
-  - `quickSortPorNombre()`: O(n log n) - Alfabético rápido
-- **Métodos Privados**:
-  - `particionPrecio()`: Auxiliar para Quick Sort
-  - `particionNombre()`: Auxiliar para Quick Sort
-- **Características**:
-  - No usa funciones nativas de PHP (`sort()`, `usort()`)
-  - Implementación manual con bucles y comparaciones
-  - Demuestra conocimiento de análisis de algoritmos
+#### **5. Gestión de Herencia y Polimorfismo**
 
-##### Busqueda
-- **Tipo**: Clase estática
-- **Responsabilidad**: Algoritmos de búsqueda desde cero
-- **Métodos Públicos**:
-  - `busquedaLinealPorCodigo()`: O(n) - Secuencial
-  - `busquedaLinealPorNombre()`: O(n) - Por nombre
-  - `busquedaBinariaPorCodigo()`: O(log n) - Divide y conquista
-  - `busquedaBinariaPorNombre()`: O(log n) - Alfabética
-- **Método Privado**:
-  - `ordenarPorCodigo()`: Prepara array para búsqueda binaria
-- **Características**:
-  - No usa `array_search()` ni `in_array()`
-  - Búsqueda binaria requiere array ordenado
-  - Implementación manual completa
-
-##### Validacion
-- **Tipo**: Clase estática
-- **Responsabilidad**: Validación y sanitización de datos
-- **Métodos**:
-  - `validarEntero()`: Verifica que sea número entero
-  - `validarDecimal()`: Verifica que sea número decimal
-  - `validarTexto()`: Verifica longitud y caracteres
-  - `sanitizarTexto()`: Limpia entrada de usuario
-- **Uso**: Prevenir inyección SQL y XSS
-
-#### Capa de Controladores (Lógica de Negocio)
-
-##### ProductoController
-- **Responsabilidad**: Gestionar operaciones CRUD de productos
-- **Atributo**:
-  - `conn`: Conexión PDO de Database
-- **Métodos de Inserción**:
-  - `insertarInicio()`: Inserta en posición 1
-  - `insertarFinal()`: Inserta en última posición
-  - `insertarPosicion()`: Inserta en posición específica
-- **Métodos de Eliminación**:
-  - `eliminarInicio()`: Elimina primer producto
-  - `eliminarFinal()`: Elimina último producto
-  - `eliminarPorCodigo()`: Elimina por código específico
-- **Métodos de Consulta**:
-  - `obtenerTodos()`: Retorna todos ordenados por posición
-  - `buscarPorCodigo()`: Busca un producto específico
-  - `contarProductos()`: Cuenta total de productos
-- **Métodos Privados**:
-  - `codigoExiste()`: Verifica unicidad de código
-  - `registrarLog()`: Auditoría de operaciones
-- **Dependencias**:
-  - Usa `Producto` para validación
-  - Usa `Ordenamiento` para ordenar resultados
-  - Usa `Busqueda` para búsquedas eficientes
-  - Usa `Database` para persistencia
-
-##### AuthController
-- **Responsabilidad**: Gestionar autenticación y sesiones
-- **Métodos Públicos**:
-  - `login()`: Autentica usuario
-  - `logout()`: Cierra sesión
-  - `verificarSesion()`: Verifica si hay sesión activa
-  - `obtenerUsuarioActual()`: Retorna usuario logueado
-- **Método Privado**:
-  - `registrarLog()`: Auditoría de accesos
-- **Seguridad**:
-  - Verifica hash de contraseñas
-  - Gestiona sesiones PHP
-  - Previene acceso no autorizado
-
-#### Relaciones entre Clases
-
-**Asociación (usa)**:
-- `ProductoController` → `Database`: Obtiene conexión
-- `AuthController` → `Database`: Obtiene conexión
-
-**Dependencia (utiliza)**:
-- `ProductoController` → `Ordenamiento`: Para ordenar productos
-- `ProductoController` → `Busqueda`: Para buscar productos
-- `ProductoController` → `Validacion`: Para validar datos
-- `AuthController` → `Validacion`: Para validar credenciales
-
-**Composición (gestiona)**:
-- `ProductoController` → `Producto`: Crea y manipula productos
-- `AuthController` → `Usuario`: Crea y manipula usuarios
-
-**Realización (valida con)**:
-- `Producto` → `Validacion`: Usa para validar sus atributos
-- `Usuario` → `Validacion`: Usa para validar credenciales
-
-#### Principios de Diseño Aplicados
-
-**1. Single Responsibility Principle (SRP)**
-- Cada clase tiene una única responsabilidad
-- `Producto` solo representa datos
-- `ProductoController` solo gestiona lógica de negocio
-- `Ordenamiento` solo ordena
-
-**2. Open/Closed Principle (OCP)**
-- Clases abiertas para extensión, cerradas para modificación
-- Fácil agregar nuevos algoritmos de ordenamiento
-- Fácil agregar nuevos tipos de búsqueda
-
-**3. Dependency Inversion Principle (DIP)**
-- Controladores dependen de abstracciones (PDO)
-- No dependen de implementaciones concretas de BD
-
-**4. Don't Repeat Yourself (DRY)**
-- Algoritmos centralizados en clases de utilidades
-- Validación reutilizable
-- Conexión única (Singleton)
+*   **Composición sobre Herencia**:
+    *   En este diseño, hemos evitado crear una jerarquía de herencia profunda (ej. `BaseController -> ProductoController`).
+    *   ¿Por qué? Porque `ProductoController` y `AuthController` tienen responsabilidades muy distintas. Forzar una herencia común a menudo lleva a clases base "dios" (God Objects) con demasiadas responsabilidades.
+    *   En su lugar, ambos controladores usan `Database` por composición. Esto mantiene el acoplamiento bajo y la cohesión alta.
 
 ---
 
-## 3. Diseño de Base de Datos
+## 3. Diseño de Base de Datos y Explicación Profesional
 
-### Diagrama Entidad-Relación
+### **Diagrama Entidad-Relación (ERD)**
 
 ```mermaid
 erDiagram
-    USUARIOS ||--o{ LOGS : "genera"
-    PRODUCTOS ||--o{ LOGS : "afecta"
+    USUARIOS ||--o{ LOGS : "genera (1:N)"
+    PRODUCTOS ||--o{ LOGS : "referencia (0:N)"
     
     USUARIOS {
-        int id PK "AUTO_INCREMENT"
-        varchar nombre_usuario UK "UNIQUE, NOT NULL"
-        varchar password_hash "NOT NULL"
-        varchar nombre_completo "NOT NULL"
-        timestamp fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
+        int id PK "Primary Key, Auto Increment"
+        varchar(50) username UK "Unique Index"
+        varchar(255) password_hash "Bcrypt Hash"
+        varchar(100) nombre_completo
+        timestamp fecha_creacion
     }
     
     PRODUCTOS {
-        int id PK "AUTO_INCREMENT"
-        int posicion "NOT NULL, DEFAULT 0, INDEX"
-        int codigo UK "UNIQUE, NOT NULL, INDEX"
-        varchar nombre "NOT NULL, INDEX"
-        decimal precio "NOT NULL, INDEX"
-        timestamp fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
-        timestamp fecha_modificacion "ON UPDATE CURRENT_TIMESTAMP"
+        int id PK "Primary Key"
+        int posicion "Index (Lista Enlazada)"
+        int codigo UK "Unique Key (Negocio)"
+        varchar(100) nombre "Index"
+        decimal(10,2) precio "Index"
+        timestamp fecha_creacion
     }
     
     LOGS {
-        int id PK "AUTO_INCREMENT"
-        int usuario_id FK "NOT NULL"
-        varchar operacion "NOT NULL"
-        text detalles "NULL"
-        int producto_id FK "NULL"
-        timestamp fecha "DEFAULT CURRENT_TIMESTAMP"
+        int id PK
+        int usuario_id FK "Foreign Key (Usuarios)"
+        varchar operacion
+        text detalles "JSON/Texto Flexible"
+        timestamp fecha "Index (Reportes)"
     }
 ```
 
-### Esquema SQL Completo
+### **Explicación Técnica para Profesionales de Base de Datos (DBA)**
 
-```sql
--- ============================================
--- Base de Datos: inventario_db
--- ============================================
+Esta sección detalla las decisiones arquitectónicas de la base de datos, justificando cada elección desde una perspectiva de rendimiento, integridad y escalabilidad.
 
-CREATE DATABASE IF NOT EXISTS inventario_db
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
+#### **1. Elección del Motor: InnoDB**
+*   **Transaccionalidad (ACID)**: Es imperativo usar **InnoDB** y no MyISAM. Las operaciones de inserción en nuestra "lista enlazada simulada" requieren múltiples pasos SQL: primero un `UPDATE` masivo para desplazar posiciones, y luego el `INSERT` del nuevo registro.
+    *   Si el `INSERT` falla después del `UPDATE`, los datos quedarían corruptos (huecos en la secuencia). Con InnoDB, envolvemos esto en una transacción (`START TRANSACTION` ... `COMMIT`/`ROLLBACK`) para garantizar atomicidad.
+*   **Bloqueo a Nivel de Fila (Row-Level Locking)**: InnoDB permite que múltiples usuarios lean o inserten en diferentes filas simultáneamente sin bloquear toda la tabla, esencial para la concurrencia.
 
-USE inventario_db;
+#### **2. Estrategia de Indexación Avanzada**
+El esquema implementa índices estratégicos para optimizar cargas de trabajo mixtas (lectura/escritura):
 
--- ============================================
--- Tabla: usuarios
--- ============================================
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    nombre_completo VARCHAR(100) NOT NULL,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_nombre_usuario (nombre_usuario)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+*   **Clustered Index (PK `id`)**: Físicamente ordena los datos en disco. Inserciones secuenciales (por `AUTO_INCREMENT`) son muy eficientes y minimizan la fragmentación de páginas de datos.
+*   **Unique Index (`codigo`)**:
+    *   Funciona como una restricción de integridad de negocio.
+    *   Permite búsquedas O(1) o O(log N) muy rápidas (`WHERE codigo = ?`).
+*   **Secondary Indexes (`nombre`, `precio`, `posicion`, `fecha`)**:
+    *   `idx_posicion`: **CRÍTICO**. El sistema ordena por defecto por `posicion`. Sin este índice, MySQL tendría que realizar un *Filesort* (ordenamiento costoso en memoria/disco) en cada consulta de listado. El índice permite recuperar las filas ya ordenadas.
+    *   `idx_fecha` (en Logs): Optimiza la generación de reportes por rangos de fechas, una consulta común en auditoría.
 
--- ============================================
--- Tabla: productos
--- ============================================
-CREATE TABLE IF NOT EXISTS productos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    posicion INT NOT NULL DEFAULT 0,
-    codigo INT NOT NULL UNIQUE,
-    nombre VARCHAR(100) NOT NULL,
-    precio DECIMAL(10, 2) NOT NULL,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_posicion (posicion),
-    INDEX idx_codigo (codigo),
-    INDEX idx_nombre (nombre),
-    INDEX idx_precio (precio)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+#### **3. Integridad Referencial (Foreign Keys)**
+*   **Relación `logs` -> `usuarios`**:
+    *   Constraint: `FOREIGN KEY (usuario_id) REFERENCES usuarios(id)`.
+    *   Acción `ON DELETE`: Se recomienda `RESTRICT` o `SET NULL`. Aquí usamos `SET NULL` (o mantener el ID si es solo historial) para que si un usuario se elimina, el log no desaparezca (auditoría), pero sabemos que el usuario ya no existe.
+*   **Relación `logs` -> `productos`**:
+    *   Constraint: `FOREIGN KEY (producto_id) REFERENCES productos(id)`.
+    *   Acción `ON DELETE SET NULL`: Si se elimina un producto, el log persiste indicando "Producto eliminado", y el campo `producto_id` se pone en NULL para mantener la integridad referencia, mientras que los detalles del producto borrado quedan preservados en el campo de texto `detalles`.
 
--- ============================================
--- Tabla: logs
--- ============================================
-CREATE TABLE IF NOT EXISTS logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    operacion VARCHAR(50) NOT NULL,
-    detalles TEXT,
-    producto_id INT NULL,
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE SET NULL,
-    
-    INDEX idx_usuario_id (usuario_id),
-    INDEX idx_fecha (fecha),
-    INDEX idx_operacion (operacion)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
+#### **4. Normalización y Desnormalización Estratégica**
+*   **3NF (Tercera Forma Normal)**:
+    *   Las tablas `usuarios` y `productos` están en 3NF. Todos los atributos dependen de la clave primaria y no hay dependencias transitivas.
+*   **Desnormalización Controlada (`logs.detalles`)**:
+    *   El campo `detalles` en la tabla `logs` viola la 1NF si contiene JSON o estructuras complejas.
+    *   **Justificación**: En auditoría, es preferible guardar una "snapshot" inmutable del estado del objeto en el momento del evento. Si normalizáramos los detalles en otra tabla, y luego cambiamos la estructura del producto, el histórico podría volverse inconsistente o difícil de reconstruir.
 
-### Explicación del Diseño de Base de Datos
-
-#### Características Generales
-
-**Motor de Almacenamiento**: InnoDB
-- ✅ Soporta transacciones ACID
-- ✅ Integridad referencial con FOREIGN KEYS
-- ✅ Bloqueo a nivel de fila
-- ✅ Recuperación ante fallos
-
-**Charset**: utf8mb4
-- ✅ Soporta emojis y caracteres especiales
-- ✅ Compatibilidad internacional completa
-- ✅ Estándar moderno de Unicode
-
-**Collation**: utf8mb4_unicode_ci
-- ✅ Comparaciones case-insensitive
-- ✅ Ordenamiento correcto de caracteres especiales
-
-#### Tabla: usuarios
-
-**Propósito**: Almacenar información de autenticación
-
-**Campos**:
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INT AUTO_INCREMENT | Clave primaria única |
-| `nombre_usuario` | VARCHAR(50) UNIQUE | Username para login, debe ser único |
-| `password_hash` | VARCHAR(255) | Contraseña hasheada con bcrypt |
-| `nombre_completo` | VARCHAR(100) | Nombre real del usuario |
-| `fecha_creacion` | TIMESTAMP | Fecha de registro automática |
-
-**Índices**:
-- `PRIMARY KEY (id)`: Búsqueda rápida por ID
-- `UNIQUE (nombre_usuario)`: Garantiza unicidad de usernames
-- `INDEX (nombre_usuario)`: Optimiza búsquedas en login
-
-**Seguridad**:
-- Contraseñas hasheadas con `password_hash()` de PHP
-- Nunca almacena passwords en texto plano
-- Hash bcrypt con salt automático
-
-**Ejemplo de Datos**:
-```sql
-INSERT INTO usuarios (nombre_usuario, password_hash, nombre_completo) VALUES
-('Horacio', '$2y$10$...hash...', 'Horacio Martínez'),
-('Omar', '$2y$10$...hash...', 'Omar López');
-```
-
-#### Tabla: productos
-
-**Propósito**: Almacenar inventario de productos
-
-**Campos**:
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INT AUTO_INCREMENT | Clave primaria única |
-| `posicion` | INT NOT NULL | Posición en la lista (para ordenamiento) |
-| `codigo` | INT UNIQUE | Código único del producto |
-| `nombre` | VARCHAR(100) | Nombre descriptivo |
-| `precio` | DECIMAL(10,2) | Precio con 2 decimales |
-| `fecha_creacion` | TIMESTAMP | Fecha de creación automática |
-| `fecha_modificacion` | TIMESTAMP | Actualización automática |
-
-**Campo Especial: `posicion`**
-- **¿Por qué existe?**: Simula comportamiento de lista enlazada
-- **Función**: Mantiene orden independiente del ID
-- **Ventaja**: Permite inserción al inicio/final sin depender de ID auto-incremental
-- **Ejemplo**:
-  ```
-  id | posicion | codigo | nombre
-  5  | 1        | 105    | Webcam     ← Insertado al inicio
-  1  | 2        | 101    | Laptop     ← Posición incrementada
-  2  | 3        | 102    | Mouse      ← Posición incrementada
-  ```
-
-**Índices**:
-- `PRIMARY KEY (id)`: Identificación única
-- `UNIQUE (codigo)`: Garantiza códigos únicos
-- `INDEX (posicion)`: Optimiza `ORDER BY posicion`
-- `INDEX (codigo)`: Optimiza búsquedas por código
-- `INDEX (nombre)`: Optimiza búsquedas por nombre
-- `INDEX (precio)`: Optimiza ordenamiento por precio
-
-**¿Por qué tantos índices?**
-- Sistema realiza búsquedas frecuentes
-- Ordenamiento es operación común
-- Índices aceleran consultas SELECT
-- Costo: Espacio adicional (aceptable para este volumen)
-
-**Constraints**:
-- `NOT NULL` en campos críticos
-- `UNIQUE` en código para evitar duplicados
-- `DEFAULT 0` en posicion para nuevos productos
-
-**Timestamps Automáticos**:
-- `fecha_creacion`: Se establece al insertar
-- `fecha_modificacion`: Se actualiza automáticamente con `ON UPDATE CURRENT_TIMESTAMP`
-
-#### Tabla: logs
-
-**Propósito**: Auditoría de operaciones del sistema
-
-**Campos**:
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INT AUTO_INCREMENT | Clave primaria única |
-| `usuario_id` | INT FK | Referencia a usuario que realizó la acción |
-| `operacion` | VARCHAR(50) | Tipo de operación (INSERT_INICIO, DELETE_CODIGO, etc.) |
-| `detalles` | TEXT | Información adicional en formato JSON o texto |
-| `producto_id` | INT FK NULL | Referencia a producto afectado (si aplica) |
-| `fecha` | TIMESTAMP | Momento exacto de la operación |
-
-**Relaciones (Foreign Keys)**:
-
-1. **`usuario_id` → `usuarios.id`**
-   - `ON DELETE CASCADE`: Si se elimina usuario, se eliminan sus logs
-   - Mantiene integridad referencial
-   
-2. **`producto_id` → `productos.id`**
-   - `ON DELETE SET NULL`: Si se elimina producto, el log permanece pero producto_id = NULL
-   - Preserva historial aunque producto ya no exista
-
-**Índices**:
-- `INDEX (usuario_id)`: Consultar logs por usuario
-- `INDEX (fecha)`: Consultar logs por rango de fechas
-- `INDEX (operacion)`: Filtrar por tipo de operación
-
-**Tipos de Operaciones Registradas**:
-- `LOGIN`: Inicio de sesión
-- `LOGOUT`: Cierre de sesión
-- `INSERT_INICIO`: Inserción al inicio
-- `INSERT_FINAL`: Inserción al final
-- `INSERT_POSICION`: Inserción en posición específica
-- `DELETE_INICIO`: Eliminación del primero
-- `DELETE_FINAL`: Eliminación del último
-- `DELETE_CODIGO`: Eliminación por código
-
-**Ejemplo de Log**:
-```sql
-INSERT INTO logs (usuario_id, operacion, detalles, producto_id) VALUES
-(1, 'INSERT_INICIO', 'Producto: Laptop Dell, Precio: 15000', 5);
-```
-
-#### Relaciones entre Tablas
-
-```
-USUARIOS (1) ──────── (N) LOGS
-   │
-   └─ Un usuario puede generar múltiples logs
-   
-PRODUCTOS (1) ──────── (N) LOGS
-   │
-   └─ Un producto puede aparecer en múltiples logs
-```
-
-**Cardinalidad**:
-- `USUARIOS` → `LOGS`: 1:N (Uno a Muchos)
-- `PRODUCTOS` → `LOGS`: 1:N (Uno a Muchos)
-
-#### Normalización
-
-**Forma Normal Alcanzada**: 3FN (Tercera Forma Normal)
-
-**1FN (Primera Forma Normal)**:
-- ✅ Todos los atributos son atómicos
-- ✅ No hay grupos repetitivos
-- ✅ Cada campo contiene un solo valor
-
-**2FN (Segunda Forma Normal)**:
-- ✅ Cumple 1FN
-- ✅ Todos los atributos no clave dependen completamente de la clave primaria
-- ✅ No hay dependencias parciales
-
-**3FN (Tercera Forma Normal)**:
-- ✅ Cumple 2FN
-- ✅ No hay dependencias transitivas
-- ✅ Cada atributo no clave depende solo de la clave primaria
-
-**Ventajas de la Normalización**:
-- Elimina redundancia de datos
-- Facilita actualizaciones
-- Previene anomalías de inserción/actualización/eliminación
-- Mejora integridad de datos
-
-#### Estrategia de Índices
-
-**Índices Primarios** (PRIMARY KEY):
-- `usuarios.id`
-- `productos.id`
-- `logs.id`
-
-**Índices Únicos** (UNIQUE):
-- `usuarios.nombre_usuario`
-- `productos.codigo`
-
-**Índices Secundarios** (INDEX):
-- `productos.posicion` → Para `ORDER BY posicion`
-- `productos.nombre` → Para búsquedas por nombre
-- `productos.precio` → Para ordenamiento por precio
-- `logs.usuario_id` → Para consultas de auditoría
-- `logs.fecha` → Para reportes por fecha
-- `logs.operacion` → Para filtrar por tipo
-
-**Análisis de Rendimiento**:
-```sql
--- Sin índice en posicion: O(n log n) sort
-SELECT * FROM productos ORDER BY posicion;
-
--- Con índice en posicion: O(n) scan del índice
-SELECT * FROM productos ORDER BY posicion;
-```
-
-#### Consideraciones de Diseño
-
-**1. ¿Por qué INT para código y no VARCHAR?**
-- ✅ Más eficiente en búsquedas (comparación numérica)
-- ✅ Menor espacio de almacenamiento
-- ✅ Índices más pequeños y rápidos
-- ✅ Compatibilidad con código C++ original
-- ❌ Limitación: No soporta códigos alfanuméricos
-
-**2. ¿Por qué DECIMAL(10,2) para precio?**
-- ✅ Precisión exacta (no errores de redondeo como FLOAT)
-- ✅ Estándar para valores monetarios
-- ✅ 10 dígitos totales, 2 decimales
-- ✅ Soporta precios hasta 99,999,999.99
-
-**3. ¿Por qué InnoDB y no MyISAM?**
-- ✅ Transacciones ACID
-- ✅ Foreign Keys
-- ✅ Recuperación ante fallos
-- ✅ Mejor para aplicaciones modernas
-
-**4. ¿Por qué ON DELETE CASCADE en logs?**
-- Si se elimina un usuario, sus logs también se eliminan
-- Mantiene consistencia
-- Evita logs huérfanos
-
-**5. ¿Por qué ON DELETE SET NULL en logs.producto_id?**
-- Preserva historial de operaciones
-- Aunque el producto ya no exista, el log indica que existió
-- Útil para auditoría
+#### **5. Patrón "Lista Enlazada en SQL" (`posicion`)**
+Este es el aspecto más sofisticado del diseño.
+*   **Reto**: SQL no garantiza orden. Las bases de datos relacionales se basan en teoría de conjuntos (sin orden intrínseco).
+*   **Solución**: Campo explícito `posicion`.
+*   **Trade-off (Compromiso)**:
+    *   **Lectura Rápida**: `SELECT * FROM productos ORDER BY posicion` es muy rápido con índices.
+    *   **Escritura Costosa**: Insertar en `posicion=1` requiere actualizar N filas (`UPDATE productos SET posicion = posicion + 1`).
+    *   **Justificación**: En la mayoría de aplicaciones, las lecturas superan a las escrituras 10 a 1 o más. Asumimos el costo de escritura para obtener lecturas ordenadas instantáneas y cumplir el requerimiento de "insertar al inicio/final".
 
 ---
 
-## Resumen de Diseños
-
-### Casos de Uso
-- **7 casos de uso principales**
-- **3 actores** (Usuario, Sistema, BD)
-- **Relaciones include y extend**
-- **Flujos detallados** para cada caso
-
-### UML de Clases
-- **11 clases** en 4 capas
-- **Patrón MVC** implementado
-- **Principios SOLID** aplicados
-- **Separación clara** de responsabilidades
-
-### Base de Datos
-- **3 tablas** normalizadas a 3FN
-- **2 relaciones** con foreign keys
-- **12 índices** para optimización
-- **Motor InnoDB** con transacciones
-
----
-
-**Documento creado para**: Sistema de Inventario  
-**Fecha**: Febrero 2026  
-**Propósito**: Documentación de diseño del sistema
+> Documento generado automáticamente por el Asistente de Arquitectura de Software.
