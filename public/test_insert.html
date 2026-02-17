@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Inserción - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #1e40af;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        pre {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Inserción de Productos</h1>
+    <p>Este formulario muestra todos los detalles de la petición y respuesta</p>
+    
+    <form id="testForm">
+        <div class="form-group">
+            <label>Código:</label>
+            <input type="number" id="codigo" value="200" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" id="nombre" value="Producto Test" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Precio:</label>
+            <input type="number" step="0.01" id="precio" value="100.00" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Tipo de Inserción:</label>
+            <select id="tipo">
+                <option value="inicio">Al Inicio</option>
+                <option value="final">Al Final</option>
+                <option value="posicion">En Posición</option>
+            </select>
+        </div>
+        
+        <button type="submit">Insertar Producto</button>
+    </form>
+    
+    <div id="resultado"></div>
+    
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.style.display = 'block';
+            resultadoDiv.className = '';
+            resultadoDiv.innerHTML = '<strong>⏳ Procesando...</strong>';
+            
+            const datos = {
+                codigo: parseInt(document.getElementById('codigo').value),
+                nombre: document.getElementById('nombre').value,
+                precio: parseFloat(document.getElementById('precio').value),
+                tipo: document.getElementById('tipo').value
+            };
+            
+            console.log('📤 Enviando datos:', datos);
+            
+            try {
+                const response = await fetch('../api/productos.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(datos)
+                });
+                
+                console.log('📥 Response status:', response.status);
+                console.log('📥 Response headers:', [...response.headers.entries()]);
+                
+                const responseText = await response.text();
+                console.log('📥 Response text:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('❌ Error parseando JSON:', parseError);
+                    resultadoDiv.className = 'error';
+                    resultadoDiv.innerHTML = `
+                        <strong>❌ Error: Respuesta no es JSON válido</strong><br><br>
+                        <strong>Status HTTP:</strong> ${response.status}<br><br>
+                        <strong>Respuesta del servidor:</strong><br>
+                        <pre>${responseText}</pre>
+                    `;
+                    return;
+                }
+                
+                console.log('📥 Datos parseados:', data);
+                
+                if (data.exito) {
+                    resultadoDiv.className = 'success';
+                    resultadoDiv.innerHTML = `
+                        <strong>✅ ${data.mensaje}</strong><br><br>
+                        <strong>Datos enviados:</strong><br>
+                        <pre>${JSON.stringify(datos, null, 2)}</pre>
+                        <strong>Respuesta completa:</strong><br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultadoDiv.className = 'error';
+                    resultadoDiv.innerHTML = `
+                        <strong>❌ Error: ${data.mensaje}</strong><br><br>
+                        <strong>Datos enviados:</strong><br>
+                        <pre>${JSON.stringify(datos, null, 2)}</pre>
+                        <strong>Respuesta completa:</strong><br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('❌ Error en la petición:', error);
+                resultadoDiv.className = 'error';
+                resultadoDiv.innerHTML = `
+                    <strong>❌ Error de red o servidor</strong><br><br>
+                    <strong>Error:</strong> ${error.message}<br><br>
+                    <strong>Datos que se intentaron enviar:</strong><br>
+                    <pre>${JSON.stringify(datos, null, 2)}</pre>
+                    <br>
+                    <strong>Abre la consola del navegador (F12) para más detalles</strong>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

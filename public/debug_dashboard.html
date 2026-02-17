@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Dashboard - Productos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .section {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        pre {
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #2563eb;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Dashboard - Productos</h1>
+    
+    <div class="section">
+        <h2>1. Test de API GET</h2>
+        <button onclick="testAPI()">Probar API</button>
+        <div id="apiResult"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. Productos en Tabla</h2>
+        <div id="totalProductos">0</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Posición</th>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Fecha Creación</th>
+                </tr>
+            </thead>
+            <tbody id="productosTableBody">
+                <tr><td colspan="6">Cargando...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>3. Console Log</h2>
+        <pre id="consoleLog"></pre>
+    </div>
+    
+    <script>
+        let logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            logs.push(logEntry);
+            document.getElementById('consoleLog').textContent = logs.join('\n');
+            console.log(logEntry);
+        }
+        
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<p>⏳ Cargando...</p>';
+            
+            try {
+                log('Iniciando petición GET a ../api/productos.php');
+                
+                const response = await fetch('../api/productos.php', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                log(`Response status: ${response.status}`);
+                log(`Response OK: ${response.ok}`);
+                
+                const text = await response.text();
+                log(`Response length: ${text.length} caracteres`);
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                    log('JSON parseado exitosamente');
+                } catch (e) {
+                    log(`Error parseando JSON: ${e.message}`, 'error');
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Error: Respuesta no es JSON válido</p>
+                        <pre>${text}</pre>
+                    `;
+                    return;
+                }
+                
+                log(`data.exito: ${data.exito}`);
+                log(`data.total: ${data.total}`);
+                log(`data.productos.length: ${data.productos ? data.productos.length : 'undefined'}`);
+                
+                if (data.exito) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ API funcionando correctamente</p>
+                        <p><strong>Total:</strong> ${data.total}</p>
+                        <p><strong>Productos recibidos:</strong> ${data.productos.length}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    
+                    // Mostrar en tabla
+                    mostrarProductos(data.productos);
+                    document.getElementById('totalProductos').textContent = `Total: ${data.total}`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Error: ${data.mensaje}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+                
+            } catch (error) {
+                log(`Error en la petición: ${error.message}`, 'error');
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Error: ${error.message}</p>
+                `;
+            }
+        }
+        
+        function mostrarProductos(productos) {
+            const tbody = document.getElementById('productosTableBody');
+            
+            if (!productos || productos.length === 0) {
+                log('Array de productos vacío o undefined', 'warning');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay productos registrados</td></tr>';
+                return;
+            }
+            
+            log(`Mostrando ${productos.length} productos en la tabla`);
+            
+            tbody.innerHTML = productos.map(producto => {
+                log(`Producto: ID=${producto.id}, Código=${producto.codigo}, Nombre=${producto.nombre}`);
+                return `
+                    <tr>
+                        <td>${producto.id}</td>
+                        <td>${producto.posicion || 'N/A'}</td>
+                        <td>${producto.codigo}</td>
+                        <td>${producto.nombre}</td>
+                        <td>$${parseFloat(producto.precio).toFixed(2)}</td>
+                        <td>${producto.fecha_creacion}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // Auto-cargar al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Página cargada, iniciando test automático');
+            testAPI();
+        });
+    </script>
+</body>
+</html>

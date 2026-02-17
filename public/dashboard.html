@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Inventario</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-page">
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h2>📦 Sistema de Inventario</h2>
+        </div>
+        <div class="nav-user">
+            <span id="userWelcome">Bienvenido, <strong id="userName"></strong></span>
+            <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Panel de Operaciones -->
+        <div class="operations-panel">
+            <div class="card">
+                <h3>➕ Insertar Producto</h3>
+                <form id="insertForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Código</label>
+                            <input type="number" id="insertCodigo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="insertNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio</label>
+                            <input type="number" step="0.01" id="insertPrecio" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo de Inserción</label>
+                            <select id="insertTipo">
+                                <option value="inicio">Al Inicio</option>
+                                <option value="final">Al Final</option>
+                                <option value="posicion">Posición Específica</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="posicionGroup" style="display: none;">
+                            <label>Posición</label>
+                            <input type="number" id="insertPosicion" min="0">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Insertar</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>🗑️ Eliminar Producto</h3>
+                <div class="button-group">
+                    <button class="btn btn-danger" onclick="eliminarProducto('inicio')">Eliminar Inicio</button>
+                    <button class="btn btn-danger" onclick="eliminarProducto('final')">Eliminar Final</button>
+                </div>
+                <div class="form-group">
+                    <label>Eliminar por Código</label>
+                    <div class="input-group">
+                        <input type="number" id="deleteCodigo" placeholder="Código">
+                        <button class="btn btn-danger" onclick="eliminarPorCodigo()">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Búsqueda y Ordenamiento -->
+        <div class="search-sort-panel">
+            <div class="card">
+                <h3>🔍 Buscar Producto</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Algoritmo</label>
+                        <select id="searchAlgoritmo">
+                            <option value="lineal">Búsqueda Lineal O(n)</option>
+                            <option value="binaria">Búsqueda Binaria O(log n)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Campo</label>
+                        <select id="searchCampo">
+                            <option value="codigo">Por Código</option>
+                            <option value="nombre">Por Nombre</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="searchValor" placeholder="Valor a buscar">
+                    <button class="btn btn-primary" onclick="buscarProducto()">Buscar</button>
+                </div>
+                <div id="searchResult" class="result-box" style="display: none;"></div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Ordenar Productos</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Algoritmo</label>
+                        <select id="sortAlgoritmo">
+                            <option value="burbuja">Bubble Sort O(n²)</option>
+                            <option value="quicksort">Quick Sort O(n log n)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Campo</label>
+                        <select id="sortCampo">
+                            <option value="precio">Por Precio</option>
+                            <option value="nombre">Por Nombre</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="ordenarProductos()">Ordenar</button>
+                <div id="sortResult" class="result-box" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Tabla de Productos -->
+        <div class="products-table-container">
+            <div class="card">
+                <div class="table-header">
+                    <h3>📋 Lista de Productos (<span id="totalProductos">0</span>)</h3>
+                    <button class="btn btn-secondary" onclick="cargarProductos()">🔄 Actualizar</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Fecha Creación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productosTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center">Cargando productos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <script src="js/main.js"></script>
+    <script src="js/productos.js"></script>
+</body>
+</html>
