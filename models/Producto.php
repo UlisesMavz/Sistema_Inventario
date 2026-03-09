@@ -11,6 +11,10 @@ class Producto {
     public $codigo;
     public $nombre;
     public $precio;
+    public $stock;
+    public $stock_minimo;
+    public $categoria;
+    public $marca_proveedor;
     public $fecha_creacion;
     public $fecha_modificacion;
     
@@ -19,13 +23,21 @@ class Producto {
      * @param int $codigo Código único del producto
      * @param string $nombre Nombre del producto
      * @param float $precio Precio del producto
+     * @param int $stock Cantidad en inventario
+     * @param int $stock_minimo Cantidad mínima antes de alerta
+     * @param string $categoria Categoría del producto
+     * @param string $marca_proveedor Marca o proveedor
      * @param int $id ID de la base de datos (opcional)
      */
-    public function __construct($codigo = null, $nombre = null, $precio = null, $id = null) {
+    public function __construct($codigo = null, $nombre = null, $precio = null, $stock = 0, $stock_minimo = 5, $categoria = 'General', $marca_proveedor = 'Genérico', $id = null) {
         $this->id = $id;
         $this->codigo = $codigo;
         $this->nombre = $nombre;
         $this->precio = $precio;
+        $this->stock = $stock;
+        $this->stock_minimo = $stock_minimo;
+        $this->categoria = $categoria;
+        $this->marca_proveedor = $marca_proveedor;
     }
     
     /**
@@ -39,6 +51,10 @@ class Producto {
             'codigo' => $this->codigo,
             'nombre' => $this->nombre,
             'precio' => $this->precio,
+            'stock' => $this->stock,
+            'stock_minimo' => $this->stock_minimo,
+            'categoria' => $this->categoria,
+            'marca_proveedor' => $this->marca_proveedor,
             'fecha_creacion' => $this->fecha_creacion,
             'fecha_modificacion' => $this->fecha_modificacion
         ];
@@ -54,6 +70,10 @@ class Producto {
             $data['codigo'] ?? null,
             $data['nombre'] ?? null,
             $data['precio'] ?? null,
+            $data['stock'] ?? 0,
+            $data['stock_minimo'] ?? 5,
+            $data['categoria'] ?? 'General',
+            $data['marca_proveedor'] ?? 'Genérico',
             $data['id'] ?? null
         );
         
@@ -84,6 +104,16 @@ class Producto {
         // Validar precio
         if ($this->precio === null || $this->precio === '' || !is_numeric($this->precio) || $this->precio < 0) {
             $errores[] = "El precio debe ser un número válido mayor o igual a 0";
+        }
+
+        // Validar stock
+        if ($this->stock === null || $this->stock === '' || !is_numeric($this->stock) || $this->stock < 0) {
+            $errores[] = "El stock debe ser un número entero mayor o igual a 0";
+        }
+
+        // Validar stock mínimo
+        if ($this->stock_minimo === null || $this->stock_minimo === '' || !is_numeric($this->stock_minimo) || $this->stock_minimo < 0) {
+            $errores[] = "El stock mínimo debe ser un número entero mayor o igual a 0";
         }
         
         return [

@@ -1,158 +1,513 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sistema de Inventario</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HA&KU — Dashboard Inventario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:#1a1410; --ink-light:#3d342a; --parchment:#f7f3ee; --parchment-d:#ede7dc;
+      --cream:#faf7f2; --accent:#6b4f35; --accent-l:#a0784f; --accent-faint:rgba(107,79,53,0.08);
+      --line:rgba(26,20,16,0.13); --line-strong:rgba(26,20,16,0.22);
+      --success:#3a7d5a; --success-bg:rgba(58,125,90,0.10);
+      --danger:#a33030; --danger-bg:rgba(163,48,48,0.10);
+      --warn:#8a6200; --warn-bg:rgba(138,98,0,0.10);
+      --sidebar-w:260px; --nav-h:64px; --radius:4px; --radius-lg:8px;
+      --shadow:0 1px 4px rgba(26,20,16,0.08); --shadow-md:0 4px 16px rgba(26,20,16,0.10);
+      --shadow-lg:0 10px 32px rgba(26,20,16,0.13); --trans:all 0.25s ease;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{font-size:15px;} body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;min-height:100vh;}
+    ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-track{background:var(--parchment);} ::-webkit-scrollbar-thumb{background:var(--accent-l);border-radius:3px;}
+    .layout{display:flex;min-height:100vh;}
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w);background:var(--ink);color:var(--parchment);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:200;transition:transform .3s ease;}
+    .sidebar-brand{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+    .sidebar-brand svg path,.sidebar-brand svg ellipse,.sidebar-brand svg circle{stroke:var(--parchment)!important;}
+    .sidebar-brand svg circle[r="2"],.sidebar-brand svg circle[r="3"]{fill:var(--parchment)!important;stroke:none!important;}
+    .sidebar-brand-text{display:flex;flex-direction:column;}
+    .sidebar-brand-name{font-family:'Cinzel',serif;font-size:16px;font-weight:600;letter-spacing:.14em;color:var(--parchment);line-height:1;}
+    .sidebar-brand-sub{font-size:10px;font-weight:300;letter-spacing:.22em;color:rgba(247,243,238,.5);text-transform:uppercase;margin-top:3px;}
+    .sidebar-nav{flex:1;padding:14px 0;overflow-y:auto;}
+    .sidebar-section-label{font-size:9px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:rgba(247,243,238,.35);padding:10px 20px 5px;}
+    .sidebar-item{display:flex;align-items:center;gap:11px;padding:9px 20px;cursor:pointer;transition:var(--trans);border-left:2px solid transparent;font-size:13px;font-weight:400;color:rgba(247,243,238,.7);text-decoration:none;user-select:none;}
+    .sidebar-item:hover{background:rgba(255,255,255,.06);color:var(--parchment);border-left-color:rgba(160,120,79,.5);}
+    .sidebar-item.active{background:rgba(107,79,53,.25);color:var(--parchment);border-left-color:var(--accent-l);font-weight:500;}
+    .sidebar-item svg{flex-shrink:0;opacity:.7;} .sidebar-item.active svg{opacity:1;}
+    .sidebar-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);}
+    .sidebar-user{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:12px;color:var(--parchment);flex-shrink:0;}
+    .user-info{display:flex;flex-direction:column;min-width:0;}
+    .user-name{font-size:12px;font-weight:500;color:var(--parchment);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:10px;font-weight:300;color:rgba(247,243,238,.45);letter-spacing:.08em;}
+    .btn-logout{width:100%;padding:8px 12px;background:rgba(163,48,48,.15);border:1px solid rgba(163,48,48,.3);border-radius:var(--radius);color:#e09090;font-family:'Jost',sans-serif;font-size:12px;font-weight:400;letter-spacing:.08em;cursor:pointer;transition:var(--trans);display:flex;align-items:center;justify-content:center;gap:6px;}
+    .btn-logout:hover{background:rgba(163,48,48,.28);color:#ffb5b5;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(26,20,16,.5);z-index:190;}
+    /* Main */
+    .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-height:100vh;}
+    .topbar{height:var(--nav-h);background:var(--parchment);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100;gap:16px;}
+    .topbar-left{display:flex;align-items:center;gap:16px;}
+    .menu-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--ink);}
+    .page-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;color:var(--ink);letter-spacing:.02em;}
+    .page-title em{font-style:italic;color:var(--accent);}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .topbar-badge{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(163,48,48,.2);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;letter-spacing:.05em;white-space:nowrap;}
+    .content{flex:1;padding:28px;max-width:1320px;width:100%;margin:0 auto;}
+    .panel{display:none;} .panel.active{display:block;}
+    /* Cards */
+    .card{background:var(--parchment);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow);margin-bottom:20px;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+    .card-title{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:19px;color:var(--ink);display:flex;align-items:center;gap:8px;}
+    .card-title-icon{color:var(--accent-l);font-size:16px;}
+    .card-danger{border-left:3px solid var(--danger);} .card-danger .card-title{color:var(--danger);}
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+    .stat-card{background:var(--parchment);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;}
+    .stat-card::after{content:'';position:absolute;top:0;right:0;width:3px;height:100%;background:var(--accent-l);opacity:.4;}
+    .stat-card.danger::after{background:var(--danger);opacity:.6;} .stat-card.success::after{background:var(--success);opacity:.5;} .stat-card.warn::after{background:var(--warn);opacity:.5;}
+    .stat-label{font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-l);}
+    .stat-value{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:var(--ink);line-height:1;}
+    .stat-sub{font-size:11px;color:rgba(26,20,16,.45);}
+    /* Forms */
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:16px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group label{font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);}
+    .form-group input,.form-group select{padding:10px 12px;background:var(--cream);border:1px solid var(--line-strong);border-radius:var(--radius);font-family:'Jost',sans-serif;font-size:14px;font-weight:300;color:var(--ink);transition:var(--trans);outline:none;width:100%;}
+    .form-group input:focus,.form-group select:focus{border-color:var(--accent-l);box-shadow:0 0 0 3px rgba(107,79,53,.08);background:#fff;}
+    .form-group input::placeholder{color:rgba(26,20,16,.3);}
+    .input-row{display:flex;gap:8px;} .input-row input{flex:1;}
+    .hint-text{font-size:12px;font-weight:300;color:rgba(26,20,16,.5);margin-bottom:10px;line-height:1.5;}
+    .hint-text.danger{color:var(--danger);}
+    /* Buttons */
+    .btn{padding:9px 18px;border:none;border-radius:var(--radius);font-family:'Jost',sans-serif;font-size:13px;font-weight:500;letter-spacing:.06em;cursor:pointer;transition:var(--trans);display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;}
+    .btn-primary{background:var(--ink);color:var(--parchment);}
+    .btn-primary:hover{background:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow-md);}
+    .btn-secondary{background:transparent;color:var(--ink);border:1px solid var(--line-strong);}
+    .btn-secondary:hover{background:var(--parchment-d);border-color:var(--accent-l);}
+    .btn-danger{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(163,48,48,.25);}
+    .btn-danger:hover{background:var(--danger);color:#fff;}
+    .btn-success{background:var(--success-bg);color:var(--success);border:1px solid rgba(58,125,90,.25);}
+    .btn-success:hover{background:var(--success);color:#fff;}
+    .btn-full{width:100%;} .btn-sm{padding:5px 12px;font-size:12px;}
+    .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    /* Table */
+    .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--line);}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    thead{background:var(--parchment-d);}
+    th{padding:11px 14px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);white-space:nowrap;border-bottom:1px solid var(--line-strong);}
+    td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--ink);vertical-align:middle;}
+    tbody tr{transition:background .15s;} tbody tr:hover{background:var(--accent-faint);} tbody tr:last-child td{border-bottom:none;}
+    .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+    .badge-ok{background:var(--success-bg);color:var(--success);} .badge-warn{background:var(--warn-bg);color:var(--warn);} .badge-danger{background:var(--danger-bg);color:var(--danger);}
+    .cat-chip{display:inline-flex;flex-direction:column;font-size:11px;line-height:1.3;} .cat-chip b{font-weight:600;font-size:11px;}
+    /* Result box */
+    .result-box{margin-top:14px;padding:14px 16px;border-radius:var(--radius);background:var(--parchment-d);border:1px solid var(--line);font-size:13px;font-weight:300;}
+    .result-box.success{background:var(--success-bg);border-color:rgba(58,125,90,.25);color:var(--success);}
+    .result-box.error{background:var(--danger-bg);border-color:rgba(163,48,48,.25);color:var(--danger);}
+    /* Modal */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(26,20,16,.5);z-index:500;align-items:center;justify-content:center;padding:20px;}
+    .modal-backdrop.open{display:flex;}
+    .modal-box{background:var(--parchment);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:slideUp .25s ease forwards;position:relative;}
+    .modal-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:24px;color:var(--ink);margin-bottom:24px;}
+    .modal-title em{font-style:italic;color:var(--accent);}
+    .modal-close{position:absolute;top:16px;right:20px;background:none;border:none;font-size:20px;cursor:pointer;color:rgba(26,20,16,.4);transition:var(--trans);line-height:1;}
+    .modal-close:hover{color:var(--danger);}
+    /* Notification */
+    #notification{position:fixed;bottom:24px;right:24px;padding:14px 20px;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:9999;font-size:13px;font-weight:400;display:none;gap:8px;align-items:center;max-width:340px;animation:slideNotif .3s ease forwards;}
+    #notification.success{background:var(--success);color:#fff;} #notification.error{background:var(--danger);color:#fff;} #notification.info{background:var(--ink);color:var(--parchment);}
+    /* Misc */
+    .deco-line{display:flex;align-items:center;gap:10px;margin:16px 0;}
+    .deco-line::before,.deco-line::after{content:'';flex:1;height:1px;background:var(--line);}
+    .deco-dot{width:4px;height:4px;border-radius:50%;background:var(--accent-l);opacity:.5;}
+    /* Animations */
+    @keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes slideNotif{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+    /* Responsive */
+    @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);} .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;} .main{margin-left:0;}
+      .menu-toggle{display:flex;align-items:center;justify-content:center;}
+      .topbar{padding:0 16px;} .content{padding:16px;}
+      .stats-grid{grid-template-columns:repeat(2,1fr);gap:12px;} .form-grid{grid-template-columns:1fr;} .modal-box{padding:24px 20px;}
+    }
+    @media(max-width:480px){
+      .stats-grid{grid-template-columns:1fr 1fr;gap:10px;} .stat-value{font-size:24px;}
+      .btn-group{flex-direction:column;} .btn-group .btn{width:100%;}
+      .page-title{font-size:18px;} .topbar-badge{display:none;}
+    }
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    @media(max-width:860px){.two-col{grid-template-columns:1fr;}}
+  </style>
 </head>
-<body class="dashboard-page">
-    <nav class="navbar">
-        <div class="nav-brand">
-            <h2>📦 Sistema de Inventario</h2>
-        </div>
-        <div class="nav-user">
-            <span id="userWelcome">Bienvenido, <strong id="userName"></strong></span>
-            <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
-        </div>
-    </nav>
+<body>
 
-    <div class="container">
-        <!-- Panel de Operaciones -->
-        <div class="operations-panel">
-            <div class="card">
-                <h3>➕ Insertar Producto</h3>
-                <form id="insertForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Código</label>
-                            <input type="number" id="insertCodigo" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" id="insertNombre" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Precio</label>
-                            <input type="number" step="0.01" id="insertPrecio" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tipo de Inserción</label>
-                            <select id="insertTipo">
-                                <option value="inicio">Al Inicio</option>
-                                <option value="final">Al Final</option>
-                                <option value="posicion">Posición Específica</option>
-                            </select>
-                        </div>
-                        <div class="form-group" id="posicionGroup" style="display: none;">
-                            <label>Posición</label>
-                            <input type="number" id="insertPosicion" min="0">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Insertar</button>
-                </form>
-            </div>
+<div class="layout">
 
-            <div class="card">
-                <h3>🗑️ Eliminar Producto</h3>
-                <div class="button-group">
-                    <button class="btn btn-danger" onclick="eliminarProducto('inicio')">Eliminar Inicio</button>
-                    <button class="btn btn-danger" onclick="eliminarProducto('final')">Eliminar Final</button>
-                </div>
-                <div class="form-group">
-                    <label>Eliminar por Código</label>
-                    <div class="input-group">
-                        <input type="number" id="deleteCodigo" placeholder="Código">
-                        <button class="btn btn-danger" onclick="eliminarPorCodigo()">Eliminar</button>
-                    </div>
-                </div>
-            </div>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <svg width="34" height="42" viewBox="0 0 52 60" fill="none">
+      <path d="M26,58 Q25,46 27,38 Q29,30 26,20" stroke="#1a1410" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M26,42 Q14,38 8,28 Q4,20 14,17 Q22,15 25,30Z" fill="none" stroke="#1a1410" stroke-width="1"/>
+      <path d="M26,42 Q38,37 44,27 Q48,19 38,16 Q30,14 27,29Z" fill="none" stroke="#1a1410" stroke-width="1"/>
+      <circle cx="26" cy="14" r="2" fill="#1a1410"/>
+      <ellipse cx="26" cy="7" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8"/>
+      <ellipse cx="26" cy="21" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(180 26 14)"/>
+      <ellipse cx="19" cy="14" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-90 26 14)"/>
+      <ellipse cx="33" cy="14" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(90 26 14)"/>
+      <ellipse cx="21" cy="9"  rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-45 26 14)"/>
+      <ellipse cx="31" cy="9"  rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(45 26 14)"/>
+      <ellipse cx="21" cy="19" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-135 26 14)"/>
+      <ellipse cx="31" cy="19" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(135 26 14)"/>
+    </svg>
+    <div class="sidebar-brand-text">
+      <span class="sidebar-brand-name">HA&amp;KU</span>
+      <span class="sidebar-brand-sub">Inventario</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">Principal</div>
+    <a class="sidebar-item active" onclick="switchPanel('dashboard')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+      Dashboard
+    </a>
+    <a class="sidebar-item" onclick="switchPanel('productos')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><line x1="5" y1="5.5" x2="11" y2="5.5" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="10.5" x2="8" y2="10.5" stroke="currentColor" stroke-width="1.2"/></svg>
+      Lista de Productos
+    </a>
+    <div class="sidebar-section-label">Operaciones</div>
+    <a class="sidebar-item" onclick="switchPanel('insertar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><line x1="8" y1="5" x2="8" y2="11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Insertar Producto
+    </a>
+    <a class="sidebar-item" onclick="switchPanel('eliminar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="2,4 14,4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M5,4 L5,2.5 C5,2 5.5,1.5 6,1.5 L10,1.5 C10.5,1.5 11,2 11,2.5 L11,4" stroke="currentColor" stroke-width="1.2"/><path d="M3.5,4 L4.5,13.5 C4.5,14 5,14.5 5.5,14.5 L10.5,14.5 C11,14.5 11.5,14 11.5,13.5 L12.5,4" stroke="currentColor" stroke-width="1.2"/></svg>
+      Eliminar Producto
+    </a>
+    <div class="sidebar-section-label">Algoritmos</div>
+    <a class="sidebar-item" onclick="switchPanel('buscar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Buscar
+    </a>
+    <a class="sidebar-item" onclick="switchPanel('ordenar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="2" y1="8" x2="10" y2="8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="2" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Ordenar
+    </a>
+    <div class="sidebar-section-label">Sistema</div>
+    <a class="sidebar-item" onclick="switchPanel('admin')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8,1.5 L8,3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M8,13 L8,14.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M1.5,8 L3,8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M13,8 L14.5,8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Admin BD
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <div class="user-info">
+        <span class="user-name" id="userName">Usuario</span>
+        <span class="user-role">Administrador</span>
+      </div>
+    </div>
+    <button class="btn-logout" id="logoutBtn">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6,2 L2,2 C1.5,2 1,2.5 1,3 L1,13 C1,13.5 1.5,14 2,14 L6,14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10,5 L15,8 L10,11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><line x1="5" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Cerrar Sesión
+    </button>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><line x1="2" y1="5" x2="18" y2="5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="2" y1="15" x2="18" y2="15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <h1 class="page-title" id="pageTitle">Dashboard <em>General</em></h1>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-badge" id="stockBadge" style="display:none">⚠ stock crítico</span>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- PANEL: DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card danger"><span class="stat-label">Sin Stock</span><span class="stat-value" id="statSinStock">—</span><span class="stat-sub">productos agotados</span></div>
+        <div class="stat-card"><span class="stat-label">Total Productos</span><span class="stat-value" id="statTotal">—</span><span class="stat-sub">registros activos</span></div>
+        <div class="stat-card success"><span class="stat-label">Categorías</span><span class="stat-value" id="statCategorias">—</span><span class="stat-sub">categorías únicas</span></div>
+        <div class="stat-card warn"><span class="stat-label">Stock Crítico</span><span class="stat-value" id="statCritico">—</span><span class="stat-sub">bajo mínimo</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">◈</span> Resumen de Inventario</span>
+          <button class="btn btn-secondary btn-sm" onclick="switchPanel('productos')">Ver todos →</button>
         </div>
-
-        <!-- Panel de Búsqueda y Ordenamiento -->
-        <div class="search-sort-panel">
-            <div class="card">
-                <h3>🔍 Buscar Producto</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Algoritmo</label>
-                        <select id="searchAlgoritmo">
-                            <option value="lineal">Búsqueda Lineal O(n)</option>
-                            <option value="binaria">Búsqueda Binaria O(log n)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Campo</label>
-                        <select id="searchCampo">
-                            <option value="codigo">Por Código</option>
-                            <option value="nombre">Por Nombre</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <input type="text" id="searchValor" placeholder="Valor a buscar">
-                    <button class="btn btn-primary" onclick="buscarProducto()">Buscar</button>
-                </div>
-                <div id="searchResult" class="result-box" style="display: none;"></div>
-            </div>
-
-            <div class="card">
-                <h3>📊 Ordenar Productos</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Algoritmo</label>
-                        <select id="sortAlgoritmo">
-                            <option value="burbuja">Bubble Sort O(n²)</option>
-                            <option value="quicksort">Quick Sort O(n log n)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Campo</label>
-                        <select id="sortCampo">
-                            <option value="precio">Por Precio</option>
-                            <option value="nombre">Por Nombre</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn btn-primary" onclick="ordenarProductos()">Ordenar</button>
-                <div id="sortResult" class="result-box" style="display: none;"></div>
-            </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Código</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead>
+            <tbody id="dashTableBody"><tr><td colspan="6" style="text-align:center;padding:20px;color:rgba(26,20,16,.4)">Cargando...</td></tr></tbody>
+          </table>
         </div>
-
-        <!-- Tabla de Productos -->
-        <div class="products-table-container">
-            <div class="card">
-                <div class="table-header">
-                    <h3>📋 Lista de Productos (<span id="totalProductos">0</span>)</h3>
-                    <button class="btn btn-secondary" onclick="cargarProductos()">🔄 Actualizar</button>
-                </div>
-                <div class="table-responsive">
-                    <table class="products-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Código</th>
-                                <th>Nombre</th>
-                                <th>Precio</th>
-                                <th>Fecha Creación</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productosTableBody">
-                            <tr>
-                                <td colspan="5" class="text-center">Cargando productos...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <div id="notification" class="notification" style="display: none;"></div>
+    <!-- PANEL: LISTA PRODUCTOS -->
+    <div class="panel" id="panel-productos">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">◈</span> Lista de Productos (<span id="totalProductos">0</span>)</span>
+          <button class="btn btn-secondary btn-sm" onclick="loadTable()">↺ Actualizar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Código</th><th>Cat / Marca</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead>
+            <tbody id="productosTableBody"><tr><td colspan="7" style="text-align:center;padding:20px;color:rgba(26,20,16,.4)">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-    <script src="js/main.js"></script>
-    <script src="js/productos.js"></script>
+    <!-- PANEL: INSERTAR -->
+    <div class="panel" id="panel-insertar">
+      <div class="card">
+        <div class="card-header"><span class="card-title"><span class="card-title-icon">+</span> Insertar Producto</span></div>
+        <form id="insertForm">
+          <div class="form-grid">
+            <div class="form-group"><label>Código</label><input type="number" id="insertCodigo" required placeholder="ej. 201"></div>
+            <div class="form-group"><label>Nombre</label><input type="text" id="insertNombre" required placeholder="Nombre del producto"></div>
+            <div class="form-group"><label>Precio</label><input type="number" step="0.01" id="insertPrecio" required placeholder="0.00"></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group"><label>Stock</label><input type="number" id="insertStock" value="0" min="0" required></div>
+            <div class="form-group"><label>Stock Mín. (Alerta)</label><input type="number" id="insertStockMinimo" value="5" min="0" required></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Categoría</label>
+              <select id="insertCategoria" onchange="toggleOtro('insertCategoria','insertCategoriaOtro')">
+                <option>Abarrotes</option><option>Lácteos</option><option>Botanas</option>
+                <option>Refrescos y Bebidas</option><option>Higiene Personal</option>
+                <option>Limpieza del Hogar</option><option>Electrónica</option>
+                <option>Papelería</option><option value="Otro">Otro...</option>
+              </select>
+              <input type="text" id="insertCategoriaOtro" placeholder="Escribe la categoría" style="display:none;margin-top:6px">
+            </div>
+            <div class="form-group">
+              <label>Marca / Proveedor</label>
+              <select id="insertMarca" onchange="toggleOtro('insertMarca','insertMarcaOtro')">
+                <option>Genérico</option><option>Bimbo</option><option>Coca-Cola</option>
+                <option>PepsiCo</option><option>Nestlé</option><option>Lala</option>
+                <option>Alpura</option><option>Sabritas</option><option>Barcel</option>
+                <option value="Otro">Otro...</option>
+              </select>
+              <input type="text" id="insertMarcaOtro" placeholder="Escribe la marca" style="display:none;margin-top:6px">
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tipo de Inserción</label>
+              <select id="insertTipo" onchange="togglePosicion()">
+                <option value="inicio">Al Inicio</option>
+                <option value="final">Al Final</option>
+                <option value="posicion">Posición Específica</option>
+              </select>
+            </div>
+            <div class="form-group" id="posicionGroup" style="display:none"><label>Posición</label><input type="number" id="insertPosicion" min="0"></div>
+          </div>
+          <div class="deco-line"><div class="deco-dot"></div></div>
+          <button type="submit" class="btn btn-primary">Insertar Producto</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PANEL: ELIMINAR -->
+    <div class="panel" id="panel-eliminar">
+      <div class="card">
+        <div class="card-header"><span class="card-title"><span class="card-title-icon" style="color:var(--danger)">✕</span> Eliminar Producto</span></div>
+        <p class="hint-text">Elimina productos por posición en la lista enlazada o por código específico.</p>
+        <div class="deco-line"><div class="deco-dot"></div></div>
+        <p class="hint-text" style="margin-bottom:10px">Eliminar por posición:</p>
+        <div class="btn-group">
+          <button class="btn btn-danger" onclick="eliminarProducto('inicio')">Eliminar del Inicio</button>
+          <button class="btn btn-danger" onclick="eliminarProducto('final')">Eliminar del Final</button>
+        </div>
+        <div class="deco-line"><div class="deco-dot"></div></div>
+        <div class="form-group" style="max-width:320px">
+          <label>Eliminar por Código</label>
+          <div class="input-row">
+            <input type="number" id="deleteCodigo" placeholder="Código del producto">
+            <button class="btn btn-danger" onclick="eliminarPorCodigo()">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: BUSCAR -->
+    <div class="panel" id="panel-buscar">
+      <div class="card">
+        <div class="card-header"><span class="card-title"><span class="card-title-icon">⌕</span> Buscar Producto</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Algoritmo</label>
+            <select id="searchAlgoritmo"><option value="lineal">Búsqueda Lineal O(n)</option><option value="binaria">Búsqueda Binaria O(log n)</option></select>
+          </div>
+          <div class="form-group">
+            <label>Campo</label>
+            <select id="searchCampo"><option value="codigo">Por Código</option><option value="nombre">Por Nombre</option></select>
+          </div>
+        </div>
+        <div class="input-row" style="max-width:440px">
+          <input type="text" id="searchValor" placeholder="Valor a buscar">
+          <button class="btn btn-primary" onclick="buscarProducto()">Buscar</button>
+        </div>
+        <div id="searchResult" class="result-box" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- PANEL: ORDENAR -->
+    <div class="panel" id="panel-ordenar">
+      <div class="card">
+        <div class="card-header"><span class="card-title"><span class="card-title-icon">↕</span> Ordenar Productos</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Algoritmo</label>
+            <select id="sortAlgoritmo"><option value="burbuja">Bubble Sort O(n²)</option><option value="quicksort">Quick Sort O(n log n)</option></select>
+          </div>
+          <div class="form-group">
+            <label>Campo</label>
+            <select id="sortCampo"><option value="precio">Por Precio</option><option value="nombre">Por Nombre</option><option value="stock">Por Stock Crítico</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="ordenarProductos()">Ordenar</button>
+        <div id="sortResult" class="result-box" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- PANEL: ADMIN -->
+    <div class="panel" id="panel-admin">
+      <div class="card card-danger">
+        <div class="card-header"><span class="card-title">⚙ Admin Base de Datos</span></div>
+        <p class="hint-text">Llena la base de datos con ~15 productos de prueba variados para testear algoritmos.</p>
+        <button class="btn btn-success btn-full" style="margin-bottom:20px" onclick="seedDatabase()">🧪 Insertar Datos de Prueba (Seed)</button>
+        <div class="deco-line"><div class="deco-dot"></div></div>
+        <p class="hint-text danger" style="margin-bottom:8px"><strong>⚠ Zona peligrosa — Borrar TODOS los registros:</strong></p>
+        <div class="form-group" style="max-width:320px;margin-bottom:10px">
+          <label>Contraseña de Admin</label>
+          <input type="password" id="adminPasswordWipe" placeholder="Contraseña requerida">
+        </div>
+        <button class="btn btn-danger btn-full" onclick="wipeDatabase()">⚠ Vaciar Base de Datos (Wipe)</button>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /.main -->
+</div><!-- /.layout -->
+
+<!-- MODAL: EDITAR -->
+<div class="modal-backdrop" id="editModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h2 class="modal-title">Editar <em>Producto</em></h2>
+    <form id="editForm">
+      <input type="hidden" id="editCodigoOriginal">
+      <div class="form-grid">
+        <div class="form-group"><label>Código</label><input type="number" id="editCodigo" required></div>
+        <div class="form-group"><label>Nombre</label><input type="text" id="editNombre" required></div>
+        <div class="form-group"><label>Precio</label><input type="number" step="0.01" id="editPrecio" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Stock</label><input type="number" id="editStock" min="0" required></div>
+        <div class="form-group"><label>Stock Mín.</label><input type="number" id="editStockMinimo" min="0" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Categoría</label>
+          <select id="editCategoria" onchange="toggleOtro('editCategoria','editCategoriaOtro')">
+            <option>Abarrotes</option><option>Lácteos</option><option>Botanas</option>
+            <option>Refrescos y Bebidas</option><option>Higiene Personal</option>
+            <option>Limpieza del Hogar</option><option>Electrónica</option>
+            <option>Papelería</option><option value="Otro">Otro...</option>
+          </select>
+          <input type="text" id="editCategoriaOtro" placeholder="Escribe la categoría" style="display:none;margin-top:6px">
+        </div>
+        <div class="form-group">
+          <label>Marca / Proveedor</label>
+          <select id="editMarca" onchange="toggleOtro('editMarca','editMarcaOtro')">
+            <option>Genérico</option><option>Bimbo</option><option>Coca-Cola</option>
+            <option>PepsiCo</option><option>Nestlé</option><option>Lala</option>
+            <option>Alpura</option><option>Sabritas</option><option>Barcel</option>
+            <option value="Otro">Otro...</option>
+          </select>
+          <input type="text" id="editMarcaOtro" placeholder="Escribe la marca" style="display:none;margin-top:6px">
+        </div>
+      </div>
+      <div class="deco-line"><div class="deco-dot"></div></div>
+      <button type="submit" class="btn btn-primary btn-full">Guardar Cambios</button>
+    </form>
+  </div>
+</div>
+
+<div id="notification"></div>
+
+<script src="js/main.js"></script>
+<script src="js/productos.js"></script>
+<script>
+  /* ── Panel switching ── */
+  const titles = {
+    dashboard:'Dashboard <em>General</em>', productos:'Lista de <em>Productos</em>',
+    insertar:'Insertar <em>Producto</em>', eliminar:'Eliminar <em>Producto</em>',
+    buscar:'Buscar <em>Producto</em>', ordenar:'Ordenar <em>Productos</em>',
+    admin:'Admin <em>Base de Datos</em>'
+  };
+  function switchPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelectorAll('.sidebar-item').forEach(i => {
+      if (i.getAttribute('onclick')?.includes("'" + name + "'")) i.classList.add('active');
+    });
+    document.getElementById('pageTitle').innerHTML = titles[name] || name;
+    closeSidebar();
+    if (name === 'productos' || name === 'dashboard') {
+      if (typeof cargarProductos === 'function') cargarProductos();
+    }
+  }
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+  function toggleOtro(selId, inputId) {
+    const sel = document.getElementById(selId);
+    const inp = document.getElementById(inputId);
+    inp.style.display = sel.value === 'Otro' ? 'block' : 'none';
+  }
+  function togglePosicion() {
+    const v = document.getElementById('insertTipo').value;
+    document.getElementById('posicionGroup').style.display = v === 'posicion' ? 'flex' : 'none';
+  }
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('open');
+  }
+  document.getElementById('editModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('editModal')) closeModal();
+  });
+
+  /* Wire edit form to existing productos.js editarProducto handler */
+  document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (typeof guardarEdicion === 'function') guardarEdicion();
+  });
+</script>
 </body>
 </html>

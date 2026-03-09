@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HA&KU — Dashboard Inventario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ══ TOKENS ══════════════════════════════════════════ */
+    :root {
+      --ink:          #1a1410;
+      --ink-light:    #3d342a;
+      --parchment:    #f7f3ee;
+      --parchment-d:  #ede7dc;
+      --cream:        #faf7f2;
+      --accent:       #6b4f35;
+      --accent-l:     #a0784f;
+      --accent-faint: rgba(107,79,53,0.08);
+      --line:         rgba(26,20,16,0.13);
+      --line-strong:  rgba(26,20,16,0.22);
+      --success:      #3a7d5a;
+      --success-bg:   rgba(58,125,90,0.10);
+      --danger:       #a33030;
+      --danger-bg:    rgba(163,48,48,0.10);
+      --warn:         #8a6200;
+      --warn-bg:      rgba(138,98,0,0.10);
+      --sidebar-w:    260px;
+      --nav-h:        64px;
+      --radius:       4px;
+      --radius-lg:    8px;
+      --shadow:       0 1px 4px rgba(26,20,16,0.08);
+      --shadow-md:    0 4px 16px rgba(26,20,16,0.10);
+      --shadow-lg:    0 10px 32px rgba(26,20,16,0.13);
+      --trans:        all 0.25s ease;
+    }
+
+    /* ══ RESET ═══════════════════════════════════════════ */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { font-size: 15px; }
+    body {
+      font-family: 'Jost', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ══ SCROLLBAR ═══════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--parchment); }
+    ::-webkit-scrollbar-thumb { background: var(--accent-l); border-radius: 3px; }
+
+    /* ══ LAYOUT ══════════════════════════════════════════ */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--ink);
+      color: var(--parchment);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 200;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-brand svg { flex-shrink: 0; }
+    .sidebar-brand svg path, .sidebar-brand svg ellipse,
+    .sidebar-brand svg circle { stroke: var(--parchment) !important; }
+    .sidebar-brand svg circle[r="2"] { fill: var(--parchment) !important; stroke: none !important; }
+    .sidebar-brand svg circle[r="3"] { fill: var(--parchment) !important; stroke: none !important; }
+
+    .sidebar-brand-text { display: flex; flex-direction: column; }
+    .sidebar-brand-name {
+      font-family: 'Cinzel', serif;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      color: var(--parchment);
+      line-height: 1;
+    }
+    .sidebar-brand-sub {
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 0.22em;
+      color: rgba(247,243,238,0.5);
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+
+    .sidebar-section-label {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(247,243,238,0.35);
+      padding: 12px 20px 6px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: var(--trans);
+      border-left: 2px solid transparent;
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(247,243,238,0.7);
+      text-decoration: none;
+      user-select: none;
+    }
+    .sidebar-item:hover {
+      background: rgba(255,255,255,0.06);
+      color: var(--parchment);
+      border-left-color: rgba(160,120,79,0.5);
+    }
+    .sidebar-item.active {
+      background: rgba(107,79,53,0.25);
+      color: var(--parchment);
+      border-left-color: var(--accent-l);
+      font-weight: 500;
+    }
+    .sidebar-item svg { flex-shrink: 0; opacity: 0.7; }
+    .sidebar-item.active svg { opacity: 1; }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .user-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      color: var(--parchment);
+      flex-shrink: 0;
+    }
+    .user-info { display: flex; flex-direction: column; min-width: 0; }
+    .user-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--parchment);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-role {
+      font-size: 10px;
+      font-weight: 300;
+      color: rgba(247,243,238,0.45);
+      letter-spacing: 0.08em;
+    }
+    .btn-logout {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(163,48,48,0.15);
+      border: 1px solid rgba(163,48,48,0.3);
+      border-radius: var(--radius);
+      color: #e09090;
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: var(--trans);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-logout:hover {
+      background: rgba(163,48,48,0.28);
+      color: #ffb5b5;
+    }
+
+    /* Sidebar overlay (mobile) */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(26,20,16,0.5);
+      z-index: 190;
+    }
+
+    /* ── Main area ── */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      height: var(--nav-h);
+      background: var(--parchment);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky; top: 0;
+      z-index: 100;
+      gap: 16px;
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+
+    .menu-toggle {
+      display: none;
+      background: none; border: none;
+      cursor: pointer; padding: 6px;
+      color: var(--ink);
+    }
+
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 22px;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+    .page-title em { font-style: italic; color: var(--accent); }
+
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    .topbar-badge {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(163,48,48,0.2);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    /* ── Content ── */
+    .content {
+      flex: 1;
+      padding: 28px;
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Panels (tabs) */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ══ CARDS ════════════════════════════════════════════ */
+    .card {
+      background: var(--parchment);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 19px;
+      color: var(--ink);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title-icon { color: var(--accent-l); font-size: 16px; }
+    .card-danger { border-left: 3px solid var(--danger); }
+    .card-danger .card-title { color: var(--danger); }
+
+    /* Stats row */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--parchment);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column; gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 3px; height: 100%;
+      background: var(--accent-l);
+      opacity: 0.4;
+    }
+    .stat-card.danger::after  { background: var(--danger); opacity: 0.6; }
+    .stat-card.success::after { background: var(--success); opacity: 0.5; }
+    .stat-card.warn::after    { background: var(--warn); opacity: 0.5; }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-l);
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .stat-sub { font-size: 11px; color: rgba(26,20,16,0.45); }
+
+    /* ══ FORMS ════════════════════════════════════════════ */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .form-group label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .form-group input,
+    .form-group select {
+      padding: 10px 12px;
+      background: var(--cream);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--ink);
+      transition: var(--trans);
+      outline: none;
+      width: 100%;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent-l);
+      box-shadow: 0 0 0 3px rgba(107,79,53,0.08);
+      background: #fff;
+    }
+    .form-group input::placeholder { color: rgba(26,20,16,0.3); }
+
+    .input-row { display: flex; gap: 8px; }
+    .input-row input { flex: 1; }
+
+    .hint-text {
+      font-size: 12px;
+      font-weight: 300;
+      color: rgba(26,20,16,0.5);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    .hint-text.danger { color: var(--danger); }
+
+    /* ══ BUTTONS ══════════════════════════════════════════ */
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Jost', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: var(--trans);
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--ink);
+      color: var(--parchment);
+    }
+    .btn-primary:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line-strong);
+    }
+    .btn-secondary:hover {
+      background: var(--parchment-d);
+      border-color: var(--accent-l);
+    }
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(163,48,48,0.25);
+    }
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn-success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(58,125,90,0.25);
+    }
+    .btn-success:hover { background: var(--success); color: #fff; }
+    .btn-full { width: 100%; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+
+    /* ══ TABLE ════════════════════════════════════════════ */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead { background: var(--parchment-d); }
+    th {
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+      border-bottom: 1px solid var(--line-strong);
+    }
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      vertical-align: middle;
+    }
+    tbody tr { transition: background 0.15s; }
+    tbody tr:hover { background: var(--accent-faint); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .badge-ok     { background: var(--success-bg); color: var(--success); }
+    .badge-warn   { background: var(--warn-bg);    color: var(--warn); }
+    .badge-danger { background: var(--danger-bg);  color: var(--danger); }
+
+    .cat-chip {
+      display: inline-flex; flex-direction: column;
+      font-size: 11px; line-height: 1.3;
+    }
+    .cat-chip b { font-weight: 600; font-size: 11px; }
+
+    /* ══ RESULT BOX ═══════════════════════════════════════ */
+    .result-box {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      background: var(--parchment-d);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 300;
+    }
+    .result-box.success { background: var(--success-bg); border-color: rgba(58,125,90,0.25); color: var(--success); }
+    .result-box.error   { background: var(--danger-bg);  border-color: rgba(163,48,48,0.25); color: var(--danger); }
+
+    /* ══ MODAL ════════════════════════════════════════════ */
+    .modal-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(26,20,16,0.5);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: var(--parchment);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.25s ease forwards;
+      position: relative;
+    }
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 24px;
+      color: var(--ink);
+      margin-bottom: 24px;
+    }
+    .modal-title em { font-style: italic; color: var(--accent); }
+    .modal-close {
+      position: absolute; top: 16px; right: 20px;
+      background: none; border: none;
+      font-size: 20px; cursor: pointer;
+      color: rgba(26,20,16,0.4);
+      transition: var(--trans);
+      line-height: 1;
+    }
+    .modal-close:hover { color: var(--danger); }
+
+    /* ══ NOTIFICATION ═════════════════════════════════════ */
+    #notification {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      padding: 14px 20px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      font-size: 13px; font-weight: 400;
+      display: none;
+      gap: 8px; align-items: center;
+      max-width: 340px;
+      animation: slideNotif 0.3s ease forwards;
+    }
+    #notification.success { background: var(--success); color: #fff; }
+    #notification.error   { background: var(--danger);  color: #fff; }
+    #notification.info    { background: var(--ink);     color: var(--parchment); }
+
+    /* ══ MISC ═════════════════════════════════════════════ */
+    .deco-line {
+      display: flex; align-items: center; gap: 10px;
+      margin: 16px 0;
+    }
+    .deco-line::before, .deco-line::after {
+      content: ''; flex: 1; height: 1px; background: var(--line);
+    }
+    .deco-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent-l); opacity: 0.5; }
+
+    /* ══ ANIMATIONS ═══════════════════════════════════════ */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideNotif {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ══ RESPONSIVE ═══════════════════════════════════════ */
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .menu-toggle { display: flex; align-items: center; justify-content: center; }
+      .topbar { padding: 0 16px; }
+      .content { padding: 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .modal-box { padding: 24px 20px; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-value { font-size: 24px; }
+      .btn-group { flex-direction: column; }
+      .btn-group .btn { width: 100%; }
+      .page-title { font-size: 18px; }
+      .topbar-badge { display: none; }
+    }
+
+    /* ══ SECTION TABS ═════════════════════════════════════ */
+    .section-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--line-strong);
+      overflow-x: auto;
+    }
+    .section-tab {
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(26,20,16,0.45);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: var(--trans);
+      white-space: nowrap;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: 'Jost', sans-serif;
+    }
+    .section-tab:hover { color: var(--ink); }
+    .section-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ══ TWO COL GRID ═════════════════════════════════════ */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+
+  <div class="sidebar-brand">
+    <svg width="36" height="44" viewBox="0 0 52 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M26,58 Q25,46 27,38 Q29,30 26,20" stroke="#1a1410" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M26,42 Q14,38 8,28 Q4,20 14,17 Q22,15 25,30Z" fill="none" stroke="#1a1410" stroke-width="1"/>
+      <path d="M26,42 Q38,37 44,27 Q48,19 38,16 Q30,14 27,29Z" fill="none" stroke="#1a1410" stroke-width="1"/>
+      <circle cx="26" cy="14" r="2" fill="#1a1410"/>
+      <ellipse cx="26" cy="7" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8"/>
+      <ellipse cx="26" cy="21" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(180 26 14)"/>
+      <ellipse cx="19" cy="14" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-90 26 14)"/>
+      <ellipse cx="33" cy="14" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(90 26 14)"/>
+      <ellipse cx="21" cy="9"  rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-45 26 14)"/>
+      <ellipse cx="31" cy="9"  rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(45 26 14)"/>
+      <ellipse cx="21" cy="19" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-135 26 14)"/>
+      <ellipse cx="31" cy="19" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(135 26 14)"/>
+    </svg>
+    <div class="sidebar-brand-text">
+      <span class="sidebar-brand-name">HA&amp;KU</span>
+      <span class="sidebar-brand-sub">Inventario</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">Principal</div>
+    <a class="sidebar-item active" onclick="switchPanel('dashboard')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+      Dashboard
+    </a>
+    <a class="sidebar-item" onclick="switchPanel('productos')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><line x1="5" y1="5.5" x2="11" y2="5.5" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="10.5" x2="8" y2="10.5" stroke="currentColor" stroke-width="1.2"/></svg>
+      Lista de Productos
+    </a>
+
+    <div class="sidebar-section-label">Operaciones</div>
+    <a class="sidebar-item" onclick="switchPanel('insertar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><line x1="8" y1="5" x2="8" y2="11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Insertar Producto
+    </a>
+    <a class="sidebar-item" onclick="switchPanel('eliminar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="2,4 14,4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M5,4 L5,2.5 C5,2 5.5,1.5 6,1.5 L10,1.5 C10.5,1.5 11,2 11,2.5 L11,4" stroke="currentColor" stroke-width="1.2"/><path d="M3.5,4 L4.5,13.5 C4.5,14 5,14.5 5.5,14.5 L10.5,14.5 C11,14.5 11.5,14 11.5,13.5 L12.5,4" stroke="currentColor" stroke-width="1.2"/></svg>
+      Eliminar Producto
+    </a>
+
+    <div class="sidebar-section-label">Algoritmos</div>
+    <a class="sidebar-item" onclick="switchPanel('buscar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Buscar
+    </a>
+    <a class="sidebar-item" onclick="switchPanel('ordenar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="2" y1="8" x2="10" y2="8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="2" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Ordenar
+    </a>
+
+    <div class="sidebar-section-label">Sistema</div>
+    <a class="sidebar-item" onclick="switchPanel('admin')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8,1.5 L8,3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M8,13 L8,14.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M1.5,8 L3,8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M13,8 L14.5,8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M3.5,3.5 L4.6,4.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M11.4,11.4 L12.5,12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M3.5,12.5 L4.6,11.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M11.4,4.6 L12.5,3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Admin BD
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">SA</div>
+      <div class="user-info">
+        <span class="user-name">Super Administrador</span>
+        <span class="user-role">Admin · Acceso total</span>
+      </div>
+    </div>
+    <button class="btn-logout" id="logoutBtn">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6,2 L2,2 C1.5,2 1,2.5 1,3 L1,13 C1,13.5 1.5,14 2,14 L6,14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10,5 L15,8 L10,11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><line x1="5" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Cerrar Sesión
+    </button>
+  </div>
+</aside>
+
+<!-- Overlay mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ══ MAIN ══════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <line x1="2" y1="5"  x2="18" y2="5"  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="2" y1="15" x2="18" y2="15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h1 class="page-title" id="pageTitle">Dashboard <em>General</em></h1>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-badge">⚠ 17 sin stock</span>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- ── PANEL: DASHBOARD ─────────────────────────── -->
+    <div class="panel active" id="panel-dashboard">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card danger">
+          <span class="stat-label">Sin Stock</span>
+          <span class="stat-value" id="statSinStock">17</span>
+          <span class="stat-sub">productos agotados</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Productos</span>
+          <span class="stat-value" id="statTotal">17</span>
+          <span class="stat-sub">registros activos</span>
+        </div>
+        <div class="stat-card success">
+          <span class="stat-label">Categorías</span>
+          <span class="stat-value">1</span>
+          <span class="stat-sub">categorías únicas</span>
+        </div>
+        <div class="stat-card warn">
+          <span class="stat-label">Stock Crítico</span>
+          <span class="stat-value" id="statCritico">17</span>
+          <span class="stat-sub">bajo mínimo</span>
+        </div>
+      </div>
+
+      <!-- Quick table -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <span class="card-title-icon">◈</span>
+            Resumen de Inventario
+          </span>
+          <button class="btn btn-secondary btn-sm" onclick="switchPanel('productos')">Ver todos →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Código</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="dashTableBody">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: LISTA PRODUCTOS ───────────────────── -->
+    <div class="panel" id="panel-productos">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">◈</span> Lista de Productos (<span id="totalProductos">17</span>)</span>
+          <button class="btn btn-secondary btn-sm" onclick="loadTable()">↺ Actualizar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Código</th><th>Cat / Marca</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productosTableBody">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: INSERTAR ──────────────────────────── -->
+    <div class="panel" id="panel-insertar">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">+</span> Insertar Producto</span>
+        </div>
+        <form id="insertForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Código</label>
+              <input type="number" id="insertCodigo" required placeholder="ej. 201">
+            </div>
+            <div class="form-group">
+              <label>Nombre</label>
+              <input type="text" id="insertNombre" required placeholder="Nombre del producto">
+            </div>
+            <div class="form-group">
+              <label>Precio</label>
+              <input type="number" step="0.01" id="insertPrecio" required placeholder="0.00">
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Stock</label>
+              <input type="number" id="insertStock" value="0" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Stock Mín. (Alerta)</label>
+              <input type="number" id="insertStockMinimo" value="5" min="0" required>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Categoría</label>
+              <select id="insertCategoria" onchange="toggleOtro('insertCategoria','insertCategoriaOtro')">
+                <option>Abarrotes</option><option>Lácteos</option><option>Botanas</option>
+                <option>Refrescos y Bebidas</option><option>Higiene Personal</option>
+                <option>Limpieza del Hogar</option><option>Electrónica</option>
+                <option>Papelería</option><option value="Otro">Otro...</option>
+              </select>
+              <input type="text" id="insertCategoriaOtro" placeholder="Escribe la categoría" style="display:none;margin-top:6px">
+            </div>
+            <div class="form-group">
+              <label>Marca / Proveedor</label>
+              <select id="insertMarca" onchange="toggleOtro('insertMarca','insertMarcaOtro')">
+                <option>Genérico</option><option>Bimbo</option><option>Coca-Cola</option>
+                <option>PepsiCo</option><option>Nestlé</option><option>Lala</option>
+                <option>Alpura</option><option>Sabritas</option><option>Barcel</option>
+                <option value="Otro">Otro...</option>
+              </select>
+              <input type="text" id="insertMarcaOtro" placeholder="Escribe la marca" style="display:none;margin-top:6px">
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tipo de Inserción</label>
+              <select id="insertTipo" onchange="togglePosicion()">
+                <option value="inicio">Al Inicio</option>
+                <option value="final">Al Final</option>
+                <option value="posicion">Posición Específica</option>
+              </select>
+            </div>
+            <div class="form-group" id="posicionGroup" style="display:none">
+              <label>Posición</label>
+              <input type="number" id="insertPosicion" min="0">
+            </div>
+          </div>
+          <div class="deco-line"><div class="deco-dot"></div></div>
+          <button type="submit" class="btn btn-primary">Insertar Producto</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── PANEL: ELIMINAR ──────────────────────────── -->
+    <div class="panel" id="panel-eliminar">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon" style="color:var(--danger)">✕</span> Eliminar Producto</span>
+        </div>
+        <p class="hint-text">Elimina productos por posición en la lista o por código específico.</p>
+        <div class="deco-line"><div class="deco-dot"></div></div>
+
+        <p class="hint-text" style="margin-bottom:10px">Eliminar por posición:</p>
+        <div class="btn-group">
+          <button class="btn btn-danger" id="btnDelInicio">Eliminar del Inicio</button>
+          <button class="btn btn-danger" id="btnDelFinal">Eliminar del Final</button>
+        </div>
+
+        <div class="deco-line"><div class="deco-dot"></div></div>
+
+        <div class="form-group" style="max-width:320px">
+          <label>Eliminar por Código</label>
+          <div class="input-row">
+            <input type="number" id="deleteCodigo" placeholder="Código del producto">
+            <button class="btn btn-danger" id="btnDelCodigo">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: BUSCAR ────────────────────────────── -->
+    <div class="panel" id="panel-buscar">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">⌕</span> Buscar Producto</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Algoritmo</label>
+            <select id="searchAlgoritmo">
+              <option value="lineal">Búsqueda Lineal O(n)</option>
+              <option value="binaria">Búsqueda Binaria O(log n)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Campo</label>
+            <select id="searchCampo">
+              <option value="codigo">Por Código</option>
+              <option value="nombre">Por Nombre</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-row" style="max-width:440px">
+          <input type="text" id="searchValor" placeholder="Valor a buscar">
+          <button class="btn btn-primary" id="btnBuscar">Buscar</button>
+        </div>
+        <div id="searchResult" class="result-box" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: ORDENAR ───────────────────────────── -->
+    <div class="panel" id="panel-ordenar">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">↕</span> Ordenar Productos</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Algoritmo</label>
+            <select id="sortAlgoritmo">
+              <option value="burbuja">Bubble Sort O(n²)</option>
+              <option value="quicksort">Quick Sort O(n log n)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Campo</label>
+            <select id="sortCampo">
+              <option value="precio">Por Precio</option>
+              <option value="nombre">Por Nombre</option>
+              <option value="stock">Por Stock Crítico</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btnOrdenar">Ordenar</button>
+        <div id="sortResult" class="result-box" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: ADMIN ─────────────────────────────── -->
+    <div class="panel" id="panel-admin">
+      <div class="card card-danger">
+        <div class="card-header">
+          <span class="card-title">⚙ Admin Base de Datos</span>
+        </div>
+
+        <p class="hint-text">Llena la base de datos con ~15 productos de prueba variados para testear algoritmos.</p>
+        <button class="btn btn-success btn-full" style="margin-bottom:20px" id="btnSeed">
+          🧪 Insertar Datos de Prueba (Seed)
+        </button>
+
+        <div class="deco-line"><div class="deco-dot"></div></div>
+
+        <p class="hint-text danger" style="margin-bottom:8px"><strong>⚠ Zona peligrosa — Borrar TODOS los registros:</strong></p>
+        <div class="form-group" style="max-width:320px; margin-bottom:10px">
+          <label>Contraseña de Admin</label>
+          <input type="password" id="adminPasswordWipe" placeholder="Contraseña requerida">
+        </div>
+        <button class="btn btn-danger btn-full" id="btnWipe">⚠ Vaciar Base de Datos (Wipe)</button>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /.main -->
+</div><!-- /.layout -->
+
+<!-- ══ MODAL: EDITAR ════════════════════════════════════ -->
+<div class="modal-backdrop" id="editModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h2 class="modal-title">Editar <em>Producto</em></h2>
+    <form id="editForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Código</label>
+          <input type="number" id="editCodigo" required>
+        </div>
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="editNombre" required>
+        </div>
+        <div class="form-group">
+          <label>Precio</label>
+          <input type="number" step="0.01" id="editPrecio" required>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Stock</label>
+          <input type="number" id="editStock" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Stock Mín.</label>
+          <input type="number" id="editStockMinimo" min="0" required>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Categoría</label>
+          <select id="editCategoria" onchange="toggleOtro('editCategoria','editCategoriaOtro')">
+            <option>Abarrotes</option><option>Lácteos</option><option>Botanas</option>
+            <option>Refrescos y Bebidas</option><option>Higiene Personal</option>
+            <option>Limpieza del Hogar</option><option>Electrónica</option>
+            <option>Papelería</option><option value="Otro">Otro...</option>
+          </select>
+          <input type="text" id="editCategoriaOtro" placeholder="Escribe la categoría" style="display:none;margin-top:6px">
+        </div>
+        <div class="form-group">
+          <label>Marca / Proveedor</label>
+          <select id="editMarca" onchange="toggleOtro('editMarca','editMarcaOtro')">
+            <option>Genérico</option><option>Bimbo</option><option>Coca-Cola</option>
+            <option>PepsiCo</option><option>Nestlé</option><option>Lala</option>
+            <option>Alpura</option><option>Sabritas</option><option>Barcel</option>
+            <option value="Otro">Otro...</option>
+          </select>
+          <input type="text" id="editMarcaOtro" placeholder="Escribe la marca" style="display:none;margin-top:6px">
+        </div>
+      </div>
+      <div class="deco-line"><div class="deco-dot"></div></div>
+      <button type="submit" class="btn btn-primary btn-full">Guardar Cambios</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══ NOTIFICATION ══════════════════════════════════════ -->
+<div id="notification"></div>
+
+<!-- ══ JAVASCRIPT ══════════════════════════════════════ -->
+<script>
+  /* ── Sample data ── */
+  const sampleProducts = [
+    {id:52,codigo:101,categoria:'General',marca:'Genérico',nombre:'Laptop Dell',precio:15999.99,stock:0,stockMinimo:5},
+    {id:53,codigo:102,categoria:'General',marca:'Genérico',nombre:'Mouse Logitech',precio:299.50,stock:0,stockMinimo:5},
+    {id:54,codigo:103,categoria:'General',marca:'Genérico',nombre:'Teclado Mecánico',precio:1299.00,stock:0,stockMinimo:5},
+    {id:55,codigo:104,categoria:'General',marca:'Genérico',nombre:'Monitor Samsung 24"',precio:3499.00,stock:0,stockMinimo:5},
+    {id:56,codigo:105,categoria:'General',marca:'Genérico',nombre:'Webcam HD',precio:899.99,stock:0,stockMinimo:5},
+    {id:57,codigo:125,categoria:'General',marca:'Genérico',nombre:'Peras',precio:10.00,stock:0,stockMinimo:5},
+    {id:49,codigo:124,categoria:'General',marca:'Genérico',nombre:'Poemas 1',precio:15.00,stock:0,stockMinimo:5},
+    {id:23,codigo:100,categoria:'General',marca:'Genérico',nombre:'Yakult',precio:20.00,stock:0,stockMinimo:5},
+    {id:34,codigo:123,categoria:'General',marca:'Genérico',nombre:'Memoria RAM',precio:1000.00,stock:0,stockMinimo:5},
+    {id:35,codigo:999,categoria:'General',marca:'Genérico',nombre:'Producto de Prueba',precio:99.99,stock:0,stockMinimo:5},
+    {id:36,codigo:888,categoria:'General',marca:'Genérico',nombre:'Test API',precio:88.88,stock:0,stockMinimo:5},
+    {id:37,codigo:200,categoria:'General',marca:'Genérico',nombre:'Yogurt',precio:100.00,stock:0,stockMinimo:5},
+    {id:43,codigo:107,categoria:'General',marca:'Genérico',nombre:'Libreta',precio:35.00,stock:0,stockMinimo:5},
+    {id:44,codigo:202,categoria:'General',marca:'Genérico',nombre:'Producto',precio:100.00,stock:0,stockMinimo:5},
+    {id:45,codigo:21, categoria:'General',marca:'Genérico',nombre:'RAM',precio:20.00,stock:0,stockMinimo:5},
+    {id:47,codigo:199,categoria:'General',marca:'Genérico',nombre:'SW',precio:99999999.99,stock:0,stockMinimo:5},
+    {id:50,codigo:55, categoria:'General',marca:'Genérico',nombre:'Poema 2',precio:11.00,stock:0,stockMinimo:5},
+  ];
+
+  let products = [...sampleProducts];
+  let currentEditId = null;
+
+  /* ── Panel switching ── */
+  const titles = {
+    dashboard:'Dashboard <em>General</em>',
+    productos:'Lista de <em>Productos</em>',
+    insertar:'Insertar <em>Producto</em>',
+    eliminar:'Eliminar <em>Producto</em>',
+    buscar:'Buscar <em>Producto</em>',
+    ordenar:'Ordenar <em>Productos</em>',
+    admin:'Admin <em>Base de Datos</em>'
+  };
+
+  function switchPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.getElementById('panel-'+name).classList.add('active');
+    const items = document.querySelectorAll('.sidebar-item');
+    items.forEach(i => { if(i.getAttribute('onclick')?.includes("'"+name+"'")) i.classList.add('active'); });
+    document.getElementById('pageTitle').innerHTML = titles[name] || name;
+    if(name === 'productos' || name === 'dashboard') loadTable();
+    closeSidebar();
+  }
+
+  /* ── Sidebar toggle (mobile) ── */
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+
+  /* ── Stock badge ── */
+  function stockBadge(stock, min) {
+    if (stock === 0)       return `<span class="badge badge-danger">0 ⚠</span>`;
+    if (stock <= min)      return `<span class="badge badge-warn">${stock}</span>`;
+    return `<span class="badge badge-ok">${stock}</span>`;
+  }
+
+  /* ── Load table ── */
+  function loadTable() {
+    const sinStock = products.filter(p => p.stock === 0).length;
+    const critico  = products.filter(p => p.stock <= p.stockMinimo).length;
+    document.getElementById('statTotal').textContent   = products.length;
+    document.getElementById('statSinStock').textContent = sinStock;
+    document.getElementById('statCritico').textContent  = critico;
+    document.getElementById('totalProductos').textContent = products.length;
+
+    // Full table
+    const tbody = document.getElementById('productosTableBody');
+    if (tbody) tbody.innerHTML = products.map(p => `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.codigo}</td>
+        <td><span class="cat-chip">${p.categoria}<b>${p.marca}</b></span></td>
+        <td>${p.nombre}</td>
+        <td>$${p.precio.toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+        <td>${stockBadge(p.stock, p.stockMinimo)}</td>
+        <td><button class="btn btn-secondary btn-sm" onclick="openEdit(${p.id})">✏ Editar</button></td>
+      </tr>`).join('');
+
+    // Dashboard quick table (top 6)
+    const dash = document.getElementById('dashTableBody');
+    if (dash) dash.innerHTML = products.slice(0,6).map(p => `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.codigo}</td>
+        <td>${p.nombre}</td>
+        <td>$${p.precio.toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+        <td>${stockBadge(p.stock, p.stockMinimo)}</td>
+        <td>${p.stock===0?'<span class="badge badge-danger">Agotado</span>':p.stock<=p.stockMinimo?'<span class="badge badge-warn">Bajo</span>':'<span class="badge badge-ok">Normal</span>'}</td>
+      </tr>`).join('');
+  }
+
+  /* ── Insert form ── */
+  document.getElementById('insertForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const tipo = document.getElementById('insertTipo').value;
+    const catSelect = document.getElementById('insertCategoria');
+    const cat = catSelect.value === 'Otro' ? document.getElementById('insertCategoriaOtro').value : catSelect.value;
+    const marcaSelect = document.getElementById('insertMarca');
+    const marca = marcaSelect.value === 'Otro' ? document.getElementById('insertMarcaOtro').value : marcaSelect.value;
+
+    const newP = {
+      id: Date.now(),
+      codigo: +document.getElementById('insertCodigo').value,
+      nombre: document.getElementById('insertNombre').value,
+      precio: +document.getElementById('insertPrecio').value,
+      stock: +document.getElementById('insertStock').value,
+      stockMinimo: +document.getElementById('insertStockMinimo').value,
+      categoria: cat,
+      marca: marca
+    };
+
+    if(tipo === 'inicio') products.unshift(newP);
+    else if(tipo === 'posicion') {
+      const pos = +document.getElementById('insertPosicion').value;
+      products.splice(Math.min(pos, products.length), 0, newP);
+    } else products.push(newP);
+
+    e.target.reset();
+    notify('Producto insertado correctamente', 'success');
+    switchPanel('productos');
+  });
+
+  /* ── Delete buttons ── */
+  document.getElementById('btnDelInicio').onclick = () => {
+    if(!products.length) return notify('No hay productos', 'error');
+    const r = products.shift();
+    notify(`"${r.nombre}" eliminado del inicio`, 'info');
+    loadTable();
+  };
+  document.getElementById('btnDelFinal').onclick = () => {
+    if(!products.length) return notify('No hay productos', 'error');
+    const r = products.pop();
+    notify(`"${r.nombre}" eliminado del final`, 'info');
+    loadTable();
+  };
+  document.getElementById('btnDelCodigo').onclick = () => {
+    const cod = +document.getElementById('deleteCodigo').value;
+    const idx = products.findIndex(p => p.codigo === cod);
+    if(idx === -1) return notify('Código no encontrado', 'error');
+    const r = products.splice(idx,1)[0];
+    notify(`"${r.nombre}" eliminado`, 'info');
+    loadTable();
+  };
+
+  /* ── Search ── */
+  document.getElementById('btnBuscar').onclick = () => {
+    const val  = document.getElementById('searchValor').value.toLowerCase();
+    const campo = document.getElementById('searchCampo').value;
+    const algo  = document.getElementById('searchAlgoritmo').value;
+    const box   = document.getElementById('searchResult');
+
+    let found = null;
+    if(algo === 'lineal') {
+      found = products.find(p => String(p[campo]).toLowerCase() === val);
+    } else {
+      // binary (sorted copy)
+      const sorted = [...products].sort((a,b) => String(a[campo]).localeCompare(String(b[campo])));
+      let lo=0, hi=sorted.length-1;
+      while(lo<=hi) {
+        const mid = Math.floor((lo+hi)/2);
+        const cmp = String(sorted[mid][campo]).toLowerCase().localeCompare(val);
+        if(cmp===0){ found=sorted[mid]; break; }
+        else if(cmp<0) lo=mid+1;
+        else hi=mid-1;
+      }
+    }
+
+    box.style.display = 'block';
+    if(found) {
+      box.className = 'result-box success';
+      box.innerHTML = `✓ Encontrado: <strong>${found.nombre}</strong> — Código: ${found.codigo} — Precio: $${found.precio.toLocaleString()} — Stock: ${found.stock}`;
+    } else {
+      box.className = 'result-box error';
+      box.textContent = '✗ No se encontró ningún producto con ese valor.';
+    }
+  };
+
+  /* ── Sort ── */
+  document.getElementById('btnOrdenar').onclick = () => {
+    const campo = document.getElementById('sortCampo').value;
+    const algo  = document.getElementById('sortAlgoritmo').value;
+
+    if(algo === 'burbuja') {
+      for(let i=0;i<products.length-1;i++)
+        for(let j=0;j<products.length-i-1;j++)
+          if(products[j][campo] > products[j+1][campo])
+            [products[j],products[j+1]] = [products[j+1],products[j]];
+    } else {
+      const qs = (arr,lo,hi) => {
+        if(lo>=hi) return;
+        const pv = arr[hi][campo];
+        let i=lo-1;
+        for(let j=lo;j<hi;j++) if(arr[j][campo]<=pv) { i++; [arr[i],arr[j]]=[arr[j],arr[i]]; }
+        [arr[i+1],arr[hi]]=[arr[hi],arr[i+1]];
+        const pi=i+1;
+        qs(arr,lo,pi-1); qs(arr,pi+1,hi);
+      };
+      qs(products,0,products.length-1);
+    }
+
+    const box = document.getElementById('sortResult');
+    box.style.display = 'block';
+    box.className = 'result-box success';
+    box.textContent = `✓ Lista ordenada por "${campo}" con ${algo==='burbuja'?'Bubble Sort':'Quick Sort'}.`;
+    loadTable();
+  };
+
+  /* ── Admin ── */
+  document.getElementById('btnSeed').onclick = () => {
+    products = [...sampleProducts];
+    notify('Datos de prueba insertados', 'success');
+    loadTable();
+  };
+  document.getElementById('btnWipe').onclick = () => {
+    const pw = document.getElementById('adminPasswordWipe').value;
+    if(!pw) return notify('Ingresa la contraseña de admin', 'error');
+    products = [];
+    notify('Base de datos vaciada', 'info');
+    loadTable();
+  };
+
+  /* ── Edit modal ── */
+  function openEdit(id) {
+    const p = products.find(x => x.id === id);
+    if(!p) return;
+    currentEditId = id;
+    document.getElementById('editCodigo').value = p.codigo;
+    document.getElementById('editNombre').value = p.nombre;
+    document.getElementById('editPrecio').value = p.precio;
+    document.getElementById('editStock').value  = p.stock;
+    document.getElementById('editStockMinimo').value = p.stockMinimo;
+    document.getElementById('editModal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('open');
+  }
+  document.getElementById('editModal').addEventListener('click', e => {
+    if(e.target === document.getElementById('editModal')) closeModal();
+  });
+  document.getElementById('editForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const idx = products.findIndex(x => x.id === currentEditId);
+    if(idx === -1) return;
+    products[idx] = {
+      ...products[idx],
+      codigo: +document.getElementById('editCodigo').value,
+      nombre: document.getElementById('editNombre').value,
+      precio: +document.getElementById('editPrecio').value,
+      stock:  +document.getElementById('editStock').value,
+      stockMinimo: +document.getElementById('editStockMinimo').value,
+    };
+    closeModal();
+    notify('Producto actualizado', 'success');
+    loadTable();
+  });
+
+  /* ── Helpers ── */
+  function toggleOtro(selId, inputId) {
+    const sel = document.getElementById(selId);
+    const inp = document.getElementById(inputId);
+    inp.style.display = sel.value === 'Otro' ? 'block' : 'none';
+  }
+  function togglePosicion() {
+    const v = document.getElementById('insertTipo').value;
+    document.getElementById('posicionGroup').style.display = v === 'posicion' ? 'flex' : 'none';
+  }
+  function notify(msg, type='info') {
+    const el = document.getElementById('notification');
+    el.textContent = msg;
+    el.className = type;
+    el.style.display = 'flex';
+    clearTimeout(window._notifTimer);
+    window._notifTimer = setTimeout(() => el.style.display='none', 3200);
+  }
+
+  /* ── Init ── */
+  loadTable();
+</script>
+</body>
+</html>

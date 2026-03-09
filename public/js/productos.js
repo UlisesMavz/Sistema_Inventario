@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (insertForm) {
         insertForm.addEventListener('submit', insertarProducto);
     }
+    
+    // Manejar formulario de edición
+    const editForm = document.getElementById('editForm');
+    if (editForm) {
+        editForm.addEventListener('submit', editarProducto);
+    }
 });
 
 /**
@@ -49,15 +55,26 @@ function mostrarProductos(productos) {
         return;
     }
     
-    tbody.innerHTML = productos.map(producto => `
+    tbody.innerHTML = productos.map(producto => {
+        // Lógica de alerta visual para stock bajo
+        const isLowStock = parseInt(producto.stock) <= parseInt(producto.stock_minimo);
+        const stockStyle = isLowStock ? 'color: red; font-weight: bold;' : '';
+        const stockIcon = isLowStock ? ' ⚠️' : '';
+        
+        const prodJSON = JSON.stringify(producto).replace(/"/g, '&quot;');
+        return `
         <tr>
             <td>${producto.id}</td>
             <td>${producto.codigo}</td>
+            <td><small>${producto.categoria}<br><b>${producto.marca_proveedor}</b></small></td>
             <td>${producto.nombre}</td>
             <td>${formatearPrecio(producto.precio)}</td>
-            <td>${formatearFecha(producto.fecha_creacion)}</td>
+            <td style="${stockStyle}">${producto.stock}${stockIcon}</td>
+            <td>
+                <button class="btn btn-secondary" onclick="abrirModalEdicion(${prodJSON})" style="padding: 5px 10px; font-size: 0.9em;">✏️ Editar</button>
+            </td>
         </tr>
-    `).join('');
+    `}).join('');
 }
 
 /**
@@ -72,10 +89,28 @@ async function insertarProducto(e) {
     const tipo = document.getElementById('insertTipo').value;
     const posicion = document.getElementById('insertPosicion').value;
     
+    // Obtener campos avanzados
+    const stock = document.getElementById('insertStock').value;
+    const stockMinimo = document.getElementById('insertStockMinimo').value;
+    
+    // Lógica para 'Otro' en Categoría
+    const catSelect = document.getElementById('insertCategoria').value;
+    const catOtro = document.getElementById('insertCategoriaOtro').value;
+    const categoria = (catSelect === 'Otro' && catOtro.trim() !== '') ? catOtro : catSelect;
+
+    // Lógica para 'Otro' en Marca
+    const marcaSelect = document.getElementById('insertMarca').value;
+    const marcaOtro = document.getElementById('insertMarcaOtro').value;
+    const marca = (marcaSelect === 'Otro' && marcaOtro.trim() !== '') ? marcaOtro : marcaSelect;
+    
     const datos = {
         codigo: parseInt(codigo),
         nombre: nombre,
         precio: parseFloat(precio),
+        stock: parseInt(stock),
+        stock_minimo: parseInt(stockMinimo),
+        categoria: categoria,
+        marca_proveedor: marca,
         tipo: tipo
     };
     
@@ -286,5 +321,163 @@ async function ordenarProductos() {
     } catch (error) {
         console.error('Error al ordenar productos:', error);
         mostrarNotificacion('Error al ordenar productos', 'error');
+    }
+}
+
+/**
+ * Abre el modal de edición y carga los datos del producto
+ */
+function abrirModalEdicion(producto) {
+    document.getElementById('editCodigoOriginal').value = producto.codigo;
+    document.getElementById('editCodigo').value = producto.codigo;
+    document.getElementById('editNombre').value = producto.nombre;
+    document.getElementById('editPrecio').value = producto.precio;
+    document.getElementById('editStock').value = producto.stock;
+    document.getElementById('editStockMinimo').value = producto.stock_minimo;
+    
+    // Configurar selectores de Categoría
+    const selectCat = document.getElementById('editCategoria');
+    const optionsCat = Array.from(selectCat.options).map(opt => opt.value);
+    if (optionsCat.includes(producto.categoria)) {
+        selectCat.value = producto.categoria;
+        document.getElementById('editCategoriaOtro').style.display = 'none';
+    } else {
+        selectCat.value = 'Otro';
+        document.getElementById('editCategoriaOtro').style.display = 'block';
+        document.getElementById('editCategoriaOtro').value = producto.categoria;
+    }
+    
+    // Configurar selectores de Marca
+    const selectMarca = document.getElementById('editMarca');
+    const optionsMarca = Array.from(selectMarca.options).map(opt => opt.value);
+    if (optionsMarca.includes(producto.marca_proveedor)) {
+        selectMarca.value = producto.marca_proveedor;
+        document.getElementById('editMarcaOtro').style.display = 'none';
+    } else {
+        selectMarca.value = 'Otro';
+        document.getElementById('editMarcaOtro').style.display = 'block';
+        document.getElementById('editMarcaOtro').value = producto.marca_proveedor;
+    }
+    
+    document.getElementById('editModal').style.display = 'block';
+}
+
+/**
+ * Cierra el modal de edición
+ */
+function cerrarModalEdicion() {
+    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('editForm').reset();
+}
+
+/**
+ * Envía la petición PUT para actualizar un producto
+ */
+async function editarProducto(e) {
+    e.preventDefault();
+    
+    // Extraer categoría
+    const catSelect = document.getElementById('editCategoria').value;
+    const catOtro = document.getElementById('editCategoriaOtro').value;
+    const categoria = (catSelect === 'Otro' && catOtro.trim() !== '') ? catOtro : catSelect;
+
+    // Extraer marca
+    const marcaSelect = document.getElementById('editMarca').value;
+    const marcaOtro = document.getElementById('editMarcaOtro').value;
+    const marca = (marcaSelect === 'Otro' && marcaOtro.trim() !== '') ? marcaOtro : marcaSelect;
+    
+    const datos = {
+        codigo_original: parseInt(document.getElementById('editCodigoOriginal').value),
+        codigo: parseInt(document.getElementById('editCodigo').value),
+        nombre: document.getElementById('editNombre').value,
+        precio: parseFloat(document.getElementById('editPrecio').value),
+        stock: parseInt(document.getElementById('editStock').value),
+        stock_minimo: parseInt(document.getElementById('editStockMinimo').value),
+        categoria: categoria,
+        marca_proveedor: marca
+    };
+    
+    try {
+        const response = await fetch('../api/productos.php', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(datos)
+        });
+        
+        const data = await response.json();
+        if (data.exito) {
+            mostrarNotificacion(data.mensaje, 'success');
+            cerrarModalEdicion();
+            cargarProductos();
+        } else {
+            mostrarNotificacion(data.mensaje, 'error');
+        }
+    } catch (error) {
+        console.error('Error al editar producto:', error);
+        mostrarNotificacion('Error al actualizar el producto', 'error');
+    }
+}
+
+/**
+ * Rellena la base de datos con productos de prueba
+ */
+async function seedDatabase() {
+    if (!confirm('¿Seguro que deseas insertar datos de prueba? Esto agregará múltiples productos automáticamente para pruebas.')) return;
+    
+    try {
+        const response = await fetch('../api/admin_db.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ accion: 'seed' })
+        });
+        
+        const data = await response.json();
+        if (data.exito) {
+            mostrarNotificacion(data.mensaje, 'success');
+            cargarProductos();
+        } else {
+            mostrarNotificacion(data.mensaje, 'error');
+        }
+    } catch (error) {
+        console.error('Error en seed:', error);
+        mostrarNotificacion('Error de conexión al rellenar BD', 'error');
+    }
+}
+
+/**
+ * Vacía la base de datos (Requiere contraseña por seguridad)
+ */
+async function wipeDatabase() {
+    const password = document.getElementById('adminPasswordWipe').value;
+    
+    if (!password) {
+        mostrarNotificacion('Debes ingresar la contraseña de Admin para poder vaciar la BD', 'error');
+        return;
+    }
+    
+    if (!confirm('⚠️ Peligro: ¿Estás ABSOLUTAMENTE SEGURO de querer borrar TODOS los productos de la base de datos? Esta acción no se puede deshacer.')) return;
+    if (!confirm('⚠️ Confirmación FINAL: Se borrarán los datos para siempre. ¿Continuar?')) return;
+    
+    try {
+        const response = await fetch('../api/admin_db.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ accion: 'wipe', password: password })
+        });
+        
+        const data = await response.json();
+        if (data.exito) {
+            mostrarNotificacion(data.mensaje, 'success');
+            document.getElementById('adminPasswordWipe').value = '';
+            cargarProductos();
+        } else {
+            mostrarNotificacion(data.mensaje, 'error');
+        }
+    } catch (error) {
+        console.error('Error en wipe:', error);
+        mostrarNotificacion('Error de conexión al vaciar BD', 'error');
     }
 }

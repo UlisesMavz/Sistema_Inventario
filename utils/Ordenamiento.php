@@ -343,5 +343,63 @@ class Ordenamiento {
         
         return $i + 1;
     }
+    
+    /**
+     * QUICK SORT - Ordenamiento por Stock Crítico (Ascendente)
+     * Ordena de menor a mayor cantidad en existencia.
+     * Complejidad: O(n log n) en promedio
+     * 
+     * @param array $productos Array de objetos Producto
+     * @param int $low Índice inferior
+     * @param int $high Índice superior
+     * @return array Array ordenado de productos
+     */
+    public static function quickSortPorStock(&$productos, $low = 0, $high = null) {
+        if ($high === null) {
+            $high = count($productos) - 1;
+        }
+        
+        if ($low < $high) {
+            $pi = self::particionStock($productos, $low, $high);
+            
+            self::quickSortPorStock($productos, $low, $pi - 1);
+            self::quickSortPorStock($productos, $pi + 1, $high);
+        }
+        
+        return $productos;
+    }
+    
+    /**
+     * Función auxiliar de partición para QuickSort por stock
+     * 
+     * @param array $productos Array de productos
+     * @param int $low Índice inferior
+     * @param int $high Índice superior
+     * @return int Índice de la posición final del pivote
+     */
+    private static function particionStock(&$productos, $low, $high) {
+        $pivot = $productos[$high]->stock;
+        
+        $i = $low - 1;
+        
+        for ($j = $low; $j < $high; $j++) {
+            // Comparar stocks (menor primero)
+            if ($productos[$j]->stock < $pivot) {
+                $i++;
+                
+                // Intercambio manual
+                $temp = $productos[$i];
+                $productos[$i] = $productos[$j];
+                $productos[$j] = $temp;
+            }
+        }
+        
+        // Colocar el pivote en su posición correcta
+        $temp = $productos[$i + 1];
+        $productos[$i + 1] = $productos[$high];
+        $productos[$high] = $temp;
+        
+        return $i + 1;
+    }
 }
 ?>

@@ -70,12 +70,17 @@ $tiempoInicio = microtime(true);
 if ($algoritmo === 'burbuja') {
     if ($campo === 'precio') {
         Ordenamiento::bubbleSortPorPrecio($productos);
+    } else if ($campo === 'stock') {
+        // Fallback for bubble sort stock (unimplemented, use quicksort instead)
+        Ordenamiento::quickSortPorStock($productos);
     } else {
         Ordenamiento::bubbleSortPorNombre($productos);
     }
 } else if ($algoritmo === 'quicksort') {
     if ($campo === 'precio') {
         Ordenamiento::quickSortPorPrecio($productos);
+    } else if ($campo === 'stock') {
+        Ordenamiento::quickSortPorStock($productos);
     } else {
         Ordenamiento::quickSortPorNombre($productos);
     }

@@ -39,12 +39,20 @@ class ProductoController {
         }
         
         try {
-            // Verificar si el código ya existe
+            // Verificar si el código ya existe para sumar stock
             if ($this->codigoExiste($producto->codigo)) {
-                return [
-                    'exito' => false,
-                    'mensaje' => 'El código de producto ya existe'
-                ];
+                $updateStockQuery = "UPDATE productos SET stock = stock + :nuevo_stock WHERE codigo = :codigo";
+                $stmtStock = $this->conn->prepare($updateStockQuery);
+                $stmtStock->bindParam(':nuevo_stock', $producto->stock);
+                $stmtStock->bindParam(':codigo', $producto->codigo);
+                
+                if ($stmtStock->execute()) {
+                    $this->registrarLog('UPDATE_STOCK', "Stock sumado al producto existente con código: {$producto->codigo}");
+                    return [
+                        'exito' => true,
+                        'mensaje' => 'El código ya existía. Se ha sumado el stock exitosamente.'
+                    ];
+                }
             }
             
             // Incrementar posición de todos los productos existentes
@@ -52,13 +60,17 @@ class ProductoController {
             $this->conn->exec($updateQuery);
             
             // Insertar nuevo producto en posición 1 (inicio)
-            $query = "INSERT INTO productos (codigo, nombre, precio, posicion) 
-                      VALUES (:codigo, :nombre, :precio, 1)";
+            $query = "INSERT INTO productos (codigo, nombre, precio, stock, stock_minimo, categoria, marca_proveedor, posicion) 
+                      VALUES (:codigo, :nombre, :precio, :stock, :stock_minimo, :categoria, :marca_proveedor, 1)";
             
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':codigo', $producto->codigo);
             $stmt->bindParam(':nombre', $producto->nombre);
             $stmt->bindParam(':precio', $producto->precio);
+            $stmt->bindParam(':stock', $producto->stock);
+            $stmt->bindParam(':stock_minimo', $producto->stock_minimo);
+            $stmt->bindParam(':categoria', $producto->categoria);
+            $stmt->bindParam(':marca_proveedor', $producto->marca_proveedor);
             
             if ($stmt->execute()) {
                 $this->registrarLog('INSERT_INICIO', "Producto insertado al inicio: {$producto->nombre}");
@@ -99,11 +111,20 @@ class ProductoController {
         }
         
         try {
+            // Verificar si el código ya existe para sumar stock
             if ($this->codigoExiste($producto->codigo)) {
-                return [
-                    'exito' => false,
-                    'mensaje' => 'El código de producto ya existe'
-                ];
+                $updateStockQuery = "UPDATE productos SET stock = stock + :nuevo_stock WHERE codigo = :codigo";
+                $stmtStock = $this->conn->prepare($updateStockQuery);
+                $stmtStock->bindParam(':nuevo_stock', $producto->stock);
+                $stmtStock->bindParam(':codigo', $producto->codigo);
+                
+                if ($stmtStock->execute()) {
+                    $this->registrarLog('UPDATE_STOCK', "Stock sumado al producto existente con código: {$producto->codigo}");
+                    return [
+                        'exito' => true,
+                        'mensaje' => 'El código ya existía. Se ha sumado el stock exitosamente.'
+                    ];
+                }
             }
             
             // Obtener la última posición
@@ -113,13 +134,17 @@ class ProductoController {
             $nuevaPosicion = $row['nueva_posicion'];
             
             // Insertar al final
-            $query = "INSERT INTO productos (codigo, nombre, precio, posicion) 
-                      VALUES (:codigo, :nombre, :precio, :posicion)";
+            $query = "INSERT INTO productos (codigo, nombre, precio, stock, stock_minimo, categoria, marca_proveedor, posicion) 
+                      VALUES (:codigo, :nombre, :precio, :stock, :stock_minimo, :categoria, :marca_proveedor, :posicion)";
             
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':codigo', $producto->codigo);
             $stmt->bindParam(':nombre', $producto->nombre);
             $stmt->bindParam(':precio', $producto->precio);
+            $stmt->bindParam(':stock', $producto->stock);
+            $stmt->bindParam(':stock_minimo', $producto->stock_minimo);
+            $stmt->bindParam(':categoria', $producto->categoria);
+            $stmt->bindParam(':marca_proveedor', $producto->marca_proveedor);
             $stmt->bindParam(':posicion', $nuevaPosicion);
             
             if ($stmt->execute()) {
@@ -162,20 +187,36 @@ class ProductoController {
         }
         
         try {
+            // Verificar si el código ya existe para sumar stock
             if ($this->codigoExiste($producto->codigo)) {
-                return [
-                    'exito' => false,
-                    'mensaje' => 'El código de producto ya existe'
-                ];
+                $updateStockQuery = "UPDATE productos SET stock = stock + :nuevo_stock WHERE codigo = :codigo";
+                $stmtStock = $this->conn->prepare($updateStockQuery);
+                $stmtStock->bindParam(':nuevo_stock', $producto->stock);
+                $stmtStock->bindParam(':codigo', $producto->codigo);
+                
+                if ($stmtStock->execute()) {
+                    $this->registrarLog('UPDATE_STOCK', "Stock sumado al producto existente con código: {$producto->codigo}");
+                    return [
+                        'exito' => true,
+                        'mensaje' => 'El código ya existía. Se ha sumado el stock exitosamente.'
+                    ];
+                }
             }
             
-            $query = "INSERT INTO productos (codigo, nombre, precio) 
-                      VALUES (:codigo, :nombre, :precio)";
+            // Para insertar en posición específica, idealmente deberíamos reordenar las posiciones
+            // (Esta es una implementación simplificada para mantener tu lógica C++ que requieres)
+            $query = "INSERT INTO productos (codigo, nombre, precio, stock, stock_minimo, categoria, marca_proveedor, posicion) 
+                      VALUES (:codigo, :nombre, :precio, :stock, :stock_minimo, :categoria, :marca_proveedor, :posicion)";
             
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':codigo', $producto->codigo);
             $stmt->bindParam(':nombre', $producto->nombre);
             $stmt->bindParam(':precio', $producto->precio);
+            $stmt->bindParam(':stock', $producto->stock);
+            $stmt->bindParam(':stock_minimo', $producto->stock_minimo);
+            $stmt->bindParam(':categoria', $producto->categoria);
+            $stmt->bindParam(':marca_proveedor', $producto->marca_proveedor);
+            $stmt->bindParam(':posicion', $posicion);
             
             if ($stmt->execute()) {
                 $this->registrarLog('INSERT_POSICION', "Producto insertado en posición {$posicion}: {$producto->nombre}");
@@ -322,7 +363,7 @@ class ProductoController {
      */
     public function obtenerTodos() {
         try {
-            $query = "SELECT id, codigo, nombre, precio, posicion, fecha_creacion, fecha_modificacion 
+            $query = "SELECT id, codigo, nombre, precio, stock, stock_minimo, categoria, marca_proveedor, posicion, fecha_creacion, fecha_modificacion 
                       FROM productos 
                       ORDER BY posicion ASC";
             

@@ -70,7 +70,20 @@ switch ($metodo) {
         }
         
         // Crear producto
-        $producto = new Producto($data['codigo'], $data['nombre'], $data['precio']);
+        $stock = isset($data['stock']) ? intval($data['stock']) : 0;
+        $stock_minimo = isset($data['stock_minimo']) ? intval($data['stock_minimo']) : 5;
+        $categoria = isset($data['categoria']) ? $data['categoria'] : 'General';
+        $marca_proveedor = isset($data['marca_proveedor']) ? $data['marca_proveedor'] : 'Genérico';
+        
+        $producto = new Producto(
+            $data['codigo'], 
+            $data['nombre'], 
+            $data['precio'], 
+            $stock, 
+            $stock_minimo, 
+            $categoria, 
+            $marca_proveedor
+        );
         
         // Determinar tipo de inserción
         $tipo = $data['tipo'] ?? 'inicio'; // Por defecto: inicio
@@ -127,6 +140,44 @@ switch ($metodo) {
                 ]);
                 exit;
         }
+        
+        http_response_code($resultado['exito'] ? 200 : 400);
+        echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
+        break;
+        
+    case 'PUT':
+        // Actualizar producto existente
+        $data = json_decode(file_get_contents("php://input"), true);
+        
+        // Validar datos requeridos
+        if (!isset($data['codigo_original']) || !isset($data['codigo']) || !isset($data['nombre']) || !isset($data['precio'])) {
+            http_response_code(400);
+            echo json_encode([
+                'exito' => false,
+                'mensaje' => 'Faltan datos requeridos (codigo_original, codigo, nombre, precio)'
+            ]);
+            exit;
+        }
+        
+        $codigoOriginal = intval($data['codigo_original']);
+        
+        // Crear producto con los datos editados
+        $stock = isset($data['stock']) ? intval($data['stock']) : 0;
+        $stock_minimo = isset($data['stock_minimo']) ? intval($data['stock_minimo']) : 5;
+        $categoria = isset($data['categoria']) ? $data['categoria'] : 'General';
+        $marca_proveedor = isset($data['marca_proveedor']) ? $data['marca_proveedor'] : 'Genérico';
+        
+        $producto = new Producto(
+            $data['codigo'], 
+            $data['nombre'], 
+            $data['precio'], 
+            $stock, 
+            $stock_minimo, 
+            $categoria, 
+            $marca_proveedor
+        );
+        
+        $resultado = $productoController->actualizarProducto($producto, $codigoOriginal);
         
         http_response_code($resultado['exito'] ? 200 : 400);
         echo json_encode($resultado, JSON_UNESCAPED_UNICODE);

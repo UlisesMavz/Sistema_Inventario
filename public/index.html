@@ -1,62 +1,708 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Inventario - Login</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HA&KU — Sistema de Inventario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1410;
+      --ink-light: #3d342a;
+      --parchment: #f7f3ee;
+      --parchment-dark: #ede7dc;
+      --cream: #faf7f2;
+      --accent: #6b4f35;
+      --accent-light: #a0784f;
+      --line: rgba(26,20,16,0.15);
+      --shadow-soft: 0 8px 40px rgba(26,20,16,0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background-color: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Botanical SVG Background */
+    .botanical-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(107,79,53,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(107,79,53,0.05) 0%, transparent 60%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Paper grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      opacity: 0.4;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Main layout */
+    .page-wrapper {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Left decorative panel */
+    .deco-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+    }
+
+    .deco-inner {
+      text-align: center;
+      animation: fadeIn 1.2s ease forwards;
+    }
+
+    .deco-panel .brand-logo-large {
+      width: 280px;
+      height: 315px;
+      margin: 0 auto 24px;
+      opacity: 0.90;
+    }
+
+    .deco-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      opacity: 0.8;
+    }
+
+    /* Vertical divider */
+    .divider {
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--line) 20%, var(--line) 80%, transparent);
+      align-self: stretch;
+    }
+
+    /* Right login panel */
+    .login-panel {
+      flex: 0 0 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 64px;
+    }
+
+    .login-box {
+      width: 100%;
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Logo / Brand */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-family: 'Cinzel', serif;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .brand-sub {
+      font-family: 'Jost', sans-serif;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Heading */
+    .login-heading {
+      margin-bottom: 8px;
+    }
+
+    .login-heading h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 36px;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .login-heading h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .login-subtitle {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--accent-light);
+      letter-spacing: 0.06em;
+      margin-bottom: 40px;
+    }
+
+    /* Decorative line */
+    .deco-line {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+
+    .deco-line::before,
+    .deco-line::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .deco-line svg {
+      flex-shrink: 0;
+      opacity: 0.4;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      background: var(--parchment);
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      font-family: 'Jost', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--ink);
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .form-group input::placeholder {
+      color: rgba(26,20,16,0.3);
+      font-weight: 300;
+    }
+
+    .form-group input:focus {
+      border-color: var(--accent-light);
+      background: var(--cream);
+      box-shadow: 0 0 0 3px rgba(107,79,53,0.08);
+    }
+
+    /* Error message */
+    .error-message {
+      display: none;
+      background: rgba(180, 60, 60, 0.08);
+      border: 1px solid rgba(180,60,60,0.2);
+      border-left: 3px solid rgba(180,60,60,0.5);
+      color: #8b3030;
+      padding: 12px 16px;
+      border-radius: 2px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 15px 24px;
+      background: var(--ink);
+      color: var(--parchment);
+      border: none;
+      border-radius: 2px;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-submit:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(107,79,53,0.25);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .loader {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(247,243,238,0.4);
+      border-top-color: var(--parchment);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    /* Footer note */
+    .login-footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .login-footer p {
+      font-size: 11px;
+      font-weight: 300;
+      color: rgba(26,20,16,0.4);
+      letter-spacing: 0.08em;
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .shake { animation: shake 0.4s ease; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .deco-panel { display: none; }
+      .divider { display: none; }
+      .login-panel {
+        flex: 1;
+        padding: 40px 32px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-panel { padding: 32px 24px; }
+      .brand-name { font-size: 22px; }
+    }
+  </style>
 </head>
-<body class="login-page">
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h1>Sistema de Gestión de Inventario</h1>
-            </div>
-            
-            <form id="loginForm" class="login-form">
-                <div class="form-group">
-                    <label for="username">Usuario</label>
-                    <input 
-                        type="text" 
-                        id="username" 
-                        name="username" 
-                        placeholder="Ingrese su usuario"
-                        required
-                        autocomplete="username"
-                    >
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        placeholder="Ingrese su contraseña"
-                        required
-                        autocomplete="current-password"
-                    >
-                </div>
-                
-                <div id="errorMessage" class="error-message" style="display: none;"></div>
-                
-                <button type="submit" class="btn btn-primary" id="loginBtn">
-                    <span class="btn-text">Iniciar Sesión</span>
-                    <span class="btn-loader" style="display: none;">
-                        <span class="loader"></span>
-                    </span>
-                </button>
-            </form>
+<body>
+
+  <!-- Botanical Background SVG -->
+  <svg class="botanical-bg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <!-- Top left botanical -->
+    <g opacity="0.07" transform="translate(-40, -60)">
+      <path d="M80,180 Q120,120 160,100 Q200,80 220,120 Q240,160 200,180 Q160,200 120,170 Q90,150 80,180Z" fill="none" stroke="#3d342a" stroke-width="1.5"/>
+      <path d="M80,180 Q60,220 40,260" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M120,170 Q100,210 90,250" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <path d="M160,150 Q170,100 200,80 Q230,60 250,90 Q270,120 240,140 Q210,160 180,145Z" fill="none" stroke="#3d342a" stroke-width="1.2"/>
+      <path d="M200,140 Q220,180 210,220" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <!-- Chrysanthemum center top-left -->
+      <circle cx="150" cy="50" r="2" fill="#3d342a"/>
+      <path d="M150,50 Q145,30 148,20" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M150,50 Q155,30 158,20" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M150,50 Q130,38 122,30" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M150,50 Q168,38 176,30" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M150,50 Q128,50 118,46" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M150,50 Q170,50 180,46" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <ellipse cx="148" cy="18" rx="4" ry="7" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <ellipse cx="158" cy="18" rx="4" ry="7" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <ellipse cx="122" cy="28" rx="4" ry="7" transform="rotate(-40 122 28)" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <ellipse cx="176" cy="28" rx="4" ry="7" transform="rotate(40 176 28)" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <ellipse cx="116" cy="46" rx="4" ry="7" transform="rotate(-80 116 46)" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <ellipse cx="180" cy="46" rx="4" ry="7" transform="rotate(80 180 46)" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+    </g>
+
+    <!-- Bottom right botanical -->
+    <g opacity="0.07" transform="translate(1300, 720)">
+      <path d="M0,80 Q40,40 80,20 Q120,0 140,40 Q160,80 120,100 Q80,120 40,90Z" fill="none" stroke="#3d342a" stroke-width="1.5"/>
+      <path d="M80,60 Q60,100 50,140" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M0,80 Q-20,120 -30,160" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <!-- Small flower bottom-right -->
+      <circle cx="120" cy="160" r="2" fill="#3d342a"/>
+      <path d="M120,160 Q116,142 118,132" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <path d="M120,160 Q124,142 126,132" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <path d="M120,160 Q105,150 100,144" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <path d="M120,160 Q134,150 140,144" fill="none" stroke="#3d342a" stroke-width="0.8"/>
+      <ellipse cx="118" cy="130" rx="3" ry="6" fill="none" stroke="#3d342a" stroke-width="0.7"/>
+      <ellipse cx="126" cy="130" rx="3" ry="6" fill="none" stroke="#3d342a" stroke-width="0.7"/>
+      <ellipse cx="100" cy="143" rx="3" ry="6" transform="rotate(-50 100 143)" fill="none" stroke="#3d342a" stroke-width="0.7"/>
+      <ellipse cx="140" cy="143" rx="3" ry="6" transform="rotate(50 140 143)" fill="none" stroke="#3d342a" stroke-width="0.7"/>
+    </g>
+
+    <!-- Scattered small botanical elements -->
+    <g opacity="0.05">
+      <path d="M700,800 Q720,760 740,780 Q760,800 730,820Z" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M100,600 Q130,570 150,590 Q170,610 140,630Z" fill="none" stroke="#3d342a" stroke-width="1"/>
+      <path d="M1300,300 Q1320,270 1340,290 Q1360,310 1330,330Z" fill="none" stroke="#3d342a" stroke-width="1"/>
+    </g>
+  </svg>
+
+  <div class="page-wrapper">
+
+    <!-- Left decorative panel -->
+    <div class="deco-panel">
+      <div class="deco-inner">
+        <!-- Large botanical logo — detailed chrysanthemum -->
+        <svg class="brand-logo-large" viewBox="0 0 320 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <style>
+              .petal { fill: none; stroke: #1a1410; stroke-linecap: round; }
+              .leaf  { fill: none; stroke: #1a1410; stroke-linecap: round; stroke-linejoin: round; }
+              .vein  { fill: none; stroke: #1a1410; stroke-linecap: round; opacity: 0.45; }
+              .stem  { fill: none; stroke: #1a1410; stroke-linecap: round; stroke-linejoin: round; }
+            </style>
+          </defs>
+
+          <!-- ── STEM ── -->
+          <path class="stem" d="M160,348 C159,320 162,300 158,278 C154,256 160,230 160,200" stroke-width="2"/>
+
+          <!-- ── BRANCH LEFT ── -->
+          <path class="stem" d="M158,270 C140,265 120,258 100,240" stroke-width="1.3"/>
+          <!-- ── BRANCH RIGHT ── -->
+          <path class="stem" d="M160,250 C178,244 198,235 216,215" stroke-width="1.3"/>
+
+          <!-- ── LEAF BIG LEFT ── -->
+          <path class="leaf" d="M100,240 C78,230 52,214 44,192 C36,170 52,152 72,156 C92,160 108,184 114,206 C118,220 110,234 100,240 Z" stroke-width="1.4"/>
+          <path class="vein" d="M100,240 C90,220 72,196 68,178" stroke-width="0.9"/>
+          <path class="vein" d="M82,210 C86,204 92,200 100,198" stroke-width="0.7"/>
+          <path class="vein" d="M70,190 C76,188 83,188 90,190" stroke-width="0.7"/>
+          <!-- leaf serration -->
+          <path class="vein" d="M52,192 C55,186 60,182 66,180" stroke-width="0.6" opacity="0.35"/>
+          <path class="vein" d="M48,200 C52,196 57,193 62,192" stroke-width="0.6" opacity="0.35"/>
+
+          <!-- ── LEAF BIG RIGHT ── -->
+          <path class="leaf" d="M216,215 C236,202 260,183 266,160 C272,137 256,120 236,126 C216,132 204,158 202,180 C200,196 208,210 216,215 Z" stroke-width="1.4"/>
+          <path class="vein" d="M216,215 C224,194 242,168 248,150" stroke-width="0.9"/>
+          <path class="vein" d="M234,186 C228,180 222,177 214,176" stroke-width="0.7"/>
+          <path class="vein" d="M246,162 C240,162 234,163 228,166" stroke-width="0.7"/>
+
+          <!-- ── LEAF SMALL LEFT (lower) ── -->
+          <path class="leaf" d="M158,308 C140,304 118,295 108,280 C100,268 108,256 120,258 C132,260 144,274 150,288 C154,298 157,306 158,308 Z" stroke-width="1.1"/>
+          <path class="vein" d="M158,308 C148,292 128,272 118,264" stroke-width="0.7"/>
+
+          <!-- ── LEAF SMALL RIGHT (lower) ── -->
+          <path class="leaf" d="M160,292 C176,286 196,275 204,260 C212,246 204,234 192,237 C180,240 170,256 166,270 C163,280 161,290 160,292 Z" stroke-width="1.1"/>
+          <path class="vein" d="M160,292 C168,276 186,256 194,246" stroke-width="0.7"/>
+
+          <!-- ── TENDRIL LEFT ── -->
+          <path class="stem" d="M72,172 C58,162 46,148 48,132 C50,116 66,112 78,122 C84,128 82,138 76,144" stroke-width="1" opacity="0.7"/>
+          <!-- TENDRIL LEFT small curl -->
+          <path class="stem" d="M76,144 C72,148 68,150 66,148 C64,146 66,142 70,142" stroke-width="0.8" opacity="0.6"/>
+
+          <!-- ── TENDRIL RIGHT ── -->
+          <path class="stem" d="M248,144 C262,132 272,116 268,100 C264,84 248,82 238,94 C232,102 236,112 244,116" stroke-width="1" opacity="0.7"/>
+          <path class="stem" d="M244,116 C248,120 252,122 254,120 C256,118 254,114 250,114" stroke-width="0.8" opacity="0.6"/>
+
+          <!-- ══════════════════════════════════════
+               CHRYSANTHEMUM — center at (160, 100)
+               ══════════════════════════════════════ -->
+
+          <!-- Center disc -->
+          <circle cx="160" cy="100" r="10" fill="none" stroke="#1a1410" stroke-width="1.4"/>
+          <circle cx="160" cy="100" r="6"  fill="none" stroke="#1a1410" stroke-width="0.9"/>
+          <circle cx="160" cy="100" r="3"  fill="#1a1410"/>
+          <!-- disc texture dots -->
+          <circle cx="155" cy="97"  r="0.8" fill="#1a1410" opacity="0.5"/>
+          <circle cx="165" cy="97"  r="0.8" fill="#1a1410" opacity="0.5"/>
+          <circle cx="160" cy="93"  r="0.8" fill="#1a1410" opacity="0.5"/>
+          <circle cx="155" cy="103" r="0.8" fill="#1a1410" opacity="0.5"/>
+          <circle cx="165" cy="103" r="0.8" fill="#1a1410" opacity="0.5"/>
+          <circle cx="160" cy="107" r="0.8" fill="#1a1410" opacity="0.5"/>
+
+          <!-- LAYER 1 — innermost tight petals (8 petals, r≈14) -->
+          <g>
+            <path class="petal" d="M160,100 C157,92 156,84 160,78 C164,84 163,92 160,100" stroke-width="1.1" transform="rotate(0   160 100)"/>
+            <path class="petal" d="M160,100 C157,92 156,84 160,78 C164,84 163,92 160,100" stroke-width="1.1" transform="rotate(45  160 100)"/>
+            <path class="petal" d="M160,100 C157,92 156,84 160,78 C164,84 163,92 160,100" stroke-width="1.1" transform="rotate(90  160 100)"/>
+            <path class="petal" d="M160,100 C157,92 156,84 160,78 C164,84 163,92 160,100" stroke-width="1.1" transform="rotate(135 160 100)"/>
+            <path class="petal" d="M160,100 C157,92 156,84 160,78 C164,84 163,92 160,100" stroke-width="1.1" transform="rotate(180 160 100)"/>
+            <path class="petal" d="M160,100 C157,92 156,84 160,78 C164,84 163,92 160,100" stroke-width="1.1" transform="rotate(225 160 100)"/>
+            <path class="petal" d="M160,100 C157,92 156,84 160,78 C164,84 163,92 160,100" stroke-width="1.1" transform="rotate(270 160 100)"/>
+            <path class="petal" d="M160,100 C157,92 156,84 160,78 C164,84 163,92 160,100" stroke-width="1.1" transform="rotate(315 160 100)"/>
+          </g>
+
+          <!-- LAYER 2 — 12 petals, longer, offset 15° -->
+          <g opacity="0.92">
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(15  160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(45  160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(75  160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(105 160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(135 160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(165 160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(195 160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(225 160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(255 160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(285 160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(315 160 100)"/>
+            <path class="petal" d="M160,100 C156,89 154,78 160,70 C166,78 164,89 160,100" stroke-width="1.05" transform="rotate(345 160 100)"/>
+          </g>
+
+          <!-- LAYER 3 — 16 petals, splayed with tip curve -->
+          <g opacity="0.82">
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(0   160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(22  160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(45  160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(67  160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(90  160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(112 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(135 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(157 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(180 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(202 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(225 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(247 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(270 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(292 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(315 160 100)"/>
+            <path class="petal" d="M160,100 C155,86 151,72 158,61 C161,56 163,56 166,61 C173,72 165,86 160,100" stroke-width="1" transform="rotate(337 160 100)"/>
+          </g>
+
+          <!-- LAYER 4 — 20 outer petals, longer, flared, slightly reflexed -->
+          <g opacity="0.68">
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(0   160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(18  160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(36  160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(54  160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(72  160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(90  160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(108 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(126 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(144 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(162 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(180 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(198 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(216 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(234 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(252 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(270 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(288 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(306 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(324 160 100)"/>
+            <path class="petal" d="M160,100 C154,84 148,66 155,50 C157,44 160,42 163,44 C170,50 168,67 160,100" stroke-width="0.9" transform="rotate(342 160 100)"/>
+          </g>
+
+          <!-- LAYER 5 — outermost guard petals, wide & reflexed -->
+          <g opacity="0.48">
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(9   160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(27  160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(45  160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(63  160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(81  160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(99  160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(117 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(135 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(153 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(171 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(189 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(207 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(225 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(243 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(261 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(279 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(297 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(315 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(333 160 100)"/>
+            <path class="petal" d="M160,100 C152,82 144,60 152,40 C155,32 160,28 165,32 C172,40 168,62 160,100" stroke-width="0.8" transform="rotate(351 160 100)"/>
+          </g>
+
+          <!-- ── CLIPBOARD / INVENTORY ICON ── -->
+          <rect x="132" y="310" width="56" height="44" rx="3" fill="none" stroke="#1a1410" stroke-width="1.4"/>
+          <rect x="147" y="305" width="26" height="10" rx="3" fill="none" stroke="#1a1410" stroke-width="1.1"/>
+          <line x1="142" y1="326" x2="178" y2="326" stroke="#1a1410" stroke-width="0.9"/>
+          <line x1="142" y1="335" x2="178" y2="335" stroke="#1a1410" stroke-width="0.9"/>
+          <line x1="142" y1="344" x2="164" y2="344" stroke="#1a1410" stroke-width="0.9"/>
+          <circle cx="138" cy="326" r="2"   fill="#1a1410"/>
+          <circle cx="138" cy="335" r="2"   fill="#1a1410"/>
+          <circle cx="138" cy="344" r="2"   fill="#1a1410"/>
+          <!-- small checkmark on first bullet -->
+          <path d="M136,324 L138,327 L141,322" fill="none" stroke="#1a1410" stroke-width="0.8"/>
+        </svg>
+
+        <p class="deco-tagline">Inventario</p>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- Login form panel -->
+    <div class="login-panel">
+      <div class="login-box">
+
+        <!-- Brand -->
+        <div class="brand">
+          <svg class="brand-icon" viewBox="0 0 52 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M26,58 Q25,46 27,38 Q29,30 26,20" stroke="#1a1410" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M26,42 Q14,38 8,28 Q4,20 14,17 Q22,15 25,30Z" fill="none" stroke="#1a1410" stroke-width="1"/>
+            <path d="M26,42 Q38,37 44,27 Q48,19 38,16 Q30,14 27,29Z" fill="none" stroke="#1a1410" stroke-width="1"/>
+            <circle cx="26" cy="14" r="2" fill="#1a1410"/>
+            <ellipse cx="26" cy="7" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8"/>
+            <ellipse cx="26" cy="21" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(180 26 14)"/>
+            <ellipse cx="19" cy="14" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-90 26 14)"/>
+            <ellipse cx="33" cy="14" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(90 26 14)"/>
+            <ellipse cx="21" cy="9" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-45 26 14)"/>
+            <ellipse cx="31" cy="9" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(45 26 14)"/>
+            <ellipse cx="21" cy="19" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(-135 26 14)"/>
+            <ellipse cx="31" cy="19" rx="2" ry="5" fill="none" stroke="#1a1410" stroke-width="0.8" transform="rotate(135 26 14)"/>
+          </svg>
+          <div class="brand-text">
+            <span class="brand-name">HA&amp;KU</span>
+            <span class="brand-sub">Sistema de Inventario</span>
+          </div>
         </div>
-        
+
+        <!-- Heading -->
+        <div class="login-heading">
+          <h1>Bienvenido <em>de vuelta</em></h1>
+        </div>
+        <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
+
+        <!-- Decorative divider -->
+        <div class="deco-line">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="2" fill="#6b4f35"/>
+            <path d="M8,2 Q7,5 8,8" stroke="#6b4f35" stroke-width="0.8"/>
+            <path d="M8,14 Q9,11 8,8" stroke="#6b4f35" stroke-width="0.8"/>
+            <path d="M2,8 Q5,9 8,8" stroke="#6b4f35" stroke-width="0.8"/>
+            <path d="M14,8 Q11,7 8,8" stroke="#6b4f35" stroke-width="0.8"/>
+          </svg>
+        </div>
+
+        <!-- Form -->
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Usuario</label>
+            <div class="input-wrap">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="5" r="3" stroke="#1a1410" stroke-width="1.2"/>
+                <path d="M2,14 C2,11 4.7,9 8,9 C11.3,9 14,11 14,14" stroke="#1a1410" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              <input type="text" id="username" name="username" placeholder="Ingrese su usuario" required autocomplete="username">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <div class="input-wrap">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="3" y="7" width="10" height="8" rx="1.5" stroke="#1a1410" stroke-width="1.2"/>
+                <path d="M5,7 L5,4.5 C5,2.6 11,2.6 11,4.5 L11,7" stroke="#1a1410" stroke-width="1.2" stroke-linecap="round"/>
+                <circle cx="8" cy="11" r="1.2" fill="#1a1410"/>
+              </svg>
+              <input type="password" id="password" name="password" placeholder="Ingrese su contraseña" required autocomplete="current-password">
+            </div>
+          </div>
+
+          <div id="errorMessage" class="error-message"></div>
+
+          <button type="submit" class="btn-submit" id="loginBtn">
+            <span class="btn-text">Iniciar Sesión</span>
+            <span class="btn-loader" style="display: none;">
+              <span class="loader" id="loader" style="display: block;"></span>
+            </span>
+          </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="login-footer">
+          <p>HA&amp;KU · Gestión de Inventario · © 2026</p>
+        </div>
+
+      </div>
     </div>
-        
-    <div class="background-animation">
-        <div class="circle circle-1"></div>
-        <div class="circle circle-2"></div>
-        <div class="circle circle-3"></div>
-    </div>
-    
-    <script src="js/auth.js"></script>
+
+  </div>
+
+  <script src="js/auth.js"></script>
 </body>
 </html>

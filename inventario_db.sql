@@ -37,6 +37,10 @@ CREATE TABLE `productos` (
   `codigo` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `precio` decimal(10,2) NOT NULL,
+  `stock` int(11) NOT NULL DEFAULT 0,
+  `stock_minimo` int(11) NOT NULL DEFAULT 5,
+  `categoria` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'General',
+  `marca_proveedor` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Genérico',
   `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
   `fecha_modificacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
