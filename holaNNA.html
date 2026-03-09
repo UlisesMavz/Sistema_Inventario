@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>El más breve espacio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', Georgia, serif;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .heart-link {
+      text-decoration: none;
+      display: block;
+    }
+
+    .heart {
+      width: 160px;
+      height: 160px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      filter: drop-shadow(0 4px 18px rgba(220, 30, 60, 0.4));
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .heart:hover {
+      transform: scale(1.12);
+      filter: drop-shadow(0 8px 28px rgba(220, 30, 60, 0.6));
+    }
+
+    .heart:active {
+      transform: scale(0.96);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.07); }
+    }
+
+    .heart:hover {
+      animation: none;
+    }
+
+    .heart svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .text-block {
+      text-align: center;
+    }
+
+    .frase {
+      font-size: 2rem;
+      font-style: italic;
+      color: #1a1a1a;
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+    }
+
+    .letra-u {
+      display: inline-block;
+      font-size: 3.5rem;
+      font-weight: 700;
+      font-style: normal;
+      color: #dc1e3c;
+      margin-top: 10px;
+      letter-spacing: 0.05em;
+      animation: fadeInU 2s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeInU {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .text-link {
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.2s ease;
+    }
+
+    .text-link:hover .frase {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .text-link:hover .letra-u {
+      opacity: 0.75;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #aaa;
+      margin-top: 6px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Corazón como hipervínculo a YouTube -->
+    <a class="heart-link" href="https://www.youtube.com/watch?v=l850VMW-Zz0" target="_blank" rel="noopener noreferrer" title="Escucha la canción ♥">
+      <div class="heart">
+        <svg viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 85 C50 85 5 55 5 28 C5 12 17 2 30 2 C38 2 45 6 50 13 C55 6 62 2 70 2 C83 2 95 12 95 28 C95 55 50 85 50 85Z"
+                fill="#dc1e3c"/>
+          <!-- brillo sutil -->
+          <ellipse cx="33" cy="22" rx="10" ry="6" fill="rgba(255,255,255,0.18)" transform="rotate(-30 33 22)"/>
+        </svg>
+      </div>
+    </a>
+
+    <!-- Texto principal (enlace a YouTube) -->
+    <a href="https://www.youtube.com/watch?v=JSGEcjJPgTo" target="_blank" rel="noopener noreferrer" class="text-link" title="Escucha esta canción ♥">
+      <div class="text-block">
+        <p class="frase">el más breve espacio</p>
+        <div>
+          <span class="letra-u">U</span>
+        </div>
+      </div>
+    </a>
+
+    <p class="hint">toca el corazón ♥</p>
+
+  </div>
+
+</body>
+</html>
