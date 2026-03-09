@@ -19,8 +19,9 @@ if (!isset($_SESSION['usuario_id'])) {
     echo "❌ <strong>ERROR:</strong> No hay sesión activa<br>";
     echo "Creando sesión de prueba...<br>";
     $_SESSION['usuario_id'] = 1;
-    $_SESSION['username'] = 'SUPERADMIN';
-    echo "✅ Sesión creada: usuario_id = 1, username = SUPERADMIN<br>";
+    $_SESSION['username'] = 'ADMIN';
+    echo "✅ Sesión creada: usuario_id = 1, username = ADMIN<br>";
+    echo "<a href='public/dashboard.html'>Ir al Dashboard Test</a><br><br>";
 } else {
     echo "✅ Sesión activa: usuario_id = {$_SESSION['usuario_id']}, username = {$_SESSION['username']}<br>";
 }

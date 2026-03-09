@@ -89,7 +89,7 @@ Abrir en el navegador: `http://localhost/Sistema_Inventario/public/index.html`
 
 | Usuario | Contraseña |
 |---------|------------|
-| SUPERADMIN | 2023350794 |
+| ADMIN | ADMIN |
 
 ## 💻 Uso del Sistema
 

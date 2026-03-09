@@ -59,7 +59,7 @@ try {
     echo "</ul>";
     echo "<h2>✨ Instalación completada con éxito</h2>";
     echo "<p><strong>Credenciales de acceso:</strong></p>";
-    echo "<p>Usuario: <strong>SUPERADMIN</strong><br>Contraseña: <strong>2023350794</strong></p>";
+    echo "<p>Usuario: <strong>ADMIN</strong><br>Contraseña: <strong>ADMIN</strong></p>";
     echo "<p><a href='public/index.html' style='background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>Ir al Login del Sistema</a></p>";
     
 } catch(PDOException $e) {

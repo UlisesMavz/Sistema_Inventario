@@ -387,24 +387,7 @@ class ProductoController {
      * @param string $descripcion Descripción de la acción
      */
     private function registrarLog($accion, $descripcion) {
-        try {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-            $usuarioId = $_SESSION['usuario_id'] ?? null;
-            
-            $query = "INSERT INTO logs (usuario_id, accion, descripcion) 
-                      VALUES (:usuario_id, :accion, :descripcion)";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':usuario_id', $usuarioId);
-            $stmt->bindParam(':accion', $accion);
-            $stmt->bindParam(':descripcion', $descripcion);
-            $stmt->execute();
-            
-        } catch (PDOException $e) {
-            error_log("Error al registrar log: " . $e->getMessage());
-        }
-    }
+    // Funcionalidad de logs eliminada a petición del usuario.
+}
 }
 ?>

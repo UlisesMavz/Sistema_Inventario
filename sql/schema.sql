@@ -37,28 +37,15 @@ CREATE TABLE IF NOT EXISTS productos (
     INDEX idx_precio (precio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
--- Tabla: logs
--- Registra todas las operaciones realizadas
--- ============================================
-CREATE TABLE IF NOT EXISTS logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT,
-    accion VARCHAR(50) NOT NULL,
-    descripcion TEXT,
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL,
-    INDEX idx_fecha (fecha),
-    INDEX idx_usuario (usuario_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Funcionalidad de logs eliminada a petición del usuario.
 
 -- ============================================
 -- Datos iniciales
 -- ============================================
 
--- Insertar superadministrador único (password: 2023350794)
+-- Insertar superadministrador único (password: ADMIN)
 INSERT INTO usuarios (username, password, nombre_completo) VALUES
-('SUPERADMIN', '$2y$10$5.sNxcwVTJE9iw2J71GmauLDayD7USaRisyH5XSZFucJsLrqQcmXy', 'Super Administrador');
+('ADMIN', '$2y$10$lh4fdkHFBufzts20VQJ6uuKvNyrl3pALrjTJawAXgQowZ2en22IX.', 'Super Administrador');
 
 -- Insertar productos de ejemplo
 INSERT INTO productos (codigo, nombre, precio) VALUES

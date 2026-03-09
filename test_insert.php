@@ -4,7 +4,8 @@ session_start();
 
 // Simular sesión de usuario
 $_SESSION['usuario_id'] = 1;
-$_SESSION['username'] = 'SUPERADMIN';
+$_SESSION['username'] = 'ADMIN';
+$_SESSION['nombre_completo'] = 'Super Administrador';
 
 require_once __DIR__ . '/controllers/ProductoController.php';
 require_once __DIR__ . '/models/Producto.php';
