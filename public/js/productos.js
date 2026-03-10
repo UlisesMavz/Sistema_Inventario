@@ -45,36 +45,99 @@ async function cargarProductos() {
 }
 
 /**
- * Muestra los productos en la tabla
+ * Muestra los productos en la tabla y actualiza el dashboard general
  */
 function mostrarProductos(productos) {
     const tbody = document.getElementById('productosTableBody');
+    const dashBody = document.getElementById('dashTableBody');
+    
+    // Calcular estadísticas
+    const sinStock = productos.filter(p => parseInt(p.stock) === 0).length;
+    const critico = productos.filter(p => parseInt(p.stock) > 0 && parseInt(p.stock) <= parseInt(p.stock_minimo)).length;
+    const categoriasUnicas = new Set(productos.map(p => p.categoria)).size;
+    
+    // Actualizar badges e info general
+    if (document.getElementById('statTotal')) document.getElementById('statTotal').textContent = productos.length;
+    if (document.getElementById('statSinStock')) document.getElementById('statSinStock').textContent = sinStock;
+    if (document.getElementById('statCritico')) document.getElementById('statCritico').textContent = critico;
+    if (document.getElementById('statCategorias')) document.getElementById('statCategorias').textContent = categoriasUnicas;
+    if (document.getElementById('totalProductos')) document.getElementById('totalProductos').textContent = productos.length;
+    
+    // topbar badge alert
+    const stockBadge = document.getElementById('stockBadge');
+    if (stockBadge) {
+        if (sinStock > 0) {
+            stockBadge.style.display = 'inline-block';
+            stockBadge.className = 'topbar-badge';
+            stockBadge.style.background = 'var(--danger-bg)';
+            stockBadge.style.color = 'var(--danger)';
+            stockBadge.textContent = `⚠ ${sinStock} agotados`;
+        } else if (critico > 0) {
+            stockBadge.style.display = 'inline-block';
+            stockBadge.style.background = 'var(--warn-bg)';
+            stockBadge.style.color = 'var(--warn)';
+            stockBadge.textContent = `⚠ ${critico} con stock crítico`;
+        } else {
+            stockBadge.style.display = 'none';
+        }
+    }
     
     if (productos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay productos registrados</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:20px;color:rgba(26,20,16,.4)">No hay productos registrados</td></tr>';
+        if (dashBody) dashBody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:20px;color:rgba(26,20,16,.4)">No hay productos registrados</td></tr>';
         return;
     }
     
-    tbody.innerHTML = productos.map(producto => {
-        // Lógica de alerta visual para stock bajo
-        const isLowStock = parseInt(producto.stock) <= parseInt(producto.stock_minimo);
-        const stockStyle = isLowStock ? 'color: red; font-weight: bold;' : '';
-        const stockIcon = isLowStock ? ' ⚠️' : '';
-        
-        const prodJSON = JSON.stringify(producto).replace(/"/g, '&quot;');
-        return `
-        <tr>
-            <td>${producto.id}</td>
-            <td>${producto.codigo}</td>
-            <td><small>${producto.categoria}<br><b>${producto.marca_proveedor}</b></small></td>
-            <td>${producto.nombre}</td>
-            <td>${formatearPrecio(producto.precio)}</td>
-            <td style="${stockStyle}">${producto.stock}${stockIcon}</td>
-            <td>
-                <button class="btn btn-secondary" onclick="abrirModalEdicion(${prodJSON})" style="padding: 5px 10px; font-size: 0.9em;">✏️ Editar</button>
-            </td>
-        </tr>
-    `}).join('');
+    // Helper para badge de stock en tabla
+    const getStockBadge = (stock, min) => {
+        stock = parseInt(stock);
+        min = parseInt(min);
+        if (stock === 0) return `<span class="badge badge-danger">0 ⚠</span>`;
+        if (stock <= min) return `<span class="badge badge-warn">${stock}</span>`;
+        return `<span class="badge badge-ok">${stock}</span>`;
+    };
+    
+    const getStatusBadge = (stock, min) => {
+        stock = parseInt(stock);
+        min = parseInt(min);
+        if (stock === 0) return `<span class="badge badge-danger">Agotado</span>`;
+        if (stock <= min) return `<span class="badge badge-warn">Bajo</span>`;
+        return `<span class="badge badge-ok">Normal</span>`;
+    };
+    
+    // Render Lista Completa
+    if (tbody) {
+        tbody.innerHTML = productos.map(producto => {
+            const prodJSON = JSON.stringify(producto).replace(/"/g, '&quot;');
+            return `
+            <tr>
+                <td>${producto.id}</td>
+                <td>${producto.codigo}</td>
+                <td><span class="cat-chip">${producto.categoria}<b>${producto.marca_proveedor}</b></span></td>
+                <td>${producto.nombre}</td>
+                <td>${formatearPrecio(producto.precio)}</td>
+                <td>${getStockBadge(producto.stock, producto.stock_minimo)}</td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="abrirModalEdicion(${prodJSON})">✏️ Editar</button>
+                </td>
+            </tr>
+        `}).join('');
+    }
+    
+    // Render Dashboard (Top 6)
+    if (dashBody) {
+        dashBody.innerHTML = productos.slice(0, 6).map(producto => {
+            return `
+            <tr>
+                <td>${producto.id}</td>
+                <td>${producto.codigo}</td>
+                <td>${producto.nombre}</td>
+                <td>${formatearPrecio(producto.precio)}</td>
+                <td>${getStockBadge(producto.stock, producto.stock_minimo)}</td>
+                <td>${getStatusBadge(producto.stock, producto.stock_minimo)}</td>
+            </tr>
+        `}).join('');
+    }
 }
 
 /**
@@ -422,15 +485,15 @@ async function editarProducto(e) {
 /**
  * Rellena la base de datos con productos de prueba
  */
-async function seedDatabase() {
-    if (!confirm('¿Seguro que deseas insertar datos de prueba? Esto agregará múltiples productos automáticamente para pruebas.')) return;
+async function seedDatabase(cantidad = 15) {
+    if (!confirm(`¿Seguro que deseas insertar ${cantidad} productos de prueba? Esto agregará múltiples productos automáticamente para pruebas.`)) return;
     
     try {
         const response = await fetch('../api/admin_db.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ accion: 'seed' })
+            body: JSON.stringify({ accion: 'seed', cantidad: cantidad })
         });
         
         const data = await response.json();

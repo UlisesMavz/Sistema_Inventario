@@ -394,8 +394,17 @@
     <div class="panel" id="panel-admin">
       <div class="card card-danger">
         <div class="card-header"><span class="card-title">⚙ Admin Base de Datos</span></div>
-        <p class="hint-text">Llena la base de datos con ~15 productos de prueba variados para testear algoritmos.</p>
-        <button class="btn btn-success btn-full" style="margin-bottom:20px" onclick="seedDatabase()">🧪 Insertar Datos de Prueba (Seed)</button>
+        <p class="hint-text">Llena la base de datos con productos de prueba variados para testear algoritmos.</p>
+        
+        <div class="form-group" style="margin-bottom:20px">
+          <label>Insertar Datos de Prueba (Seed)</label>
+          <div class="input-row">
+            <button class="btn btn-success" style="flex:1" onclick="seedDatabase(20)">🧪 20 Prod.</button>
+            <button class="btn btn-success" style="flex:1" onclick="seedDatabase(50)">🧪 50 Prod.</button>
+            <button class="btn btn-success" style="flex:1" onclick="seedDatabase(100)">🧪 100 Prod.</button>
+          </div>
+        </div>
+
         <div class="deco-line"><div class="deco-dot"></div></div>
         <p class="hint-text danger" style="margin-bottom:8px"><strong>⚠ Zona peligrosa — Borrar TODOS los registros:</strong></p>
         <div class="form-group" style="max-width:320px;margin-bottom:10px">
@@ -413,7 +422,7 @@
 <!-- MODAL: EDITAR -->
 <div class="modal-backdrop" id="editModal">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeModal()">×</button>
+    <button class="modal-close" onclick="cerrarModalEdicion()">×</button>
     <h2 class="modal-title">Editar <em>Producto</em></h2>
     <form id="editForm">
       <input type="hidden" id="editCodigoOriginal">
@@ -501,12 +510,6 @@
   }
   document.getElementById('editModal').addEventListener('click', e => {
     if (e.target === document.getElementById('editModal')) closeModal();
-  });
-
-  /* Wire edit form to existing productos.js editarProducto handler */
-  document.getElementById('editForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (typeof guardarEdicion === 'function') guardarEdicion();
   });
 </script>
 </body>
