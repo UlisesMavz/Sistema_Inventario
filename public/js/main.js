@@ -9,11 +9,21 @@
 function verificarAutenticacion() {
     const loggedIn = localStorage.getItem('logged_in');
     if (!loggedIn || loggedIn !== 'true') {
-        window.location.href = 'index.html';
+        window.location.replace('index.html');
         return false;
     }
     return true;
 }
+
+// Prevenir acceso vía botón "Atrás" cargando desde la caché
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+        const loggedIn = localStorage.getItem('logged_in');
+        if (!loggedIn || loggedIn !== 'true') {
+            window.location.replace('index.html');
+        }
+    }
+});
 
 /**
  * Obtiene información del usuario actual
@@ -85,13 +95,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejar logout
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            // Limpiar localStorage
+        logoutBtn.addEventListener('click', async function() {
+            // 1. Destruir sesión en el servidor (CRÍTICO)
+            try {
+                await fetch('../api/logout.php', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (e) {
+                // Si falla la red, igual limpiamos localmente
+            }
+            
+            // 2. Limpiar estado local del navegador
             localStorage.removeItem('usuario');
             localStorage.removeItem('logged_in');
+            sessionStorage.clear();
             
-            // Redirigir al login
-            window.location.href = 'index.html';
+            // 3. Redirigir reemplazando el historial (sin dejar el dashboard en el historial)
+            window.location.replace('index.html');
         });
     }
     

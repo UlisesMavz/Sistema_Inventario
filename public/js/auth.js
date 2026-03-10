@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Redirigir al dashboard
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    window.location.replace('dashboard.html');
                 }, 500);
             } else {
                 // Login fallido
