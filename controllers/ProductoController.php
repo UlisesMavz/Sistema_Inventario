@@ -383,6 +383,80 @@ class ProductoController {
     }
     
     /**
+     * Actualiza un producto existente en la base de datos
+     * 
+     * @param Producto $producto Producto con los datos actualizados
+     * @param int $codigoOriginal El código original antes de la actualización
+     * @return array Array con 'exito' (bool) y 'mensaje' (string)
+     */
+    public function actualizarProducto($producto, $codigoOriginal) {
+        $validacion = $producto->validar();
+        if (!$validacion['valido']) {
+            return [
+                'exito' => false,
+                'mensaje' => implode(', ', $validacion['errores'])
+            ];
+        }
+        
+        try {
+            // Verificar si el nuevo código (si cambió) ya existe en otro producto
+            if ($producto->codigo !== $codigoOriginal && $this->codigoExiste($producto->codigo)) {
+                return [
+                    'exito' => false,
+                    'mensaje' => 'El nuevo código ya está asignado a otro producto'
+                ];
+            }
+            
+            $query = "UPDATE productos 
+                      SET codigo = :codigo, 
+                          nombre = :nombre, 
+                          precio = :precio, 
+                          stock = :stock, 
+                          stock_minimo = :stock_minimo, 
+                          categoria = :categoria, 
+                          marca_proveedor = :marca_proveedor
+                      WHERE codigo = :codigo_original";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':codigo', $producto->codigo);
+            $stmt->bindParam(':nombre', $producto->nombre);
+            $stmt->bindParam(':precio', $producto->precio);
+            $stmt->bindParam(':stock', $producto->stock);
+            $stmt->bindParam(':stock_minimo', $producto->stock_minimo);
+            $stmt->bindParam(':categoria', $producto->categoria);
+            $stmt->bindParam(':marca_proveedor', $producto->marca_proveedor);
+            $stmt->bindParam(':codigo_original', $codigoOriginal);
+            
+            if ($stmt->execute()) {
+                if ($stmt->rowCount() > 0) {
+                    $this->registrarLog('UPDATE_PRODUCTO', "Producto actualizado: {$producto->codigo}");
+                    return [
+                        'exito' => true,
+                        'mensaje' => 'Producto actualizado correctamente'
+                    ];
+                } else {
+                    return [
+                        'exito' => true,
+                        'mensaje' => 'No hubo cambios en los datos del producto'
+                    ];
+                }
+            }
+            
+            return [
+                'exito' => false,
+                'mensaje' => 'Error al ejecutar la actualización'
+            ];
+            
+        } catch (PDOException $e) {
+            error_log("Error al actualizar producto: " . $e->getMessage());
+            return [
+                'exito' => false,
+                'mensaje' => 'Error al actualizar producto en la base de datos'
+            ];
+        }
+    }
+    
+    /**
      * Cuenta el número total de productos
      * Equivalente a ContarNodos() del código C++
      * 

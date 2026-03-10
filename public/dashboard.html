@@ -424,7 +424,7 @@
   <div class="modal-box">
     <button class="modal-close" onclick="cerrarModalEdicion()">×</button>
     <h2 class="modal-title">Editar <em>Producto</em></h2>
-    <form id="editForm">
+    <form id="editForm" onsubmit="editarProducto(event)">
       <input type="hidden" id="editCodigoOriginal">
       <div class="form-grid">
         <div class="form-group"><label>Código</label><input type="number" id="editCodigo" required></div>

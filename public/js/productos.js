@@ -12,12 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (insertForm) {
         insertForm.addEventListener('submit', insertarProducto);
     }
-    
-    // Manejar formulario de edición
-    const editForm = document.getElementById('editForm');
-    if (editForm) {
-        editForm.addEventListener('submit', editarProducto);
-    }
 });
 
 /**
