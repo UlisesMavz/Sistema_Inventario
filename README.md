@@ -1,66 +1,88 @@
-# 📦 Sistema de Inventario 
+# 🌿 HA&KU — Sistema de Inventario
 
-Sistema de gestión de inventario desarrollado con XAMPP (MySQL + PHP) y frontend en HTML/CSS/JavaScript. **Todos los algoritmos de ordenamiento y búsqueda están implementados desde cero** para demostrar conocimientos de análisis de algoritmos.
+Sistema de gestión de inventario desarrollado con **XAMPP (MySQL + PHP)** y frontend en **HTML/CSS/JavaScript** bajo la estética minimalista *HA&KU*. **Todos los algoritmos de ordenamiento y búsqueda están implementados desde cero** para demostrar conocimientos de análisis de algoritmos y estructuras de datos.
+
+---
 
 ## 🎯 Características Principales
 
 ### Algoritmos Implementados desde Cero
 
-#### Ordenamiento
-- **Bubble Sort** O(n²) - Por precio y nombre
-- **Quick Sort** O(n log n) - Por precio y nombre
+#### Ordenamiento (`utils/Ordenamiento.php`)
+| Algoritmo | Complejidad | Campo |
+|-----------|-------------|-------|
+| Bubble Sort | O(n²) | Precio, Nombre, Stock |
+| Quick Sort | O(n log n) | Precio, Nombre, Stock |
 
-#### Búsqueda
-- **Búsqueda Lineal** O(n) - Por código y nombre
-- **Búsqueda Binaria** O(log n) - Por código y nombre
+#### Búsqueda (`utils/Busqueda.php`)
+| Algoritmo | Complejidad | Campo |
+|-----------|-------------|-------|
+| Búsqueda Lineal | O(n) | Código, Nombre |
+| Búsqueda Binaria | O(log n) | Código, Nombre |
 
-### Funcionalidades
-- ✅ Autenticación de usuarios
-- ✅ Insertar productos (inicio, final, posición específica)
+### Funcionalidades del Sistema
+- ✅ Autenticación de usuarios con sesiones PHP + localStorage
+- ✅ Seguridad: Logout destruye sesión en servidor; no se puede acceder con el botón "Atrás"
+- ✅ Insertar productos (inicio, final, posición específica) — simula lista enlazada
 - ✅ Eliminar productos (inicio, final, por código)
-- ✅ Buscar productos con medición de rendimiento
-- ✅ Ordenar productos con medición de rendimiento
-- ✅ Interfaz moderna y responsiva
-- ✅ Registro de auditoría (logs)
+- ✅ Editar productos desde un modal interactivo
+- ✅ Buscar productos con medición de rendimiento en ms
+- ✅ Ordenar productos con medición de rendimiento en ms
+- ✅ Gestión de Stock con alertas visuales (stock bajo / agotado)
+- ✅ Categoría y Marca/Proveedor por producto
+- ✅ Panel de Administración: Seed de BD (20/50/100 productos) y Wipe con contraseña
+- ✅ Interfaz moderna, responsiva y animada (diseño pergamino-tinta)
+- ✅ Separación de responsabilidades: HTML / CSS en archivos externos / JS
+
+---
 
 ## 📁 Estructura del Proyecto
 
 ```
 Sistema_Inventario/
 ├── config/
-│   └── database.php          # Conexión a BD
+│   └── database.php              # Conexión PDO a MySQL
 ├── models/
-│   ├── Producto.php          # Modelo de producto
-│   └── Usuario.php           # Modelo de usuario
+│   ├── Producto.php              # Modelo de producto
+│   └── Usuario.php               # Modelo de usuario
 ├── controllers/
-│   ├── AuthController.php    # Autenticación
-│   └── ProductoController.php # Gestión de productos
+│   ├── AuthController.php        # Autenticación y sesiones
+│   └── ProductoController.php    # Gestión CRUD de productos
 ├── utils/
-│   ├── Ordenamiento.php      # Algoritmos de ordenamiento
-│   ├── Busqueda.php          # Algoritmos de búsqueda
-│   └── Validacion.php        # Validaciones
+│   ├── Ordenamiento.php          # Bubble Sort y Quick Sort (desde cero)
+│   ├── Busqueda.php              # Búsqueda Lineal y Binaria (desde cero)
+│   └── Validacion.php            # Validaciones de datos
 ├── api/
-│   ├── login.php             # API de login
-│   ├── productos.php         # API CRUD de productos
-│   ├── buscar.php            # API de búsqueda
-│   └── ordenar.php           # API de ordenamiento
+│   ├── login.php                 # POST — Iniciar sesión
+│   ├── logout.php                # POST — Cerrar sesión (destruye sesión PHP)
+│   ├── productos.php             # GET/POST/PUT/DELETE — CRUD de productos
+│   ├── buscar.php                # GET — Búsqueda de productos
+│   ├── ordenar.php               # POST — Ordenamiento de productos
+│   └── admin_db.php              # POST — Seed y Wipe de base de datos
 ├── public/
-│   ├── css/styles.css        # Estilos
+│   ├── css/
+│   │   ├── dashboard.css         # Estilos del dashboard
+│   │   ├── login.css             # Estilos de la página de login
+│   │   └── styles.css            # Estilos globales
 │   ├── js/
-│   │   ├── auth.js           # Autenticación
-│   │   ├── main.js           # Utilidades
-│   │   └── productos.js      # Gestión de productos
-│   ├── index.html            # Login
-│   └── dashboard.html        # Dashboard
-└── sql/
-    └── schema.sql            # Esquema de BD
+│   │   ├── auth.js               # Lógica de autenticación
+│   │   ├── main.js               # Utilidades, logout, anti-caché
+│   │   └── productos.js          # Gestión de productos (CRUD, ordenar, buscar)
+│   ├── index.html                # Página de Login
+│   └── dashboard.html            # Dashboard principal
+├── sql/
+│   └── schema.sql                # Esquema actualizado de la BD
+├── install.php                   # Instalador automático (ejecutar 1 vez)
+└── inventario_db.sql             # Backup/dump completo de la BD
 ```
+
+---
 
 ## 🚀 Instalación y Configuración
 
 ### Requisitos Previos
-- XAMPP instalado (Apache + MySQL + PHP)
-- Navegador web moderno
+- **XAMPP** instalado (Apache + MySQL + PHP 8+)
+- Navegador web moderno (Chrome, Edge, Firefox)
 
 ### Pasos de Instalación
 
@@ -68,96 +90,90 @@ Sistema_Inventario/
 - Abrir XAMPP Control Panel
 - Iniciar **Apache** y **MySQL**
 
-#### 2. Crear la Base de Datos
-1. Abrir phpMyAdmin: `http://localhost/phpmyadmin`
-2. Crear nueva base de datos llamada `inventario_db`
-3. Importar el archivo `sql/schema.sql` o ejecutar el siguiente comando:
+#### 2. Instalar la Base de Datos (automático)
+Abrir en el navegador:
+```
+http://localhost/Sistema_Inventario/install.php
+```
+Este script crea la base de datos `inventario_db` y todas las tablas automáticamente.
 
-```bash
-mysql -u root -p inventario_db < sql/schema.sql
+> **Alternativa manual:** Importar `inventario_db.sql` desde phpMyAdmin (`http://localhost/phpmyadmin`)
+
+#### 3. Acceder a la Aplicación
+```
+http://localhost/Sistema_Inventario/public/index.html
 ```
 
-O copiar y pegar el contenido de `schema.sql` en la pestaña SQL de phpMyAdmin.
-
-#### 3. Verificar la Ubicación del Proyecto
-El proyecto debe estar en: `c:\xampp\htdocs\Sistema_Inventario\`
-
-#### 4. Acceder a la Aplicación
-Abrir en el navegador: `http://localhost/Sistema_Inventario/public/index.html`
+---
 
 ## 👤 Credenciales de Acceso
 
 | Usuario | Contraseña |
 |---------|------------|
-| ADMIN | ADMIN |
+| `ADMIN` | `ADMIN`    |
+
+---
 
 ## 💻 Uso del Sistema
 
-### 1. Login
-- Ingresar usuario y NIP
-- El sistema validará las credenciales
+### Login
+- Ingresar usuario y contraseña
+- Al cerrar sesión, la sesión PHP se destruye en el servidor — el botón "Atrás" **no** permite reentrar
 
-### 2. Gestión de Productos
+### Panel: Lista de Productos
+- Visualiza todos los productos con su posición en la lista enlazada, stock y estado
+- Botón **↺ Actualizar** para recargar desde la BD
 
-#### Insertar Producto
-- Completar código, nombre y precio
-- Seleccionar tipo de inserción:
-  - **Al Inicio**: Inserta al principio de la lista
-  - **Al Final**: Inserta al final de la lista
-  - **Posición Específica**: Inserta en una posición determinada
+### Panel: Insertar Producto
+Completa todos los campos y selecciona el tipo de inserción:
+- **Al Inicio** — Posición 1 (head de la lista enlazada)
+- **Al Final** — Última posición (tail)
+- **Posición Específica** — Nodo intermedio
 
-#### Eliminar Producto
-- **Eliminar Inicio**: Elimina el primer producto
-- **Eliminar Final**: Elimina el último producto
-- **Por Código**: Elimina un producto específico
+### Panel: Eliminar Producto
+- **Eliminar del Inicio** / **Eliminar del Final** — Por posición
+- **Eliminar por Código** — Nodo arbitrario
 
-### 3. Búsqueda de Productos
+### Panel: Buscar Producto
+Selecciona algoritmo y campo:
+- **Búsqueda Lineal O(n)** — Por código o nombre
+- **Búsqueda Binaria O(log n)** — Por código o nombre *(requiere datos ordenados)*
 
-#### Búsqueda Lineal
-- Complejidad: O(n)
-- Recorre todos los elementos secuencialmente
-- Funciona con datos ordenados y desordenados
+Muestra el resultado con tiempo de ejecución en ms y la posición exacta en la BD.
 
-#### Búsqueda Binaria
-- Complejidad: O(log n)
-- Divide el espacio de búsqueda a la mitad en cada iteración
-- **Requiere datos ordenados**
-- Mucho más rápida para grandes conjuntos de datos
+### Panel: Ordenar Productos
+Selecciona algoritmo y campo de ordenamiento:
+- **Bubble Sort O(n²)** / **Quick Sort O(n log n)**
+- Campos: Precio · Nombre · Stock Crítico
 
-### 4. Ordenamiento de Productos
+> La lista ordenada se muestra inmediatamente. El botón **↺ Actualizar** retorna el orden original de la BD.
 
-#### Bubble Sort
-- Complejidad: O(n²)
-- Algoritmo simple pero ineficiente para grandes conjuntos
-- Útil para demostrar conceptos básicos
+### Panel: Admin Base de Datos
+- **Seed** — Inserta 20, 50 o 100 productos de prueba variados
+- **Wipe** — Elimina **todos** los productos (requiere contraseña de admin)
 
-#### Quick Sort
-- Complejidad: O(n log n) en promedio
-- Algoritmo eficiente usando divide y conquista
-- Recomendado para grandes conjuntos de datos
-
-**El sistema muestra el tiempo de ejecución en milisegundos para comparar rendimiento**
+---
 
 ## 🔧 Configuración de Base de Datos
 
-Si necesitas cambiar las credenciales de MySQL, edita `config/database.php`:
+Edita `config/database.php` si necesitas cambiar las credenciales de MySQL:
 
 ```php
-private $host = "localhost";
-private $db_name = "inventario_db";
+private $host     = "localhost";
+private $db_name  = "inventario_db";
 private $username = "root";
-private $password = ""; // Cambiar si tienes contraseña
+private $password = ""; // Cambiar si tienes contraseña en MySQL
 ```
 
-## 📊 Demostración de Algoritmos
+---
 
-### Ejemplo de Bubble Sort (Ordenamiento.php)
+## 📊 Pseudocódigo de Algoritmos
+
+### Bubble Sort
 ```php
-// Implementación manual sin usar funciones nativas
 for ($i = 0; $i < $n - 1; $i++) {
     for ($j = 0; $j < $n - 1 - $i; $j++) {
         if ($productos[$j]->precio > $productos[$j + 1]->precio) {
-            // Intercambio manual
             $temp = $productos[$j];
             $productos[$j] = $productos[$j + 1];
             $productos[$j + 1] = $temp;
@@ -166,66 +182,64 @@ for ($i = 0; $i < $n - 1; $i++) {
 }
 ```
 
-### Ejemplo de Búsqueda Binaria (Busqueda.php)
+### Búsqueda Binaria
 ```php
-// Implementación manual de búsqueda binaria
-$low = 0;
-$high = count($productos) - 1;
-
+$low = 0; $high = count($productos) - 1;
 while ($low <= $high) {
     $mid = (int)(($low + $high) / 2);
-    
-    if ($productos[$mid]->codigo == $codigo) {
-        return $productos[$mid]; // Encontrado
-    } else if ($productos[$mid]->codigo < $codigo) {
-        $low = $mid + 1; // Buscar en mitad superior
-    } else {
-        $high = $mid - 1; // Buscar en mitad inferior
-    }
+    if ($productos[$mid]->codigo == $codigo) return $productos[$mid];
+    else if ($productos[$mid]->codigo < $codigo) $low = $mid + 1;
+    else $high = $mid - 1;
 }
 ```
 
-## 🎓 Conceptos de Análisis de Algoritmos Demostrados
+---
 
-1. **Complejidad Temporal**: Medición de tiempos de ejecución
-2. **Notación Big O**: Clasificación de algoritmos
-3. **Divide y Conquista**: Quick Sort
-4. **Recursión**: Quick Sort
-5. **Búsqueda Eficiente**: Comparación lineal vs binaria
-6. **Manejo de Punteros**: Simulación con arrays en PHP
-7. **Estructuras de Datos**: Listas enlazadas simuladas
+## 🎓 Conceptos Demostrados
 
-## 🐛 Solución de Problemas
-
-### Error: "No se puede conectar a la base de datos"
-- Verificar que MySQL esté ejecutándose en XAMPP
-- Verificar credenciales en `config/database.php`
-- Verificar que la base de datos `inventario_db` exista
-
-### Error: "No autorizado"
-- Limpiar localStorage del navegador
-- Volver a iniciar sesión
-
-### Los productos no se muestran
-- Verificar que Apache esté ejecutándose
-- Abrir consola del navegador (F12) para ver errores
-- Verificar que las rutas de las APIs sean correctas
-
-## 📝 Notas Técnicas
-
-- **Sin librerías externas**: Todos los algoritmos están implementados manualmente
-- **PDO**: Se usa PDO para prevenir SQL injection
-- **Sesiones PHP**: Manejo seguro de autenticación
-- **REST API**: Arquitectura RESTful para comunicación cliente-servidor
-- **Responsive Design**: Interfaz adaptable a diferentes dispositivos
-
-
-
-Sistema desarrollado como proyecto educativo para demostrar conocimientos de:
-- Análisis de Algoritmos
-- Estructuras de Datos
-- Desarrollo Full-Stack
-- Arquitectura MVC
+| Concepto | Dónde |
+|----------|-------|
+| Complejidad Temporal Big O | Ordenamiento y Búsqueda |
+| Divide y Conquista | Quick Sort |
+| Recursión | Quick Sort |
+| Lista Enlazada Simulada | `posicion` en tabla `productos` |
+| Arquitectura MVC | Controllers / Models / Views |
+| API RESTful | Endpoints en `api/` |
+| Seguridad (sesiones, SQL Injection) | PDO + `AuthController` |
+| Separación de Responsabilidades | HTML / CSS / JS en archivos separados |
 
 ---
 
+## 🐛 Solución de Problemas
+
+**Error: "No se puede conectar a la base de datos"**
+- Verifica que MySQL esté activo en XAMPP
+- Verifica credenciales en `config/database.php`
+- Verifica que `inventario_db` exista en phpMyAdmin
+
+**Error: "No autorizado" en las APIs**
+- Cierra sesión y vuelve a iniciar sesión
+- Si persiste, limpia las cookies del navegador (F12 → Application → Cookies → Clear)
+
+**Los productos no aparecen en la tabla**
+- Verifica que Apache esté activo
+- Abre la consola del navegador (F12) y revisa errores en la pestaña Network
+
+**El botón "Atrás" muestra el dashboard después de cerrar sesión**
+- Asegúrate de que el servidor Apache esté en ejecución (el logout llama a `api/logout.php`)
+
+---
+
+## 📝 Notas Técnicas
+
+- **Sin librerías externas**: Todos los algoritmos son implementación manual
+- **PDO con prepared statements**: Previene SQL Injection
+- **Sesiones PHP**: La sesión se destruye en el servidor al hacer logout
+- **Cache-Control headers**: Las páginas protegidas incluyen `no-cache, no-store, must-revalidate`
+- **Diseño Responsivo**: Adapta el layout a móvil y escritorio con media queries
+
+---
+
+*Sistema desarrollado como proyecto educativo para demostrar conocimientos en Análisis de Algoritmos, Estructuras de Datos, Desarrollo Full-Stack y Arquitectura MVC.*
+
+---
