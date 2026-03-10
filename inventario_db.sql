@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 02-03-2026 a las 05:21:55
+-- Tiempo de generación: 10-03-2026 a las 02:43:58
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -23,10 +23,6 @@ SET time_zone = "+00:00";
 
 -- --------------------------------------------------------
 
--- Tabla logs eliminada a petición del usuario.
-
--- --------------------------------------------------------
-
 --
 -- Estructura de tabla para la tabla `productos`
 --
@@ -37,30 +33,37 @@ CREATE TABLE `productos` (
   `codigo` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `precio` decimal(10,2) NOT NULL,
+  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
+  `fecha_modificacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `stock` int(11) NOT NULL DEFAULT 0,
   `stock_minimo` int(11) NOT NULL DEFAULT 5,
-  `categoria` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'General',
-  `marca_proveedor` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Genérico',
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
-  `fecha_modificacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `categoria` varchar(100) NOT NULL DEFAULT 'General',
+  `marca_proveedor` varchar(100) NOT NULL DEFAULT 'Genérico'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id`, `posicion`, `codigo`, `nombre`, `precio`, `fecha_creacion`, `fecha_modificacion`) VALUES
-(23, 6, 100, 'Yakult', 20.00, '2026-02-16 03:03:41', '2026-02-17 02:43:23'),
-(34, 7, 123, 'Memoria RAM', 1000.00, '2026-02-16 05:41:04', '2026-02-17 02:43:23'),
-(35, 8, 999, 'Producto de Prueba', 99.99, '2026-02-16 05:47:07', '2026-02-17 02:43:23'),
-(36, 9, 888, 'Test API', 88.88, '2026-02-16 05:47:07', '2026-02-17 02:43:23'),
-(37, 10, 200, 'Yogurt', 100.00, '2026-02-16 05:48:49', '2026-02-17 02:43:23'),
-(43, 11, 107, 'Libreta', 35.00, '2026-02-16 05:49:41', '2026-02-17 02:43:23'),
-(44, 12, 202, 'Producto ', 100.00, '2026-02-16 05:51:11', '2026-02-17 02:43:23'),
-(45, 13, 21, 'RAM', 20.00, '2026-02-16 05:58:31', '2026-02-17 02:43:23'),
-(47, 15, 199, 'SW', 99999999.99, '2026-02-16 06:09:33', '2026-02-17 02:43:23'),
-(49, 2, 124, 'poemas1', 15.00, '2026-02-16 06:40:27', '2026-02-17 02:43:23'),
-(50, 16, 55, 'poema2', 11.00, '2026-02-16 06:41:16', '2026-02-17 02:43:23');
+INSERT INTO `productos` (`id`, `posicion`, `codigo`, `nombre`, `precio`, `fecha_creacion`, `fecha_modificacion`, `stock`, `stock_minimo`, `categoria`, `marca_proveedor`) VALUES
+(2, 2, 5625, 'Nescafé 120g', 74.80, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 38, 14, 'Abarrotes', 'Nestlé'),
+(3, 3, 5449, 'Doritos Nacho 50g', 18.54, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 40, 6, 'Botanas', 'Sabritas'),
+(4, 4, 5632, 'Coca Cola 600ml', 16.84, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 41, 6, 'Refrescos y Bebidas', 'Coca-Cola'),
+(5, 5, 9002, 'Leche Alpura Clásica', 27.16, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 36, 18, 'Lácteos', 'Alpura'),
+(6, 6, 2449, 'Mouse Logitech', 270.00, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 19, 18, 'Electrónica', 'Logitech'),
+(7, 7, 3966, 'Plumas BIC', 55.00, '2026-03-10 00:40:49', '2026-03-10 01:01:53', 0, 13, 'Papelería', 'BIC'),
+(8, 8, 9880, 'Yogurt Lala Fresa', 11.88, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 45, 17, 'Lácteos', 'Lala'),
+(9, 9, 304, 'Cuaderno Scribe', 36.75, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 38, 19, 'Papelería', 'Scribe'),
+(10, 10, 843, 'Coca Cola 600ml', 17.39, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 20, 18, 'Refrescos y Bebidas', 'Coca-Cola'),
+(11, 11, 785, 'Coca Cola 600ml', 18.32, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 28, 8, 'Refrescos y Bebidas', 'Coca-Cola'),
+(12, 12, 2594, 'Yogurt Lala Fresa', 14.75, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 20, 17, 'Lácteos', 'Lala'),
+(13, 13, 5106, 'Detergente Ariel 1kg', 39.56, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 27, 7, 'Limpieza del Hogar', 'Genérico'),
+(14, 14, 2125, 'Coca Cola 600ml', 18.50, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 20, 10, 'Refrescos y Bebidas', 'Coca-Cola'),
+(15, 15, 4841, 'Nescafé 120g', 98.60, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 32, 10, 'Abarrotes', 'Nestlé'),
+(16, 16, 3428, 'Yogurt Lala Fresa', 12.75, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 20, 7, 'Lácteos', 'Lala'),
+(17, 17, 9141, 'Sabritas Saladas 40g', 18.87, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 5, 20, 'Botanas', 'Sabritas'),
+(18, 18, 2852, 'Bimbo Pan Blanco', 44.55, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 8, 14, 'Abarrotes', 'Bimbo'),
+(19, 19, 9052, 'Laptop Lenovo ThinkPad', 12600.00, '2026-03-10 00:40:49', '2026-03-10 00:40:49', 37, 15, 'Electrónica', 'Lenovo');
 
 -- --------------------------------------------------------
 
@@ -81,19 +84,11 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `username`, `password`, `nombre_completo`, `fecha_creacion`) VALUES
-(9, 'ADMIN', '$2y$10$lh4fdkHFBufzts20VQJ6uuKvNyrl3pALrjTJawAXgQowZ2en22IX.', 'Super Administrador', '2026-02-16 02:48:36');
+(14, 'ADMIN', '$2y$10$lh4fdkHFBufzts20VQJ6uuKvNyrl3pALrjTJawAXgQowZ2en22IX.', 'Super Administrador', '2026-02-26 04:29:39');
 
 --
 -- Índices para tablas volcadas
 --
-
---
--- Indices de la tabla `logs`
---
-ALTER TABLE `logs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_fecha` (`fecha`),
-  ADD KEY `idx_usuario` (`usuario_id`);
 
 --
 -- Indices de la tabla `productos`
@@ -118,25 +113,17 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
--- (Logs eliminados)
-
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- Restricciones para tablas volcadas
---
-
--- (Filtros logs eliminados)
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
