@@ -251,7 +251,7 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>ID</th><th>Código</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead>
+            <thead><tr><th>Posición</th><th>Código</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead>
             <tbody id="dashTableBody"><tr><td colspan="6" style="text-align:center;padding:20px;color:rgba(26,20,16,.4)">Cargando...</td></tr></tbody>
           </table>
         </div>
@@ -263,11 +263,11 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title"><span class="card-title-icon">◈</span> Lista de Productos (<span id="totalProductos">0</span>)</span>
-          <button class="btn btn-secondary btn-sm" onclick="loadTable()">↺ Actualizar</button>
+          <button class="btn btn-secondary btn-sm" onclick="cargarProductos()">↺ Actualizar</button>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>ID</th><th>Código</th><th>Cat / Marca</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Posición</th><th>Código</th><th>Cat / Marca</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead>
             <tbody id="productosTableBody"><tr><td colspan="7" style="text-align:center;padding:20px;color:rgba(26,20,16,.4)">Cargando...</td></tr></tbody>
           </table>
         </div>
@@ -484,9 +484,6 @@
     });
     document.getElementById('pageTitle').innerHTML = titles[name] || name;
     closeSidebar();
-    if (name === 'productos' || name === 'dashboard') {
-      if (typeof cargarProductos === 'function') cargarProductos();
-    }
   }
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');

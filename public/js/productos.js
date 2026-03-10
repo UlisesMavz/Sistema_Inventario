@@ -101,11 +101,11 @@ function mostrarProductos(productos) {
     
     // Render Lista Completa
     if (tbody) {
-        tbody.innerHTML = productos.map(producto => {
+        tbody.innerHTML = productos.map((producto, index) => {
             const prodJSON = JSON.stringify(producto).replace(/"/g, '&quot;');
             return `
             <tr>
-                <td>${producto.id}</td>
+                <td>${index + 1}</td>
                 <td>${producto.codigo}</td>
                 <td><span class="cat-chip">${producto.categoria}<b>${producto.marca_proveedor}</b></span></td>
                 <td>${producto.nombre}</td>
@@ -120,10 +120,10 @@ function mostrarProductos(productos) {
     
     // Render Dashboard (Top 6)
     if (dashBody) {
-        dashBody.innerHTML = productos.slice(0, 6).map(producto => {
+        dashBody.innerHTML = productos.slice(0, 6).map((producto, index) => {
             return `
             <tr>
-                <td>${producto.id}</td>
+                <td>${index + 1}</td>
                 <td>${producto.codigo}</td>
                 <td>${producto.nombre}</td>
                 <td>${formatearPrecio(producto.precio)}</td>
@@ -303,6 +303,7 @@ async function buscarProducto() {
             resultBox.className = 'result-box success';
             resultBox.innerHTML = `
                 <strong>✅ Producto Encontrado</strong><br>
+                <strong>Posición en BD:</strong> <span class="badge badge-ok">No. ${producto.posicion}</span><br>
                 <strong>Código:</strong> ${producto.codigo}<br>
                 <strong>Nombre:</strong> ${producto.nombre}<br>
                 <strong>Precio:</strong> ${formatearPrecio(producto.precio)}<br>
