@@ -296,6 +296,183 @@ En cuanto a la memoria, en C++ el programador es responsable de liberar cada nod
 
 ---
 
+### 4.7 API REST (Representational State Transfer)
+
+#### 4.7.1 Fundamentos teóricos
+
+REST es un **estilo arquitectónico** para sistemas distribuidos, definido por Roy T. Fielding en su tesis doctoral del año 2000. No es un protocolo ni un estándar, sino un conjunto de seis restricciones de diseño que, cuando se respetan, producen sistemas web altamente desacoplados, escalables e interoperables (Fielding, 2000):
+
+1. **Cliente-Servidor:** La interfaz de usuario (cliente) y el almacenamiento de datos (servidor) están separados; cada uno puede evolucionar independientemente.
+2. **Sin estado (Stateless):** Cada petición HTTP del cliente al servidor debe contener toda la información necesaria para ser procesada. El servidor no guarda el estado de la conversación entre llamadas. En el sistema HA&KU, esto se cumple porque cada petición incluye automáticamente la *cookie* de sesión PHP gracias al parámetro `credentials: 'include'` de Fetch API.
+3. **Caché:** Las respuestas deben indicar si pueden o no ser almacenadas en caché. El sistema declara `Cache-Control: no-cache` en las rutas protegidas para evitar que datos sensibles sean servidos desde la caché del navegador.
+4. **Interfaz uniforme:** Todos los recursos se identifican mediante URIs y se manipulan a través de los métodos estándar de HTTP (GET, POST, PUT, DELETE).
+5. **Sistema en capas:** El cliente no necesita saber si se conecta directamente al servidor final o a un intermediario (proxy, balanceador de carga).
+6. **Código bajo demanda (opcional):** El servidor puede enviar código ejecutable al cliente (por ejemplo, scripts JavaScript).
+
+La comunicación entre el frontend y el backend del sistema HA&KU sigue fielmente el patrón REST: el cliente JavaScript realiza peticiones HTTP con *payloads* en formato **JSON** (JavaScript Object Notation) y el servidor PHP responde con estructuras JSON de la forma `{"exito": true/false, "mensaje": "...", "datos": {...}}`. Este contrato uniforme hace que el frontend sea completamente independiente del backend: cualquier cambio en la implementación PHP no afecta al JavaScript mientras se respete la forma de la respuesta.
+
+#### 4.7.2 Verbos HTTP y su uso en el proyecto
+
+| Verbo HTTP | Semántica REST | Uso en HA&KU |
+|-----------|----------------|--------------|
+| `GET` | Recuperar un recurso sin modificarlo | Obtener la lista de productos |
+| `POST` | Crear un nuevo recurso o ejecutar una acción | Insertar producto, buscar, ordenar, login, seed/wipe |
+| `PUT` | Actualizar un recurso existente por completo | Editar datos de un producto |
+| `DELETE` | Eliminar un recurso | Eliminar producto por código, inicio o final |
+
+#### 4.7.3 Funcionamiento de cada endpoint en el proyecto
+
+Todos los archivos de la carpeta `api/` siguen la misma estructura interna: (1) verifican el método HTTP recibido, (2) validan que exista una sesión PHP activa, (3) decodifican el cuerpo JSON de la petición, (4) delegan al controlador correspondiente y (5) retornan una respuesta JSON con código HTTP apropiado.
+
+---
+
+**`api/login.php` — Autenticación de usuario**
+
+- **Método:** `POST`
+- **Requiere sesión:** No (es la puerta de entrada)
+- **Payload de entrada:**
+```json
+{ "username": "ADMIN", "password": "ADMIN" }
+```
+- **Flujo interno:**
+  1. Decodifica el JSON del cuerpo de la petición (`php://input`)
+  2. Crea una instancia de `AuthController`
+  3. Llama a `AuthController::login($username, $password)`
+  4. El controlador busca el usuario en la BD y verifica la contraseña con `password_verify()` (Bcrypt)
+  5. Si es correcto, establece las variables de sesión PHP: `$_SESSION['usuario_id']`, `$_SESSION['logged_in'] = true`
+- **Respuesta exitosa (HTTP 200):**
+```json
+{ "exito": true, "mensaje": "Login exitoso", "usuario": { "id": 14, "username": "ADMIN", "nombre_completo": "Super Administrador" } }
+```
+- **Respuesta fallida (HTTP 401):**
+```json
+{ "exito": false, "mensaje": "Usuario o contraseña incorrectos" }
+```
+
+---
+
+**`api/logout.php` — Cierre de sesión**
+
+- **Método:** `POST`
+- **Requiere sesión:** Sí
+- **Payload:** Ninguno
+- **Flujo interno:**
+  1. Llama a `AuthController::logout()`
+  2. El controlador borra todas las variables de sesión (`$_SESSION = []`) y destruye la sesión PHP (`session_destroy()`)
+  3. Desde el frontend, el JavaScript complementa con `localStorage.removeItem('logged_in')` y redirige con `window.location.replace('index.html')`
+- **Por qué es crítico:** Sin este endpoint, solo se limpiaría el `localStorage` del navegador, pero la sesión PHP permanecería activa en el servidor. Cualquier petición a `api/productos.php` seguiría siendo autorizada, lo que constituye una vulnerabilidad de seguridad.
+- **Respuesta (HTTP 200):**
+```json
+{ "exito": true, "mensaje": "Sesión cerrada correctamente" }
+```
+
+---
+
+**`api/productos.php` — CRUD completo de productos**
+
+Este endpoint es el más completo del sistema; maneja cuatro métodos HTTP distintos.
+
+- **GET — Obtener lista de productos:**
+  - Llama a `ProductoController::obtenerTodos()`
+  - Ejecuta `SELECT * FROM productos ORDER BY posicion ASC`
+  - Retorna el arreglo completo de productos serializado a JSON
+
+- **POST — Insertar producto:**
+  - Payload:
+  ```json
+  { "codigo": 5001, "nombre": "Laptop Dell", "precio": 15999.99, "tipo": "inicio", "stock": 10, "stock_minimo": 3, "categoria": "Electrónica", "marca_proveedor": "Dell" }
+  ```
+  - El campo `"tipo"` determina qué método del controlador se invoca: `insertarInicio()`, `insertarFinal()` o `insertarPosicion()`
+  - Cada variante actualiza el campo `posicion` de los registros existentes antes de insertar
+
+- **PUT — Actualizar producto:**
+  - Payload:
+  ```json
+  { "id": 7, "codigo": 5001, "nombre": "Laptop Dell XPS", "precio": 18000.00, "stock": 8, "stock_minimo": 2, "categoria": "Electrónica", "marca_proveedor": "Dell" }
+  ```
+  - Llama a `ProductoController::actualizarProducto($id, $datos)`
+  - Ejecuta un `UPDATE` con los campos modificados
+
+- **DELETE — Eliminar producto:**
+  - Payload:
+  ```json
+  { "tipo": "codigo", "codigo": 5001 }
+  ```
+  - El campo `"tipo"` puede ser `"inicio"`, `"final"` o `"codigo"`
+  - Después de eliminar el registro, compacta las posiciones con `UPDATE productos SET posicion = posicion - 1 WHERE posicion > :pos`
+
+---
+
+**`api/buscar.php` — Búsqueda de productos**
+
+- **Método:** `POST`
+- **Payload de entrada:**
+```json
+{ "algoritmo": "binaria", "campo": "codigo", "valor": "5001" }
+```
+- **Flujo interno:**
+  1. Recupera todos los productos con `ProductoController::obtenerTodos()`
+  2. Para búsqueda binaria, el arreglo ya viene ordenado por `posicion`; si se busca por código, se reordena primero por código con Quick Sort
+  3. Registra el tiempo de inicio con `microtime(true)`
+  4. Llama a `Busqueda::busquedaBinariasPorCodigo($productos, $valor)` o la variante seleccionada
+  5. Calcula el tiempo transcurrido en milisegundos
+- **Respuesta exitosa:**
+```json
+{ "exito": true, "producto": { "id": 6, "codigo": 5001, "nombre": "Laptop Dell", "precio": 15999.99 }, "tiempo_ms": 0.043, "comparaciones": 4 }
+```
+- **Respuesta sin resultado:**
+```json
+{ "exito": false, "mensaje": "Producto no encontrado", "tiempo_ms": 0.038 }
+```
+
+---
+
+**`api/ordenar.php` — Ordenamiento de productos**
+
+- **Método:** `POST`
+- **Payload de entrada:**
+```json
+{ "algoritmo": "quicksort", "campo": "precio", "orden": "asc" }
+```
+- **Flujo interno:**
+  1. Recupera todos los productos de la BD
+  2. Registra el tiempo de inicio
+  3. Aplica el algoritmo indicado: `Ordenamiento::quickSortPorPrecio($productos)` o sus variantes por nombre o stock
+  4. Si `orden === "desc"`, invierte el arreglo resultante
+  5. Calcula el tiempo transcurrido
+- **Nota de diseño:** El ordenamiento opera **en memoria PHP** sobre el arreglo de objetos ya cargado; no ejecuta ningún `ORDER BY` en SQL. Esto es intencional: el propósito es demostrar y medir los algoritmos de ordenamiento, no delegar el trabajo al motor de base de datos.
+- **Respuesta:**
+```json
+{ "exito": true, "productos": [ {...}, {...} ], "tiempo_ms": 0.61, "algoritmo": "quicksort", "campo": "precio" }
+```
+
+---
+
+**`api/admin_db.php` — Administración de la base de datos**
+
+- **Método:** `POST`
+- **Payload para Seed:**
+```json
+{ "accion": "seed", "cantidad": 50 }
+```
+- **Payload para Wipe:**
+```json
+{ "accion": "wipe", "password": "ADMIN" }
+```
+- **Flujo Seed:**
+  1. Genera `$cantidad` (20, 50 o 100) objetos `Producto` con datos variados y realistas (nombres, marcas, categorías y precios generados con variación aleatoria controlada)
+  2. Los inserta uno a uno al final de la lista enlazada simulada
+- **Flujo Wipe:**
+  1. Verifica la contraseña contra el hash Bcrypt del usuario ADMIN en la BD
+  2. Si es válida, ejecuta `DELETE FROM productos` y reinicia los contadores de posición
+  3. Si es inválida, retorna HTTP 403
+- **Respuesta Seed:**
+```json
+{ "exito": true, "mensaje": "Se insertaron 50 productos de prueba correctamente" }
+```
+
+---
+
 ## 5. Desarrollo
 
 ### 5.1 Metodología Ágil Adaptada
