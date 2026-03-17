@@ -240,6 +240,8 @@ while ($low <= $high) {
 
 ---
 
-*Sistema desarrollado como proyecto educativo para demostrar conocimientos en Análisis de Algoritmos, Estructuras de Datos, Desarrollo Full-Stack y Arquitectura MVC.*
+*Sistema desarrollado como proyecto educativo para demostrar conocimientos en Análisis de Algoritmos, Estructuras de Datos, Desarrollo Full-Stack y Arquitectura MVC.
+
+ESIME - Culhuacan*
 
 ---
