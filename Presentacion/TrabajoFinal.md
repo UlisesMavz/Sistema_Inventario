@@ -1,9 +1,17 @@
 # Sistema de Inventario con Algoritmos de Ordenamiento y Búsqueda sobre Lista Enlazada Simulada en Base de Datos Relacional
 
 **Materia:** Análisis de Algoritmos  
-**Carrera:** Ingeniería en Computación  
-**Integrantes del equipo:** *(Nombres del equipo)*  
-**Fecha:** Marzo 2026
+**Carrera:** Ingeniería en Computación 
+**Tema:** Sistema de Inventario – Aplicación Web
+**Grupo:** 5CM13
+**Mtra.:** Azorín Vega Claudia
+**Integrantes del equipo:** *(
+- García Martínez Kassandra Betzabeth
+- Marín Vázquez Ulises
+- Mata Romera Alan
+- Vázquez Olivares Héctor
+)* 
+
 
 ---
 

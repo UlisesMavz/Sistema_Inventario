@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TECHNOCOMPILER – TECHNOVA Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0b1120;
+    --surface: rgba(15, 23, 42, 0.6);
+    --surface-solid: #0f172a;
+    --accent1: #38bdf8;
+    --accent2: #0ea5e9;
+    --accent3: #7dd3fc;
+    --muted: #94a3b8;
+    --text: #f8fafc;
+    --text-light: #cbd5e1;
+    --border: rgba(56, 189, 248, 0.2);
+    --border-highlight: rgba(56, 189, 248, 0.5);
+    --pastel-peach: rgba(56, 189, 248, 0.05);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --glow: 0 0 20px rgba(56, 189, 248, 0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0b1120 70%);
+    background-attachment: fixed;
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(11, 17, 32, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 70px;
+    box-shadow: var(--shadow-sm);
+  }
+  .nav-logo {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: 1.25rem; color: var(--accent1); letter-spacing: 0.01em;
+  }
+  .nav-links { display: flex; gap: 1.4rem; list-style: none; flex-wrap: wrap; }
+  .nav-links a {
+    text-decoration: none; font-size: 0.8rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-light);
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent1); text-shadow: 0 0 8px var(--accent1); }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 6rem 2rem 4rem;
+    background: linear-gradient(to bottom, rgba(11,17,32,0.6), rgba(11,17,32,0.95)), url('img_hero.png') center/cover no-repeat;
+    position: relative; overflow: hidden;
+  }
+  .hero::before, .hero::after { display: none; }
+  .hero-content {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-top: 1px solid var(--border-highlight);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    max-width: 800px;
+    box-shadow: var(--shadow), var(--glow);
+    position: relative; z-index: 2;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(56, 189, 248, 0.1); color: var(--accent1);
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.5rem 1.2rem; border-radius: 100px; margin-bottom: 1.5rem;
+    border: 1px solid var(--border-highlight);
+    box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.1);
+  }
+  .hero h1 {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: clamp(2.4rem, 6vw, 4.2rem); color: var(--text);
+    line-height: 1.15; margin-bottom: 1.2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  }
+  .hero h1 span { color: var(--accent1); }
+  .hero p {
+    font-size: 1.1rem; color: var(--text-light); max-width: 580px;
+    margin: 0 auto 2.4rem; font-weight: 300; text-shadow: 0 1px 5px rgba(0,0,0,0.8);
+  }
+  .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.8rem; border-radius: 100px;
+    font-size: 0.9rem; font-weight: 700; text-decoration: none;
+    transition: all 0.25s; cursor: pointer; border: none;
+  }
+  .btn-primary { background: var(--accent1); color: #0b1120; box-shadow: 0 4px 16px rgba(56,189,248,0.4); text-shadow: none; }
+  .btn-primary:hover { background: #bae6fd; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56,189,248,0.6); }
+  .btn-outline { background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); color: var(--text); border: 1px solid var(--accent1); }
+  .btn-outline:hover { background: rgba(56,189,248,0.1); border-color: var(--accent3); transform: translateY(-2px); box-shadow: var(--glow); }
+
+  /* ===== SECTIONS ===== */
+  section { padding: 5rem 2rem; }
+  .container { max-width: 1080px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 0.6rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h2.sec-title {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: clamp(1.8rem, 4vw, 2.6rem); color: var(--text);
+    margin-bottom: 2.5rem; line-height: 1.2;
+  }
+  h3.sub-title {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: 1.3rem; color: var(--accent1); margin-bottom: 0.8rem;
+  }
+  .divider {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent3));
+    border-radius: 2px; margin: 1rem 0 2rem;
+  }
+
+  /* ===== ABOUT ===== */
+  #acerca { background: var(--surface-solid); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; }
+  .about-card {
+    background: var(--surface); backdrop-filter: blur(10px); border-radius: 16px;
+    padding: 2rem; border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  }
+  .about-card p { color: var(--text-light); font-size: 0.97rem; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.2rem; }
+  .tag {
+    background: rgba(56,189,248,0.1); color: var(--text); border: 1px solid var(--border); backdrop-filter: blur(4px); box-shadow: inset 0 0 5px rgba(56,189,248,0.2);
+    border-radius: 100px; padding: 0.28rem 0.9rem; font-size: 0.78rem; font-weight: 700;
+  }
+  .about-text p { color: var(--text-light); margin-bottom: 1rem; font-size: 0.97rem; }
+  .info-row { display: flex; align-items: flex-start; gap: 0.8rem; margin-bottom: 0.9rem; }
+  .info-icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: rgba(56,189,248,0.1); border: 1px solid var(--border); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent1);
+  }
+
+  /* ===== ACCORDION ===== */
+  #compilador { background: var(--bg); }
+  .accordion { display: flex; flex-direction: column; gap: 0.8rem; }
+  .acc-item {
+    background: var(--surface); backdrop-filter: blur(10px); border-radius: 14px; border: 1px solid var(--border);
+    overflow: hidden; box-shadow: var(--shadow-sm); transition: all 0.3s;
+  }
+  .acc-item:hover { box-shadow: var(--glow); border-color: var(--border-highlight); }
+  .acc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.5rem; cursor: pointer; user-select: none; gap: 1rem;
+  }
+  .acc-header-left { display: flex; align-items: center; gap: 1rem; }
+  .acc-num {
+    width: 32px; height: 32px; flex-shrink: 0;
+    background: var(--pastel-peach); color: var(--accent1);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem;
+  }
+  .acc-title { font-family: 'Georgia', serif; font-style: italic; font-size: 1.05rem; color: var(--text); }
+  .acc-arrow { transition: transform 0.3s; color: var(--muted); font-size: 1.1rem; flex-shrink: 0; }
+  .acc-item.open .acc-arrow { transform: rotate(180deg); }
+  .acc-body { max-height: 0; overflow: hidden; transition: max-height 0.45s ease; padding: 0 1.5rem; }
+  .acc-item.open .acc-body { max-height: 3000px; padding: 0 1.5rem 1.5rem; }
+  .acc-body p, .acc-body li { color: var(--text-light); font-size: 0.95rem; margin-bottom: 0.6rem; }
+  .acc-body ul { padding-left: 1.2rem; }
+  .acc-body code {
+    font-family: 'Source Code Pro', monospace; font-size: 0.82rem;
+    background: var(--pastel-peach); padding: 0.15rem 0.4rem;
+    border-radius: 4px; color: var(--accent1);
+  }
+  .code-block {
+    background: #000000; color: #a8c9e8;
+    font-family: 'Source Code Pro', monospace; font-size: 0.85rem;
+    border-radius: 10px; padding: 1.2rem; overflow-x: auto;
+    line-height: 1.7; margin-top: 0.8rem;
+    border: 1px solid #1e293b;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+  }
+  .code-block .kw { color: #38bdf8; }
+  .code-block .fn { color: #bae6fd; }
+  .code-block .cm { color: #64748b; font-style: italic; }
+  .code-block .st { color: #a7f3d0; }
+  .code-block .num { color: #fcd34d; }
+
+  /* ===== PIPELINE ===== */
+  .pipeline {
+    display: flex; flex-wrap: wrap; gap: 0; align-items: center;
+    margin: 2rem 0; justify-content: center;
+  }
+  .pipe-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(5px);
+    padding: 1rem 1.1rem; min-width: 110px; text-align: center; box-shadow: var(--shadow-sm);
+    transition: all 0.3s;
+  }
+  .pipe-block:hover { transform: translateY(-5px); box-shadow: var(--glow); border-color: var(--accent1); }
+  .pipe-block.active { background: rgba(56,189,248,0.15); border-color: var(--accent1); box-shadow: inset 0 0 15px rgba(56,189,248,0.2); }
+  .pipe-block .pipe-icon { font-size: 1.4rem; margin-bottom: 0.3rem; text-shadow: var(--glow); }
+  .pipe-block .pipe-name {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: 0.82rem; color: var(--accent1); font-weight: bold;
+  }
+  .pipe-block .pipe-desc { font-size: 0.7rem; color: var(--text-light); margin-top: 0.2rem; }
+  .pipe-arrow { color: var(--accent3); font-size: 1.4rem; padding: 0 0.3rem; line-height: 1; text-shadow: var(--glow); }
+
+  /* ===== AST DIAGRAM ===== */
+  .ast-diagram-wrap {
+    background: #0a121e;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 1.2rem;
+    border: 1px solid #10203a;
+  }
+  .ast-diagram-wrap h4 {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: 0.9rem; color: #9ac0e8;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 1.5rem; text-align: center;
+  }
+  .ast-svg-container { display: flex; justify-content: center; }
+  /* AST explanation box */
+  .ast-explain {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem; margin-top: 1.4rem;
+  }
+  .ast-node-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(154,194,232,0.2);
+    border-radius: 10px; padding: 0.9rem;
+  }
+  .ast-node-card .node-label {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: 0.85rem; color: #7ab8e8; margin-bottom: 0.4rem;
+  }
+  .ast-node-card p { font-size: 0.78rem; color: #5878a0; line-height: 1.5; margin: 0; }
+
+  /* ===== ARCH DIAGRAM ===== */
+  .arch-diagram-wrap {
+    background: var(--pastel-cream);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 1.2rem;
+    border: 1px solid var(--border);
+  }
+  .arch-diagram-wrap h4 {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: 0.9rem; color: var(--text-light);
+    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1.5rem; text-align: center;
+  }
+
+  /* ===== AUTOMATA ===== */
+  .automata-box {
+    background: white; border-radius: 16px; padding: 2rem;
+    border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-top: 1.5rem;
+  }
+  .automata-states {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0;
+  }
+  .state {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: var(--pastel-peach); border: 2px solid var(--accent2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.78rem; font-weight: 600; color: var(--accent1);
+    text-align: center; flex-direction: column; padding: 0.2rem;
+  }
+  .state.final { border-width: 3px; border-color: var(--accent1); background: #e8f5e8; color: #2d6a2d; }
+  .state.start { background: var(--pastel-rose); border-color: #7098c8; color: #204d7a; }
+  .state-arrow { font-size: 1.2rem; color: var(--accent3); }
+
+  /* ===== DEMO ===== */
+  #demo { background: var(--surface); }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .demo-panel { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+  .demo-panel-header {
+    background: var(--accent1); color: white; padding: 0.8rem 1.2rem;
+    font-family: 'Georgia', serif; font-style: italic; font-size: 0.95rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .demo-panel-body {
+    background: #2a1a0e; padding: 1.2rem;
+    font-family: 'Source Code Pro', monospace; font-size: 0.82rem;
+    color: #e8c9a8; min-height: 160px; line-height: 1.7;
+  }
+  .demo-panel-body .kw { color: #4a9bd4; }
+  .demo-panel-body .cm { color: #203a5a; }
+  .demo-panel-body .num { color: #7ab8e8; }
+  .demo-download {
+    margin-top: 2rem; background: #edf5ed; border-radius: 14px;
+    padding: 1.8rem 2rem; display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid #b5d9b5; flex-wrap: wrap; gap: 1rem;
+  }
+  .demo-download h3 {
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: 1.15rem; color: var(--text); margin-bottom: 0.3rem;
+  }
+  .demo-download p { color: var(--text-light); font-size: 0.88rem; }
+  .btn-download {
+    background: #2d6a2d; color: white; padding: 0.8rem 1.8rem;
+    border-radius: 100px; font-weight: 700; font-size: 0.9rem;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all 0.2s;
+  }
+  .btn-download:hover { background: #235023; transform: translateY(-2px); }
+
+  /* ===== CODE EXPLAINED ===== */
+  #codigo { background: var(--bg); }
+  .code-section-grid { display: grid; grid-template-columns: 210px 1fr; gap: 2rem; align-items: start; }
+  .code-nav {
+    background: white; border-radius: 14px; padding: 1rem;
+    border: 1px solid var(--border); position: sticky; top: 80px;
+  }
+  .code-nav p { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
+  .code-nav a {
+    display: block; padding: 0.5rem 0.8rem; border-radius: 8px;
+    font-size: 0.83rem; color: var(--text-light); text-decoration: none;
+    transition: all 0.2s; margin-bottom: 0.2rem;
+  }
+  .code-nav a:hover { background: var(--pastel-peach); color: var(--accent1); }
+  .code-module {
+    background: white; border-radius: 14px; padding: 1.5rem;
+    border: 1px solid var(--border); margin-bottom: 1.5rem;
+  }
+  .code-module h3 { font-family: 'Georgia', serif; font-style: italic; color: var(--accent1); margin-bottom: 0.6rem; }
+  .code-module p { color: var(--text-light); font-size: 0.93rem; margin-bottom: 0.8rem; }
+
+  /* ===== TOOLS ===== */
+  #herramientas { background: var(--surface); }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.2rem; }
+  .tool-card {
+    background: var(--bg); border-radius: 14px; padding: 1.5rem;
+    border: 1px solid var(--border); text-align: center; transition: all 0.2s;
+  }
+  .tool-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .tool-icon { font-size: 2rem; margin-bottom: 0.7rem; }
+  .tool-card h4 { font-family: 'Georgia', serif; font-style: italic; font-size: 1rem; color: var(--text); margin-bottom: 0.3rem; }
+  .tool-card p { font-size: 0.82rem; color: var(--text-light); }
+  .limit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+  .limit-card { border-radius: 14px; padding: 1.5rem; border: 1px solid; }
+  .limit-card.problem { background: #fdf1ee; border-color: #e8c0b0; }
+  .limit-card.solution { background: #edf5ed; border-color: #b5d9b5; }
+  .limit-card h4 { font-family: 'Georgia', serif; font-style: italic; margin-bottom: 0.8rem; font-size: 1rem; }
+  .limit-card.problem h4 { color: #a03020; }
+  .limit-card.solution h4 { color: #2d6a2d; }
+  .limit-card ul { padding-left: 1.2rem; }
+  .limit-card li { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+
+  /* ===== TEAM ===== */
+  #equipo { background: var(--bg); }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.2rem; }
+  .team-card {
+    background: white; border-radius: 16px; padding: 1.8rem 1.2rem;
+    border: 1px solid var(--border); text-align: center; transition: all 0.25s; box-shadow: var(--shadow-sm);
+  }
+  .team-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: var(--accent3); }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 1rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Georgia', serif; font-style: italic;
+    font-size: 1.4rem; font-weight: bold; color: white;
+  }
+  .av1 { background: linear-gradient(135deg, #1a70b5, #4a9bd4); }
+  .av2 { background: linear-gradient(135deg, #3080a0, #50a0c0); }
+  .av3 { background: linear-gradient(135deg, #4a6a8a, #7098c0); }
+  .av4 { background: linear-gradient(135deg, #4080c0, #60a8e0); }
+  .av5 { background: linear-gradient(135deg, #40607a, #6080a0); }
+  .team-card h4 { font-family: 'Georgia', serif; font-style: italic; font-size: 1rem; color: var(--text); margin-bottom: 0.3rem; line-height: 1.3; }
+  .team-card p { font-size: 0.78rem; color: var(--muted); }
+  .team-role {
+    display: inline-block; margin-top: 0.6rem;
+    background: var(--pastel-peach); color: var(--accent1);
+    font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.7rem; border-radius: 100px;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: #0a121e; color: #486a8a;
+    text-align: center; padding: 2.5rem; font-size: 0.85rem;
+  }
+  footer strong { color: #9ac0e8; font-family: 'Georgia', serif; font-style: italic; }
+
+  .back-top {
+    position: fixed; bottom: 2rem; right: 2rem; width: 44px; height: 44px;
+    background: var(--accent1); color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; box-shadow: 0 4px 16px rgba(14,165,233,0.4);
+    font-size: 1.1rem; transition: all 0.2s; z-index: 50;
+  }
+  .back-top:hover { background: #0284c7; transform: translateY(-3px); }
+
+  @media (max-width: 768px) {
+    .about-grid, .demo-grid, .limit-grid, .code-section-grid, .ast-explain { grid-template-columns: 1fr; }
+    .code-nav { position: static; }
+    .nav-links { display: none; }
+    .pipeline { gap: 0.3rem; }
+    .pipe-arrow { font-size: 0.9rem; padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">TECHNOCOMPILER</div>
+  <ul class="nav-links">
+    <li><a href="#acerca">Acerca</a></li>
+    <li><a href="#compilador">Compilador</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#codigo">Código</a></li>
+    <li><a href="#herramientas">Herramientas</a></li>
+    <li><a href="#equipo">Equipo</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-logos">
+    <div class="logo-box">
+      <svg width="160" height="100" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 35 20 Q 10 20 10 60 Q 10 100 35 100" stroke="#0ea5e9" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <line x1="55" y1="50" x2="75" y2="50" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round"/>
+        <line x1="65" y1="40" x2="65" y2="60" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round"/>
+        <line x1="82" y1="50" x2="102" y2="50" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round"/>
+        <line x1="92" y1="40" x2="92" y2="60" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round"/>
+        <line x1="75" y1="95" x2="155" y2="25" stroke="#7080a0" stroke-width="6" stroke-linecap="round"/>
+        <polygon points="155,25 135,22 148,38" fill="#7080a0"/>
+        <rect x="110" y="62" width="52" height="40" rx="6" fill="white" stroke="#7dd3fc" stroke-width="2"/>
+        <line x1="118" y1="73" x2="154" y2="73" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="118" y1="81" x2="145" y2="81" stroke="#4a9bd4" stroke-width="2" stroke-linecap="round"/>
+        <line x1="118" y1="89" x2="150" y2="89" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+        <text x="18" y="115" font-family="Georgia" font-style="italic" font-size="11" font-weight="bold" fill="#0ea5e9">TECHNOVA</text>
+        <text x="96" y="115" font-family="Georgia" font-style="italic" font-size="11" fill="#334155"> Solutions</text>
+      </svg>
+    </div>
+    <div class="logo-box">
+      <svg width="150" height="80" viewBox="0 0 180 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="10" y1="15" x2="70" y2="15" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round"/>
+        <line x1="40" y1="15" x2="40" y2="75" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round"/>
+        <line x1="15" y1="15" x2="15" y2="35" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="15" cy="35" r="5" fill="white" stroke="#0ea5e9" stroke-width="3"/>
+        <line x1="65" y1="15" x2="65" y2="35" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="65" cy="35" r="5" fill="white" stroke="#0ea5e9" stroke-width="3"/>
+        <line x1="40" y1="50" x2="20" y2="50" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="20" cy="50" r="5" fill="white" stroke="#0ea5e9" stroke-width="3"/>
+        <line x1="40" y1="65" x2="60" y2="65" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="60" cy="65" r="5" fill="white" stroke="#0ea5e9" stroke-width="3"/>
+        <circle cx="40" cy="8" r="5" fill="white" stroke="#0ea5e9" stroke-width="3"/>
+        <text x="82" y="38" font-family="Georgia" font-style="italic" font-size="15" font-weight="bold" fill="#0f172a">TECHNOVA</text>
+        <text x="82" y="57" font-family="Georgia" font-style="italic" font-size="12" fill="#334155">SOLUTIONS</text>
+      </svg>
+    </div>
+  </div>
+  <div class="hero-badge">🚀 TECHNOVA Solutions</div>
+  <h1>TECHNO<span>COMPILER</span></h1>
+  <p>Solución innovadora para la optimización automática de código C++ empresarial mediante arquitectura modular de compilador.</p>
+  <div class="hero-cta">
+    <a href="#compilador" class="btn btn-primary">Ver Compilador →</a>
+    <a href="#demo" class="btn btn-outline">Demo en vivo</a>
+  </div>
+</section>
+
+<!-- ACERCA DE -->
+<section id="acerca">
+  <div class="container">
+    <div class="section-label">01 — Sobre nosotros</div>
+    <h2 class="sec-title">Acerca de TECHNOVA</h2>
+    <div class="about-grid">
+      <div>
+        <div class="about-text">
+          <p>TECHNOVA Solutions es una empresa tecnológica enfocada en el desarrollo de herramientas avanzadas de software orientadas al análisis estructural, optimización automática y mejora del rendimiento del código fuente mediante técnicas modernas de compiladores.</p>
+          <p>Nuestra misión es automatizar procesos complejos del desarrollo de software mediante herramientas inteligentes capaces de analizar código y proponer mejoras automáticas.</p>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">📖</div>
+          <div><strong>Teoría de compiladores</strong><p style="font-size:0.85rem;color:var(--text-light)">Inspirado en GCC, Clang y LLVM</p></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">🏗️</div>
+          <div><strong>Lenguajes formales</strong><p style="font-size:0.85rem;color:var(--text-light)">Gramáticas y autómatas formales</p></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">⚙️</div>
+          <div><strong>Optimización de programas</strong><p style="font-size:0.85rem;color:var(--text-light)">Constant folding y reducción estructural</p></div>
+        </div>
+      </div>
+      <div class="about-card">
+        <h3 class="sub-title">Antecedentes</h3>
+        <p>El desarrollo del TECHNOCOMPILER se inspira en arquitecturas reales de compiladores profesionales de la industria:</p>
+        <div class="tags">
+          <span class="tag">GCC</span><span class="tag">Clang</span><span class="tag">LLVM</span>
+          <span class="tag">AST</span><span class="tag">IR</span><span class="tag">Parsing</span>
+          <span class="tag">Constant Folding</span>
+        </div>
+        <p style="margin-top:1.2rem;">Este proyecto replica a pequeña escala la arquitectura conceptual utilizada por compiladores profesionales, permitiendo comprender su funcionamiento interno real.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPILADOR -->
+<section id="compilador">
+  <div class="container">
+    <div class="section-label">02 — Arquitectura y fases</div>
+    <h2 class="sec-title">El Compilador</h2>
+
+    <!-- Pipeline -->
+    <div class="pipeline">
+      <div class="pipe-block active"><div class="pipe-icon">📄</div><div class="pipe-name">Código C++</div><div class="pipe-desc">Entrada</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-block"><div class="pipe-icon">🔤</div><div class="pipe-name">Lexer</div><div class="pipe-desc">Tokens</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-block"><div class="pipe-icon">🌳</div><div class="pipe-name">Parser</div><div class="pipe-desc">AST</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-block"><div class="pipe-icon">📋</div><div class="pipe-name">IR</div><div class="pipe-desc">Representación</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-block"><div class="pipe-icon">⚡</div><div class="pipe-name">Optimizador</div><div class="pipe-desc">Folding</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-block active"><div class="pipe-icon">✅</div><div class="pipe-name">Código Final</div><div class="pipe-desc">Salida</div></div>
+    </div>
+
+    <div class="accordion">
+
+      <!-- Propósito -->
+      <div class="acc-item open">
+        <div class="acc-header" onclick="toggle(this)">
+          <div class="acc-header-left"><div class="acc-num">01</div><div class="acc-title">Propósito y Objetivo Tecnológico</div></div>
+          <span class="acc-arrow">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>El TECHNOCOMPILER tiene como finalidad demostrar la aplicación práctica de la teoría de compiladores mediante el desarrollo de una herramienta funcional capaz de analizar código real.</p>
+          <ul>
+            <li>Analizar archivos C++ completos</li>
+            <li>Detectar estructuras de control (while, do-while, asignaciones)</li>
+            <li>Generar representación intermedia (IR) con etiquetas de salto</li>
+            <li>Aplicar optimizaciones automáticas como Constant Folding</li>
+            <li>Generar código C++ optimizado como salida</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Metodología -->
+      <div class="acc-item">
+        <div class="acc-header" onclick="toggle(this)">
+          <div class="acc-header-left"><div class="acc-num">02</div><div class="acc-title">Metodología Implementada</div></div>
+          <span class="acc-arrow">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>Se implementó una <strong>arquitectura basada en fases clásicas</strong> de compilador, siguiendo el modelo de compiladores industriales como GCC y LLVM:</p>
+          <ul>
+            <li><strong>Programación modular:</strong> cada fase es independiente y autocontenida</li>
+            <li><strong>Escalabilidad:</strong> permite agregar nuevas fases sin afectar las existentes</li>
+            <li><strong>Separación de responsabilidades:</strong> lexer, parser, IR, optimizador y reconstructor operan de forma desacoplada</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Arquitectura del sistema — con diagrama -->
+      <div class="acc-item">
+        <div class="acc-header" onclick="toggle(this)">
+          <div class="acc-header-left"><div class="acc-num">03</div><div class="acc-title">Arquitectura del Sistema</div></div>
+          <span class="acc-arrow">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>El sistema se organiza en módulos independientes orquestados por <code>main.py</code>. Cada archivo Python corresponde a una fase del compilador:</p>
+          <div class="arch-diagram-wrap">
+            <h4>Diagrama de Arquitectura — TECHNOCOMPILER</h4>
+            <svg width="100%" viewBox="0 0 700 380" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-width:660px;display:block;margin:0 auto;">
+              <!-- main.py central box -->
+              <rect x="270" y="10" width="160" height="50" rx="10" fill="#0ea5e9" stroke="#0284c7" stroke-width="1.5"/>
+              <text x="350" y="30" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="13" fill="white">main.py</text>
+              <text x="350" y="48" text-anchor="middle" font-family="Lato,sans-serif" font-size="10" fill="#e0f2fe">Control general</text>
+
+              <!-- Arrow down from main -->
+              <line x1="350" y1="60" x2="350" y2="90" stroke="#7dd3fc" stroke-width="2" marker-end="url(#arr)"/>
+
+              <!-- lexer box -->
+              <rect x="30" y="100" width="130" height="46" rx="8" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1.5"/>
+              <text x="95" y="119" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="12" fill="#0ea5e9">lexer</text>
+              <text x="95" y="136" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#334155">→ Tokens</text>
+
+              <!-- parser box -->
+              <rect x="185" y="100" width="130" height="46" rx="8" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1.5"/>
+              <text x="250" y="119" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="12" fill="#0ea5e9">parser</text>
+              <text x="250" y="136" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#334155">→ AST</text>
+
+              <!-- Nodo box -->
+              <rect x="340" y="100" width="130" height="46" rx="8" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+              <text x="405" y="119" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="12" fill="#0ea5e9">Nodo</text>
+              <text x="405" y="136" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#334155">Estructura AST</text>
+
+              <!-- generar_ir box -->
+              <rect x="495" y="100" width="130" height="46" rx="8" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1.5"/>
+              <text x="560" y="119" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="12" fill="#0ea5e9">generar_ir</text>
+              <text x="560" y="136" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#334155">→ IR</text>
+
+              <!-- Lines from main to boxes -->
+              <line x1="200" y1="90" x2="95" y2="100" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <line x1="270" y1="90" x2="250" y2="100" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <line x1="350" y1="90" x2="405" y2="100" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <line x1="450" y1="90" x2="560" y2="100" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <!-- Horizontal line at y=90 -->
+              <line x1="200" y1="90" x2="450" y2="90" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+              <!-- Arrow connections between phases -->
+              <!-- lexer -> parser -->
+              <line x1="160" y1="123" x2="185" y2="123" stroke="#0ea5e9" stroke-width="1.8" marker-end="url(#arr)"/>
+              <!-- parser -> Nodo -->
+              <line x1="315" y1="123" x2="340" y2="123" stroke="#0ea5e9" stroke-width="1.8" marker-end="url(#arr)"/>
+              <!-- Nodo -> generar_ir -->
+              <line x1="470" y1="123" x2="495" y2="123" stroke="#0ea5e9" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- generar_ir arrow down -->
+              <line x1="560" y1="146" x2="560" y2="190" stroke="#0ea5e9" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- optimizar_ir box -->
+              <rect x="340" y="200" width="130" height="46" rx="8" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1.5"/>
+              <text x="405" y="219" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="12" fill="#0ea5e9">optimizar_ir</text>
+              <text x="405" y="236" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#334155">Optimización</text>
+
+              <!-- Arrow from generar_ir to optimizar_ir -->
+              <line x1="560" y1="190" x2="472" y2="200" stroke="#0ea5e9" stroke-width="1.8" stroke-dasharray="3,2"/>
+              <line x1="560" y1="190" x2="560" y2="200" stroke="#0ea5e9" stroke-width="1"/>
+              <line x1="495" y1="200" x2="470" y2="223" stroke="#0ea5e9" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- reconstruir_codigo box -->
+              <rect x="185" y="200" width="130" height="46" rx="8" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5"/>
+              <text x="250" y="216" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="11" fill="#0ea5e9">reconstruir</text>
+              <text x="250" y="231" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="11" fill="#0ea5e9">_codigo</text>
+              <text x="250" y="242" text-anchor="middle" font-family="Lato,sans-serif" font-size="9" fill="#334155">Output final</text>
+
+              <!-- Arrow optimizar_ir -> reconstruir -->
+              <line x1="340" y1="223" x2="315" y2="223" stroke="#0ea5e9" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Output file box -->
+              <rect x="30" y="200" width="130" height="46" rx="8" fill="#0ea5e9" stroke="#0284c7" stroke-width="1.5"/>
+              <text x="95" y="219" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="12" fill="white">Output .cpp</text>
+              <text x="95" y="236" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#e0f2fe">Código optimizado</text>
+
+              <!-- Arrow reconstruir -> output -->
+              <line x1="185" y1="223" x2="160" y2="223" stroke="#0ea5e9" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Reporte .txt box -->
+              <rect x="30" y="300" width="130" height="46" rx="8" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1.5"/>
+              <text x="95" y="319" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="12" fill="#0ea5e9">Reporte .txt</text>
+              <text x="95" y="336" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#334155">Opcional</text>
+
+              <!-- Arrow output -> reporte -->
+              <line x1="95" y1="246" x2="95" y2="300" stroke="#7dd3fc" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrd)"/>
+
+              <!-- Arrow defs -->
+              <defs>
+                <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L8,3 z" fill="#0ea5e9"/>
+                </marker>
+                <marker id="arrd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L8,3 z" fill="#7dd3fc"/>
+                </marker>
+              </defs>
+
+              <!-- Legend -->
+              <line x1="480" y1="300" x2="510" y2="300" stroke="#0ea5e9" stroke-width="1.5"/>
+              <text x="515" y="304" font-family="Lato,sans-serif" font-size="9" fill="#334155">Flujo principal</text>
+              <line x1="480" y1="318" x2="510" y2="318" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <text x="515" y="322" font-family="Lato,sans-serif" font-size="9" fill="#334155">Conexión modular</text>
+              <rect x="480" y="330" width="22" height="12" rx="3" fill="#0ea5e9"/>
+              <text x="515" y="340" font-family="Lato,sans-serif" font-size="9" fill="#334155">Módulo clave</text>
+            </svg>
+          </div>
+          <p style="margin-top:1rem;">El <code>main.py</code> actúa como director de orquesta: invoca cada módulo en secuencia y gestiona la entrada/salida del sistema.</p>
+        </div>
+      </div>
+
+      <!-- Análisis Léxico -->
+      <div class="acc-item">
+        <div class="acc-header" onclick="toggle(this)">
+          <div class="acc-header-left"><div class="acc-num">04</div><div class="acc-title">Análisis Léxico — Lexer</div></div>
+          <span class="acc-arrow">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>El <strong>Lexer</strong> convierte el código fuente en una secuencia de <em>tokens</em> usando expresiones regulares. Es el primer módulo del pipeline.</p>
+          <ul>
+            <li>Detecta identificadores (<code>\w+</code>), operadores compuestos (<code>==</code>, <code>!=</code>, <code>&lt;=</code>, <code>&gt;=</code>) y símbolos de control</li>
+            <li>Retorna una lista plana de strings que el Parser consume</li>
+          </ul>
+          <div class="code-block"><span class="cm"># Expresión regular del lexer</span>
+<span class="kw">def</span> <span class="fn">lexer</span>(codigo):
+    tokens = re.findall(
+        <span class="st">r"\w+|==|!=|&lt;=|>=|[+\-*/=;(){}&lt;&gt;]"</span>,
+        codigo)
+    <span class="kw">return</span> tokens</div>
+        </div>
+      </div>
+
+      <!-- Parser + AST con diagrama -->
+      <div class="acc-item">
+        <div class="acc-header" onclick="toggle(this)">
+          <div class="acc-header-left"><div class="acc-num">05</div><div class="acc-title">Análisis Sintáctico — Parser &amp; AST</div></div>
+          <span class="acc-arrow">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>El <strong>Parser</strong> construye el <em>Árbol de Sintaxis Abstracta (AST)</em> recorriendo el código línea por línea. Cada estructura de control se convierte en un nodo del árbol con sus hijos anidados.</p>
+          <ul>
+            <li><code>while(cond){...}</code> → Nodo WHILE con hijos: condición y cuerpo</li>
+            <li><code>do{...}while(cond);</code> → Nodo DO_WHILE con cuerpo y condición</li>
+            <li><code>var = expr;</code> → Nodo ASIGNACION con variable y expresión</li>
+          </ul>
+
+          <!-- AST Diagram -->
+          <div class="ast-diagram-wrap">
+            <h4>Árbol AST — Estructura jerárquica del programa</h4>
+            <div class="ast-svg-container">
+              <svg width="460" height="300" viewBox="0 0 460 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Defs for dark theme arrow -->
+                <defs>
+                  <marker id="wa" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                    <path d="M0,0 L0,7 L7,3.5 z" fill="#9ac0e8"/>
+                  </marker>
+                </defs>
+
+                <!-- Programa node (root) -->
+                <rect x="155" y="14" width="150" height="44" rx="8" fill="#081a2e" stroke="#4a9bd4" stroke-width="2"/>
+                <text x="230" y="38" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="14" fill="#9ac0e8">Programa</text>
+
+                <!-- Edge: Programa -> Asignacion (left) -->
+                <path d="M200,58 C200,90 95,90 95,115" stroke="#9ac0e8" stroke-width="1.5" fill="none" marker-end="url(#wa)"/>
+                <!-- Edge: Programa -> While (right of center) -->
+                <path d="M260,58 C260,90 300,90 300,115" stroke="#9ac0e8" stroke-width="1.5" fill="none" marker-end="url(#wa)"/>
+
+                <!-- Asignacion node (left) -->
+                <rect x="30" y="115" width="140" height="44" rx="8" fill="#081a2e" stroke="#4a9bd4" stroke-width="2"/>
+                <text x="100" y="139" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="13" fill="#9ac0e8">Asignación</text>
+                <text x="100" y="153" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#5878a0">a = 2 + 3</text>
+
+                <!-- While node -->
+                <rect x="220" y="115" width="140" height="44" rx="8" fill="#081a2e" stroke="#4a9bd4" stroke-width="2"/>
+                <text x="290" y="139" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="13" fill="#9ac0e8">While</text>
+                <text x="290" y="153" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#5878a0">a &lt; 10</text>
+
+                <!-- Edges: While -> Condicion, While -> Cuerpo -->
+                <path d="M260,159 C255,185 210,185 205,210" stroke="#9ac0e8" stroke-width="1.5" fill="none" marker-end="url(#wa)"/>
+                <path d="M330,159 C335,185 370,185 370,210" stroke="#9ac0e8" stroke-width="1.5" fill="none" marker-end="url(#wa)"/>
+
+                <!-- Condicion node -->
+                <rect x="130" y="210" width="130" height="44" rx="8" fill="#081a2e" stroke="#4090c0" stroke-width="1.5"/>
+                <text x="195" y="234" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="13" fill="#7ab8e8">Condición</text>
+                <text x="195" y="248" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#5878a0">a &lt; 10</text>
+
+                <!-- Cuerpo node -->
+                <rect x="305" y="210" width="130" height="44" rx="8" fill="#081a2e" stroke="#4090c0" stroke-width="1.5"/>
+                <text x="370" y="234" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="13" fill="#7ab8e8">Cuerpo</text>
+                <text x="370" y="248" text-anchor="middle" font-family="Lato,sans-serif" font-size="9.5" fill="#5878a0">{ a = a+1 }</text>
+
+                <!-- Edge: Cuerpo -> Asignacion2 -->
+                <path d="M370,254 L370,270 L290,270 L290,280" stroke="#9ac0e8" stroke-width="1.5" fill="none" marker-end="url(#wa)"/>
+
+                <!-- Asignacion2 under cuerpo -->
+                <rect x="220" y="278" width="140" height="18" rx="5" fill="#10203a" stroke="#4090c0" stroke-width="1"/>
+                <text x="290" y="291" text-anchor="middle" font-family="Lato,sans-serif" font-size="9" fill="#9ac0e8">Asignación: a = a + 1</text>
+              </svg>
+            </div>
+            <!-- Node explanation cards -->
+            <div class="ast-explain">
+              <div class="ast-node-card">
+                <div class="node-label">🌿 Programa (raíz)</div>
+                <p>Nodo raíz del árbol. Contiene todos los nodos de nivel superior: asignaciones y estructuras de control.</p>
+              </div>
+              <div class="ast-node-card">
+                <div class="node-label">🔁 While</div>
+                <p>Nodo de estructura de control. Sus hijos son la <em>condición</em> (expresión booleana) y el <em>cuerpo</em> (lista de nodos).</p>
+              </div>
+              <div class="ast-node-card">
+                <div class="node-label">📝 Asignación</div>
+                <p>Nodo hoja con una variable y su expresión. Puede aparecer en nivel raíz o dentro del cuerpo de un While.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-block" style="margin-top:1.2rem;"><span class="kw">class</span> <span class="fn">Nodo</span>:
+    <span class="cm"># tipo: WHILE | DO_WHILE | ASIGNACION</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, tipo, valor=<span class="st">None</span>,
+                 izq=<span class="st">None</span>, der=<span class="st">None</span>, cuerpo=<span class="st">None</span>):
+        self.tipo   = tipo    <span class="cm"># tipo de nodo</span>
+        self.valor  = valor   <span class="cm"># condición o nombre de variable</span>
+        self.izq    = izq     <span class="cm"># expresión izquierda</span>
+        self.cuerpo = cuerpo  <span class="cm"># lista de nodos hijos</span></div>
+        </div>
+      </div>
+
+      <!-- IR -->
+      <div class="acc-item">
+        <div class="acc-header" onclick="toggle(this)">
+          <div class="acc-header-left"><div class="acc-num">06</div><div class="acc-title">Generación de IR — Representación Intermedia</div></div>
+          <span class="acc-arrow">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>La <strong>IR</strong> transforma el AST en instrucciones simples con etiquetas de salto, similar al bytecode de compiladores reales.</p>
+          <ul>
+            <li>Asignaciones: <code>a = expresión</code></li>
+            <li>Condicionales de salto: <code>if !(condición) goto Lx</code></li>
+            <li>Saltos incondicionales: <code>goto Lx</code></li>
+            <li>Etiquetas: <code>L0:</code>, <code>L1:</code></li>
+          </ul>
+          <div class="code-block"><span class="cm"># IR generada para while(a&lt;10)</span>
+L0:
+if !(a&lt;10) goto L1
+    a = a + 1;
+goto L0
+L1:</div>
+        </div>
+      </div>
+
+      <!-- Optimización -->
+      <div class="acc-item">
+        <div class="acc-header" onclick="toggle(this)">
+          <div class="acc-header-left"><div class="acc-num">07</div><div class="acc-title">Optimización — Constant Folding</div></div>
+          <span class="acc-arrow">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>El <strong>optimizador</strong> aplica <em>Constant Folding</em>: evalúa en tiempo de compilación expresiones formadas únicamente por constantes literales.</p>
+          <ul>
+            <li>Detecta patrón: <code>var = número OP número</code></li>
+            <li>Evalúa la expresión y reemplaza con el resultado</li>
+            <li>Ejemplo: <code>a = 2 + 3</code> → <code>a = 5</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Autómata -->
+      <div class="acc-item">
+        <div class="acc-header" onclick="toggle(this)">
+          <div class="acc-header-left"><div class="acc-num">08</div><div class="acc-title">Autómata Finito — Base del Lexer</div></div>
+          <span class="acc-arrow">▾</span>
+        </div>
+        <div class="acc-body">
+          <p>El análisis léxico se fundamenta en un <strong>Autómata Finito Determinista (AFD)</strong>. Las expresiones regulares usadas en el lexer son equivalentes formales de AFDs.</p>
+          <ul>
+            <li>Un conjunto de <em>estados</em> que representan el avance en el reconocimiento</li>
+            <li>Un <em>alfabeto</em> de símbolos válidos (caracteres C++)</li>
+            <li>Una <em>función de transición</em> que define el siguiente estado</li>
+            <li>Un <em>estado inicial</em> y <em>estados de aceptación</em> para cada tipo de token</li>
+          </ul>
+          <div class="automata-box">
+            <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.5rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">AFD — Reconocimiento de identificadores</p>
+            <div class="automata-states">
+              <div class="state start">q₀<br><span style="font-size:0.6rem">inicio</span></div>
+              <div class="state-arrow">→</div>
+              <div class="state">q₁<br><span style="font-size:0.6rem">letra</span></div>
+              <div class="state-arrow">→</div>
+              <div class="state final">q₂<br><span style="font-size:0.6rem">id ✓</span></div>
+            </div>
+            <p style="font-size:0.82rem;color:var(--text-light);">q₀ →<em>(letra)</em>→ q₁ →<em>(letra|dígito)*</em>→ q₂ [aceptación]. Python implementa este AFD internamente al compilar la expresión regular <code>\w+</code>.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="container">
+    <div class="section-label">03 — Demostración aplicada</div>
+    <h2 class="sec-title">Demo del Compilador</h2>
+    <p style="color:var(--text-light);margin-bottom:2rem;">Proceso completo de optimización: entrada de código C++ y salida del compilador.</p>
+    <div class="demo-grid">
+      <div class="demo-panel">
+        <div class="demo-panel-header">📄 Código Original C++</div>
+        <div class="demo-panel-body">
+<span class="cm">// Código de entrada</span>
+a = <span class="num">2</span> + <span class="num">3</span>;
+
+<span class="kw">while</span>(a&lt;<span class="num">10</span>)
+{
+    a = a + <span class="num">1</span>;
+}
+        </div>
+      </div>
+      <div class="demo-panel">
+        <div class="demo-panel-header" style="background:#3a7a3a;">✅ Código Optimizado</div>
+        <div class="demo-panel-body">
+<span class="cm">//Codigo optimizado por TECHNOCOMPILER V7//</span>
+a = <span class="num">5</span>;  <span class="cm">// 2+3 → constant folding</span>
+
+<span class="kw">while</span>(a&lt;<span class="num">10</span>)
+{
+    a = a + <span class="num">1</span>;
+}
+        </div>
+      </div>
+    </div>
+    <div style="background:white;border-radius:14px;padding:1.5rem;border:1px solid var(--border);margin-top:1.5rem;">
+      <h3 class="sub-title">Representación Intermedia (IR)</h3>
+      <div class="code-block">
+<span class="cm">// IR original</span>
+a = 2 + 3
+L0:
+if !(a&lt;10) goto L1
+    a = a + 1;
+goto L0
+L1:
+
+<span class="cm">// IR optimizada</span>
+a = 5    <span class="cm">← constant folding aplicado</span>
+L0:
+if !(a&lt;10) goto L1
+    a = a + 1;
+goto L0
+L1:</div>
+    </div>
+    <div class="demo-download">
+      <div>
+        <h3>Descargar TECHNOCOMPILER</h3>
+        <p>Archivo Python completo listo para ejecutar. Requiere Python 3.8+ sin dependencias externas.</p>
+      </div>
+      <a href="#codigo" class="btn-download">⬇ Descargar Compilador</a>
+    </div>
+  </div>
+</section>
+
+<!-- CÓDIGO EXPLICADO -->
+<section id="codigo">
+  <div class="container">
+    <div class="section-label">04 — Código fuente</div>
+    <h2 class="sec-title">Código Explicado</h2>
+    <div class="code-section-grid">
+      <div class="code-nav">
+        <p>Módulos</p>
+        <a href="#mod-nodo">Clase Nodo</a>
+        <a href="#mod-lexer">Lexer</a>
+        <a href="#mod-parser">Parser</a>
+        <a href="#mod-ir">Generar IR</a>
+        <a href="#mod-opt">Optimizador</a>
+        <a href="#mod-rec">Reconstructor</a>
+        <a href="#mod-main">Main</a>
+      </div>
+      <div>
+        <div class="code-module" id="mod-nodo">
+          <h3>📦 Clase Nodo — Estructura del AST</h3>
+          <p>Define el nodo básico del Árbol de Sintaxis Abstracta. Cada nodo tiene tipo, valor y punteros a sus hijos.</p>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">Nodo</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, tipo, valor=<span class="st">None</span>,
+                 izq=<span class="st">None</span>, der=<span class="st">None</span>, cuerpo=<span class="st">None</span>):
+        self.tipo = tipo
+        self.valor = valor
+        self.izq = izq
+        self.der = der
+        self.cuerpo = cuerpo</div>
+        </div>
+        <div class="code-module" id="mod-lexer">
+          <h3>🔤 Lexer — Análisis Léxico</h3>
+          <p>Tokeniza el código fuente completo en una sola pasada con una expresión regular.</p>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">lexer</span>(codigo):
+    tokens = re.findall(
+        <span class="st">r"\w+|==|!=|&lt;=|>=|[+\-*/=;(){}&lt;&gt;]"</span>,
+        codigo)
+    <span class="kw">return</span> tokens</div>
+        </div>
+        <div class="code-module" id="mod-parser">
+          <h3>🌳 Parser — Análisis Sintáctico</h3>
+          <p>Recorre el código línea por línea detectando estructuras y construyendo nodos del AST.</p>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">parser</span>(codigo):
+    ast = []
+    lineas = codigo.splitlines()
+    i = <span class="num">0</span>
+    <span class="kw">while</span> i &lt; len(lineas):
+        match_while = re.match(<span class="st">r"while\s*\((.+)\)"</span>, lineas[i].strip())
+        <span class="kw">if</span> match_while:
+            condicion = match_while.group(<span class="num">1</span>)
+            cuerpo = []
+            i += <span class="num">1</span>
+            <span class="kw">while</span> <span class="st">"}"</span> <span class="kw">not in</span> lineas[i]:
+                cuerpo.append(lineas[i]); i += <span class="num">1</span>
+            ast.append(<span class="fn">Nodo</span>(<span class="st">"WHILE"</span>, condicion, cuerpo=cuerpo))
+        <span class="cm"># ... do-while, asignaciones similares</span></div>
+        </div>
+        <div class="code-module" id="mod-ir">
+          <h3>📋 Generar IR</h3>
+          <p>Transforma nodos AST en instrucciones lineales con etiquetas de salto.</p>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">generar_ir</span>(ast):
+    ir = []; label_count = <span class="num">0</span>
+    <span class="kw">for</span> nodo <span class="kw">in</span> ast:
+        <span class="kw">if</span> nodo.tipo == <span class="st">"WHILE"</span>:
+            Lstart = <span class="st">f"L{label_count}"</span>; label_count += <span class="num">1</span>
+            Lend   = <span class="st">f"L{label_count}"</span>; label_count += <span class="num">1</span>
+            ir.append(<span class="st">f"{Lstart}:"</span>)
+            ir.append(<span class="st">f"if !({nodo.valor}) goto {Lend}"</span>)
+            <span class="kw">for</span> l <span class="kw">in</span> nodo.cuerpo: ir.append(l.strip())
+            ir.append(<span class="st">f"goto {Lstart}"</span>)
+            ir.append(<span class="st">f"{Lend}:"</span>)</div>
+        </div>
+        <div class="code-module" id="mod-opt">
+          <h3>⚡ Optimizador — Constant Folding</h3>
+          <p>Detecta y evalúa expresiones de constantes en tiempo de compilación.</p>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">optimizar_ir</span>(ir):
+    nueva_ir = []
+    <span class="kw">for</span> instr <span class="kw">in</span> ir:
+        match = re.match(
+            <span class="st">r"(\w+)\s*=\s*(\d+)\s*([+\-*/])\s*(\d+)"</span>, instr)
+        <span class="kw">if</span> match:
+            var, a, op, b = match.groups()
+            nueva_ir.append(<span class="st">f"{var} = {eval(f'{a}{op}{b}')}"</span>)
+            <span class="kw">continue</span>
+        nueva_ir.append(instr)
+    <span class="kw">return</span> nueva_ir</div>
+        </div>
+        <div class="code-module" id="mod-rec">
+          <h3>🔧 Reconstructor — Código Final</h3>
+          <p>Aplica optimizaciones sobre el código original manteniendo su estructura.</p>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">reconstruir_codigo</span>(codigo_original, ir_opt):
+    codigo_final = codigo_original
+    <span class="kw">for</span> instr <span class="kw">in</span> ir_opt:
+        match = re.match(<span class="st">r"(\w+)\s*=\s*(\d+)"</span>, instr)
+        <span class="kw">if</span> match:
+            var, valor = match.groups()
+            codigo_final = re.sub(
+                <span class="st">rf"{var}\s*=\s*[^;]+;"</span>,
+                <span class="st">f"{var} = {valor};"</span>, codigo_final)
+    <span class="kw">return</span> <span class="st">"//Codigo optimizado por TECHNOCOMPILER V7//\n"</span> + codigo_final</div>
+        </div>
+        <div class="code-module" id="mod-main">
+          <h3>🚀 Main — Control General</h3>
+          <p>Orquesta todas las fases del compilador y gestiona la entrada/salida.</p>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">main</span>():
+    ruta = input(<span class="st">"Ruta del archivo .cpp: "</span>)
+    <span class="kw">with</span> open(ruta, <span class="st">"r"</span>) <span class="kw">as</span> f: codigo = f.read()
+    tokens       = <span class="fn">lexer</span>(codigo)
+    ast          = <span class="fn">parser</span>(codigo)
+    ir           = <span class="fn">generar_ir</span>(ast)
+    ir_opt       = <span class="fn">optimizar_ir</span>(ir)
+    codigo_final = <span class="fn">reconstruir_codigo</span>(codigo, ir_opt)
+    <span class="kw">with</span> open(<span class="st">"optimizado_"</span> + os.path.basename(ruta), <span class="st">"w"</span>) <span class="kw">as</span> f:
+        f.write(codigo_final)
+    <span class="fn">generar_reporte_txt</span>(tokens, ast, ir, ir_opt)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HERRAMIENTAS + LIMITACIONES -->
+<section id="herramientas">
+  <div class="container">
+    <div class="section-label">05 — Tecnología y restricciones</div>
+    <h2 class="sec-title">Herramientas &amp; Limitaciones</h2>
+    <h3 class="sub-title">Herramientas utilizadas</h3>
+    <div class="divider"></div>
+    <div class="tools-grid">
+      <div class="tool-card"><div class="tool-icon">🐍</div><h4>Python 3</h4><p>Lenguaje principal, sin dependencias externas</p></div>
+      <div class="tool-card"><div class="tool-icon">🔣</div><h4>Módulo re</h4><p>Expresiones regulares para lexer y parser</p></div>
+      <div class="tool-card"><div class="tool-icon">📁</div><h4>Módulo os</h4><p>Manejo de rutas y archivos del sistema</p></div>
+      <div class="tool-card"><div class="tool-icon">🌳</div><h4>AST propio</h4><p>Árbol de sintaxis implementado desde cero</p></div>
+      <div class="tool-card"><div class="tool-icon">📄</div><h4>C++ como objetivo</h4><p>Código fuente y salida optimizada en C++</p></div>
+    </div>
+    <h3 class="sub-title" style="margin-top:3rem;">Limitaciones &amp; Soluciones Futuras</h3>
+    <div class="divider"></div>
+    <div class="limit-grid">
+      <div class="limit-card problem">
+        <h4>⚠ Limitaciones Actuales</h4>
+        <ul>
+          <li><strong>Parser limitado:</strong> Solo detecta while, do-while y asignaciones simples</li>
+          <li><strong>Sin validación sintáctica:</strong> No detecta errores como paréntesis no cerrados</li>
+          <li><strong>Sin tabla de símbolos:</strong> No valida declaración de variables</li>
+          <li><strong>Sin soporte de IF:</strong> No maneja condicionales if/else</li>
+          <li><strong>Sin funciones ni tipos:</strong> No procesa funciones, arrays, ni tipos de datos</li>
+        </ul>
+      </div>
+      <div class="limit-card solution">
+        <h4>✅ Soluciones Futuras</h4>
+        <ul>
+          <li><strong>Gramática formal BNF:</strong> Parser robusto basado en gramática</li>
+          <li><strong>Tabla de símbolos:</strong> Validar declaración y tipos de variables</li>
+          <li><strong>Type checking:</strong> Detectar errores de tipos en compilación</li>
+          <li><strong>Implementar IF/ELSE:</strong> Ampliar el parser con control condicional</li>
+          <li><strong>Dead code elimination:</strong> Eliminar código inalcanzable</li>
+          <li><strong>Propagación de constantes:</strong> Optimización avanzada entre instrucciones</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EQUIPO -->
+<section id="equipo">
+  <div class="container">
+    <div class="section-label">06 — Desarrolladores</div>
+    <h2 class="sec-title">Equipo TECHNOVA</h2>
+    <p style="color:var(--text-light);margin-bottom:2.5rem;">El compilador fue diseñado, implementado y documentado por:</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="avatar av1">JB</div>
+        <h4>Bautista Lara<br>Juan Francisco</h4>
+        <div class="team-role">Desarrollador</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar av2">DC</div>
+        <h4>Cruz Soberanes<br>Daniel</h4>
+        <div class="team-role">Desarrollador</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar av3">AE</div>
+        <h4>Escalona Mejía<br>Arturo Uriel</h4>
+        <div class="team-role">Desarrollador</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar av4">KG</div>
+        <h4>García Martínez<br>Kassandra Betzabeth</h4>
+        <div class="team-role">Desarrolladora</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar av5">HV</div>
+        <h4>Vázquez Olivares<br>Héctor</h4>
+        <div class="team-role">Desarrollador</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>TECHNOCOMPILER</strong> — Desarrollado por TECHNOVA Solutions</p>
+  <p style="margin-top:0.5rem;font-size:0.78rem;">Teoría de Compiladores · Arquitectura Modular · Optimización Automática C++</p>
+</footer>
+
+<a href="#inicio" class="back-top" title="Volver arriba">↑</a>
+
+<script>
+  function toggle(header) {
+    const item = header.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.acc-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+</script>
+</body>
+</html>

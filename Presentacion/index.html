@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HA&KU — Sistema de Inventario · Análisis de Algoritmos</title>
+    <meta name="description" content="Presentación del Sistema de Inventario HA&KU con Algoritmos de Ordenamiento y Búsqueda sobre Lista Enlazada Simulada en BD Relacional.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ── Extra styles for HA&KU slides ── */
+        .full-img-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+            padding: 0.3rem 0.5rem;
+            gap: 0.3rem;
+            box-sizing: border-box;
+        }
+        .full-img-slide img.main-img {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+        }
+        /* Slide 8: 2×2 grid of screenshots */
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0.6rem;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+        }
+        .screenshots-grid img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            background: #f9fafb;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        /* Split 2-col for búsqueda slide */
+        .split-search {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+        }
+        .search-col {
+            background: #fafafa;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 12px;
+            padding: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .search-col .pattern-image {
+            height: 160px;
+            margin-top: auto;
+        }
+        .code-img-wrap {
+            width: 100%;
+            margin-top: 0.8rem;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            overflow: hidden;
+        }
+        .code-img-wrap img {
+            width: 100%;
+            height: auto;
+            max-height: 48vh;
+            object-fit: contain;
+        }
+        /* DB split layout */
+        .db-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            width: 100%;
+            align-items: center;
+        }
+        .db-split .pattern-image {
+            height: 320px;
+        }
+        /* Conclusiones highlight */
+        .concl-card .pattern-title { color: var(--ipn-color); }
+        .mvc-img-wrap {
+            width: 100%;
+            margin-top: 0.8rem;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            overflow: hidden;
+        }
+        .mvc-img-wrap img {
+            width: 100%;
+            height: auto;
+            max-height: 48vh;
+            object-fit: contain;
+        }
+        .rest-img-wrap {
+            width: 100%;
+            margin-top: 0.8rem;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            overflow: hidden;
+        }
+        .rest-img-wrap img {
+            width: 100%;
+            height: auto;
+            max-height: 44vh;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Progress bar -->
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Slides Wrapper -->
+        <div class="slides-wrapper" id="slidesWrapper">
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 1 — Portada
+            ══════════════════════════════════════ -->
+            <section class="slide active">
+                <div class="slide-content cover-slide">
+                    <img src="LogoIPN.png" alt="Logo IPN" class="logo logo-left">
+                    <img src="LogoESIME.png" alt="Logo ESIME" class="logo logo-right">
+
+                    <div class="header-titles">
+                        <h2>INSTITUTO POLITÉCNICO NACIONAL</h2>
+                        <h3>ESCUELA SUPERIOR DE INGENIERÍA MECÁNICA Y ELÉCTRICA</h3>
+                        <h4>UNIDAD CULHUACÁN</h4>
+                        <h5>INGENIERÍA EN COMPUTACIÓN</h5>
+                    </div>
+
+                    <div class="main-title">
+                        <p class="subject">Análisis de Algoritmos</p>
+                        <h1>HA&amp;KU<br>Sistema de Inventario</h1>
+                    </div>
+
+                    <div class="authors-section">
+                        <p class="authors-title">Alumnos:</p>
+                        <ul class="authors-list">
+                            <li>García Martínez Kassandra Betzabeth</li>
+                            <li>Marín Vázquez Ulises</li>
+                            <li>Mata Romera Alan</li>
+                            <li>Vázquez Olivares Héctor</li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-info" style="align-items:center;">
+                        <p class="teacher">Mtra. Azorín Vega Claudia</p>
+                        <p class="group">Grupo: 5CM13</p>
+                        <div style="margin-top:0.8rem;">
+                            <img src="Logo.png" alt="Logo de HA&KU" style="height:110px; object-fit:contain;">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 2 — Justificación
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#800000,#600000)"></div>
+                        <h2>Justificación</h2>
+                    </div>
+                    <div class="patterns-grid top-row" style="grid-template-columns:1.6fr 1fr; margin-bottom:0;">
+                        <div class="pattern-card" style="gap:0.6rem;">
+                            <div class="pattern-text">
+                                <span class="pattern-title">¿Por qué este proyecto?</span>
+                                <span class="pattern-desc">Desarrollar un <strong>sistema de inventario funcional</strong> —con autenticación de usuarios, operaciones CRUD completas, panel de administración y una interfaz de usuario estética— obliga al equipo a aplicar los algoritmos en un contexto concreto, con datos reales y con la restricción adicional de que el entorno de ejecución no es un arreglo en memoria sino una <strong>base de datos relacional</strong>.</span>
+                            </div>
+                            <div class="pattern-text" style="margin-top:0.4rem;">
+                                <span class="pattern-title">La capa de complejidad extra</span>
+                                <span class="pattern-desc">Este punto introduce una capa de complejidad inusual en los proyectos académicos: los algoritmos deben <strong>recuperar los datos de MySQL y operar sobre ellos en PHP</strong>, lo que añade el concepto de <strong>transferencia de datos entre capas</strong> al análisis de rendimiento.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card" style="align-items:center; justify-content:center;">
+                            <div class="pattern-image" style="height:220px; width:100%;">
+                                <img src="justificacion.png" alt="Justificación — Capas del sistema">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 3 — Objetivo General
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#2563eb,#1d4ed8)"></div>
+                        <h2>Objetivo General</h2>
+                    </div>
+                    <div class="patterns-grid top-row" style="grid-template-columns:1.4fr 1fr; margin-bottom:0;">
+                        <div class="pattern-card" style="justify-content:center;">
+                            <div class="pattern-text">
+                                <span class="pattern-title" style="font-size:1rem; color:var(--accent);">Meta del proyecto</span>
+                                <span class="pattern-desc" style="font-size:1.15rem; line-height:1.6; color:var(--text-main);">Diseñar, implementar y analizar un <strong>sistema web de gestión de inventario</strong> que demuestre la aplicación práctica de algoritmos clásicos de <strong>ordenamiento y búsqueda</strong> sobre una estructura de datos persistida en una base de datos relacional, empleando <strong>arquitectura MVC</strong> y <strong>metodología ágil colaborativa</strong>.</span>
+                            </div>
+                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.8rem;">
+                                <span style="background:rgba(37,99,235,0.1); color:var(--accent); padding:0.3rem 0.8rem; border-radius:9999px; font-size:0.75rem; font-weight:700;">PHP + MySQL</span>
+                                <span style="background:rgba(128,0,0,0.1); color:var(--ipn-color); padding:0.3rem 0.8rem; border-radius:9999px; font-size:0.75rem; font-weight:700;">Arquitectura MVC</span>
+                                <span style="background:rgba(16,185,129,0.1); color:#059669; padding:0.3rem 0.8rem; border-radius:9999px; font-size:0.75rem; font-weight:700;">API RESTful</span>
+                                <span style="background:rgba(245,158,11,0.1); color:#b45309; padding:0.3rem 0.8rem; border-radius:9999px; font-size:0.75rem; font-weight:700;">Metodología Ágil</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card" style="align-items:center; justify-content:center;">
+                            <div class="pattern-image" style="height:220px; width:100%;">
+                                <img src="objetivo_general.png" alt="Objetivo General">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 4 — Objetivos Particulares
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#10b981,#059669)"></div>
+                        <h2>Objetivos Particulares</h2>
+                    </div>
+                    <div class="patterns-grid top-row" style="margin-bottom:0.6rem;">
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">① Algoritmos en PHP puro</span>
+                                <span class="pattern-desc">Implementar <strong>Bubble Sort, Quick Sort, Búsqueda Lineal y Búsqueda Binaria</strong> en PHP sin funciones nativas de ordenamiento/búsqueda.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">② Lista Enlazada en MySQL</span>
+                                <span class="pattern-desc">Simular lista enlazada mediante un <strong>campo de posición explícita</strong> para operaciones de inserción en cabeza, cola y posición arbitraria.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">③ Medición de Rendimiento</span>
+                                <span class="pattern-desc">Medir el <strong>tiempo de ejecución en ms</strong> de cada algoritmo y visualizar los resultados comparativos en la interfaz.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="patterns-grid bottom-row" style="padding:0; grid-template-columns:repeat(3,1fr);">
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">④ Arquitectura MVC + API REST</span>
+                                <span class="pattern-desc">Desarrollar una aplicación con <strong>arquitectura MVC y API RESTful</strong> que comunique el frontend JavaScript con el backend PHP.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">⑤ Autenticación y Seguridad</span>
+                                <span class="pattern-desc">Implementar <strong>autenticación de usuarios y consultas preparadas con PDO</strong> para prevenir SQL Injection y accesos no autorizados.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">⑥ Metodología Ágil</span>
+                                <span class="pattern-desc">Gestionar el trabajo de <strong>4 integrantes</strong> mediante metodología ágil con entregables definidos por fase.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 4.1 — Diseño de Casos de Uso
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content full-img-slide">
+                    <div class="grid-header" style="width:100%; margin-bottom:0.3rem; flex-shrink:0;">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#6366f1,#4338ca)"></div>
+                        <h2 style="font-size:1.5rem; margin:0;">Diseño de Casos de Uso</h2>
+                    </div>
+                    <img src="CasosDeUso.png" alt="Diagrama de Casos de Uso" class="main-img">
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 5 — Patrón MVC
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#f59e0b,#b45309)"></div>
+                        <h2>Patrón de Arquitectura MVC</h2>
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.5rem; line-height:1.45;">Su propósito central es la <strong>separación de responsabilidades</strong>: el Modelo gestiona los datos y la lógica de negocio; la Vista se encarga de la presentación y la interacción con el usuario; el Controlador actúa como intermediario, recibiendo las acciones del usuario, invocando la lógica del Modelo y seleccionando la Vista adecuada para la respuesta.</p>
+                    <div class="patterns-grid top-row" style="margin-bottom:0.5rem;">
+                        <!-- Vista -->
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title" style="color:#2563eb;">👁 Vista (public/)</span>
+                                <span class="pattern-desc">Frontend compuesto por archivos <strong>HTML5 estáticos</strong> (<code>index.html</code>, <code>dashboard.html</code>) vinculados a CSS externos y scripts JS. La única comunicación con el servidor es a través de <strong>Fetch API</strong> que consume los endpoints REST. Esta separación garantiza portabilidad a cualquier cliente.</span>
+                            </div>
+                        </div>
+                        <!-- Controlador -->
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title" style="color:#f59e0b;">⚙ Controlador (controllers/ + api/)</span>
+                                <span class="pattern-desc">Los controladores (<code>AuthController.php</code>, <code>ProductoController.php</code>) contienen la <strong>lógica de negocio</strong>: autenticar usuarios, insertar/eliminar productos, invocar algoritmos y devolver respuestas JSON. Los archivos <code>api/</code> actúan como <em>routers</em> que validan el método HTTP y la sesión activa.</span>
+                            </div>
+                        </div>
+                        <!-- Modelo -->
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title" style="color:#10b981;">🗄 Modelo (models/)</span>
+                                <span class="pattern-desc">Las clases <code>Producto.php</code> y <code>Usuario.php</code> representan las entidades del dominio. Cada clase encapsula atributos, un método de <strong>validación de datos</strong> y métodos de conversión (<code>toArray()</code>, <code>fromArray()</code>) para facilitar la serialización JSON. El Modelo no contiene lógica de acceso a la BD.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mvc-img-wrap">
+                        <img src="MVC.png" alt="Diagrama MVC del sistema HA&KU">
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 6 — Bases de Datos y Modelo E-R
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#0ea5e9,#0369a1)"></div>
+                        <h2>Bases de Datos Relacionales y Modelo E-R</h2>
+                    </div>
+                    <div class="db-split">
+                        <div style="display:flex; flex-direction:column; gap:0.7rem;">
+                            <div class="pattern-card">
+                                <div class="pattern-text">
+                                    <span class="pattern-title">¿Qué es una BD Relacional?</span>
+                                    <span class="pattern-desc">Organiza la información en <strong>tablas (relaciones)</strong> cuyos datos están inter-relacionados mediante claves primarias y foráneas. El modelo relacional garantiza la <strong>integridad referencial</strong>, permite consultas declarativas mediante <strong>SQL</strong> y asegura las propiedades <strong>ACID</strong>.</span>
+                                </div>
+                            </div>
+                            <div class="pattern-card">
+                                <div class="pattern-text">
+                                    <span class="pattern-title">Entidades del sistema HA&KU</span>
+                                    <span class="pattern-desc"><strong>usuarios:</strong> credenciales con contraseña hasheada Bcrypt (<code>password_hash()</code>)<br><strong>productos:</strong> inventario con campos <code>id</code>, <code>posicion</code>, <code>codigo</code>, <code>nombre</code>, <code>precio</code>, <code>stock</code>, <code>stock_minimo</code>, <code>categoria</code>, <code>marca_proveedor</code></span>
+                                </div>
+                            </div>
+                            <div class="pattern-card">
+                                <div class="pattern-text">
+                                    <span class="pattern-title">Índices para rendimiento</span>
+                                    <span class="pattern-desc">Los índices definidos sobre <code>posicion</code>, <code>codigo</code> y <code>nombre</code> aceleran las consultas de ordenamiento y búsqueda a nivel de BD, complementando los algoritmos en la capa de aplicación.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pattern-card" style="align-items:center; justify-content:center;">
+                            <div class="pattern-image" style="height:300px; width:100%;">
+                                <img src="DB.png" alt="Modelo Entidad-Relación HA&KU">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 7 — Lista Enlazada en BD
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#ef4444,#b91c1c)"></div>
+                        <h2>Simulación de Lista Enlazada en BD Relacional</h2>
+                    </div>
+                    <div class="patterns-grid top-row" style="margin-bottom:0.6rem;">
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">¿Qué es una Lista Enlazada?</span>
+                                <span class="pattern-desc">Estructura lineal donde cada nodo contiene un dato y un <strong>apuntador al siguiente nodo</strong>. Sus operaciones características:<br><strong>Cabeza:</strong> O(1) · <strong>Cola:</strong> O(1) con tail ptr · <strong>Posición k:</strong> O(k) · <strong>Eliminación cabeza:</strong> O(1) · <strong>Búsqueda:</strong> O(n)</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">El problema con BD Relacionales</span>
+                                <span class="pattern-desc">Las BD relacionales <strong>no contemplan nativamente</strong> una estructura equivalente a la lista enlazada. Los registros de una tabla no tienen un orden garantizado salvo el especificado explícitamente en la cláusula <code>ORDER BY</code>.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Estrategia adoptada: campo <code>posicion</code></span>
+                                <span class="pattern-desc"><strong>Campo posicion (INT, NOT NULL):</strong> Cada producto almacena un entero que representa su lugar en la secuencia lógica. La consulta <code>SELECT * FROM productos ORDER BY posicion ASC</code> reproduce fielmente el recorrido de una lista enlazada de cabeza a cola.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="patterns-grid bottom-row" style="padding:0; grid-template-columns:repeat(3,1fr);">
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Inserción en Cabeza — O(n)</span>
+                                <span class="pattern-desc"><code>UPDATE productos SET posicion = posicion + 1;</code><br>Luego: <code>INSERT INTO productos (..., posicion) VALUES (..., 1);</code><br>O(n) por la actualización masiva.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Inserción en Cola — O(1)</span>
+                                <span class="pattern-desc"><code>SELECT MAX(posicion)+1 AS nueva FROM productos;</code><br>Luego <code>INSERT</code> con esa posición. O(1) si MAX está indexado.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Inserción en Posición k</span>
+                                <span class="pattern-desc"><code>UPDATE productos SET posicion = posicion + 1 WHERE posicion &gt;= :k;</code><br>Luego <code>INSERT (..., posicion) VALUES (..., :k);</code></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 8 — Capturas del Sistema
+            ══════════════════════════════════════ -->
+            <section class="slide" style="padding:0.5rem 1.5rem;">
+                <div class="slide-content full-img-slide" style="max-width:100%; height:100%; justify-content:flex-start;">
+                    <div class="grid-header" style="width:100%; margin-bottom:0.4rem; flex-shrink:0;">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#06b6d4,#0891b2)"></div>
+                        <h2 style="font-size:1.5rem; margin:0;">Sistema en Funcionamiento</h2>
+                    </div>
+                    <img src="44.png" alt="Pantalla del sistema HA&KU"
+                         style="width:100%; flex:1; min-height:0; object-fit:contain; border-radius:8px; box-shadow:0 4px 24px rgba(0,0,0,0.18);">
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 9 — Diagrama de Clases UML
+            ══════════════════════════════════════ -->
+            <section class="slide" style="padding:0.5rem 1.5rem;">
+                <div class="slide-content full-img-slide" style="max-width:100%; height:100%; justify-content:flex-start;">
+                    <div class="grid-header" style="width:100%; margin-bottom:0.4rem; flex-shrink:0;">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#8b5cf6,#7c3aed)"></div>
+                        <h2 style="font-size:1.5rem; margin:0;">Diagrama de Clases Principales</h2>
+                    </div>
+                    <img src="UML.png" alt="Diagrama de Clases UML del sistema HA&KU"
+                         style="width:100%; flex:1; min-height:0; object-fit:contain; border-radius:8px; box-shadow:0 4px 24px rgba(0,0,0,0.18);">
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 10 — Bubble Sort
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#10b981,#047857)"></div>
+                        <h2>Algoritmos de Ordenamiento — Bubble Sort</h2>
+                    </div>
+                    <div class="patterns-grid top-row" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:0.5rem;">
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">¿Cómo funciona?</span>
+                                <span class="pattern-desc">Funciona <strong>comparando pares de elementos adyacentes</strong> e intercambiándolos si están en el orden incorrecto, repitiendo el proceso hasta que el arreglo esté ordenado. Los valores mayores "burbujean" hacia el final en cada pasada.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Complejidad</span>
+                                <span class="pattern-desc">
+                                    <strong>Peor caso:</strong> O(n²) — arreglo invertido<br>
+                                    <strong>Caso promedio:</strong> O(n²)<br>
+                                    <strong>Mejor caso:</strong> O(n) — ya ordenado (con bandera)<br>
+                                    <strong>Espacio:</strong> O(1) — in-place<br>
+                                    <strong>Estabilidad:</strong> Estable ✓
+                                </span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Implementación en PHP</span>
+                                <span class="pattern-desc">Implementado con la <strong>optimización de bandera</strong> (<code>$huboIntercambio</code>) que detecta cuando el arreglo ya está ordenado y termina anticipadamente, logrando O(n) en el mejor caso. Sin uso de <code>sort()</code> nativo.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="code-img-wrap">
+                        <img src="burbuja PHP.png" alt="Implementación Bubble Sort en PHP">
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 11 — Quick Sort
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#f59e0b,#d97706)"></div>
+                        <h2>Algoritmos de Ordenamiento — Quick Sort</h2>
+                    </div>
+                    <div class="patterns-grid top-row" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:0.5rem;">
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Divide y Ganarás</span>
+                                <span class="pattern-desc">El Quick Sort selecciona un elemento como <strong>pivote</strong> y reordena el arreglo de manera que todos los elementos menores al pivote queden a su izquierda y todos los mayores a su derecha. Luego se aplica <strong>recursivamente</strong> a cada subconjunto.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Complejidad</span>
+                                <span class="pattern-desc">
+                                    <strong>Peor caso:</strong> O(n²) — pivote siempre mínimo/máximo<br>
+                                    <strong>Caso promedio:</strong> O(n log n)<br>
+                                    <strong>Mejor caso:</strong> O(n log n)<br>
+                                    <strong>Espacio:</strong> O(log n) en pila de recursión<br>
+                                    <strong>Estabilidad:</strong> No estable
+                                </span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">Ventaja sobre Bubble Sort</span>
+                                <span class="pattern-desc">En las pruebas del sistema, Quick Sort fue <strong>~3.5× más rápido</strong> que Bubble Sort para n=100 productos (0.6 ms vs 2.1 ms). La diferencia crece con n, siguiendo la predicción teórica O(n log n) vs O(n²).</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="code-img-wrap">
+                        <img src="quick sort PHP.png" alt="Implementación Quick Sort en PHP">
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 12 — Algoritmos de Búsqueda
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#ec4899,#be185d)"></div>
+                        <h2>Algoritmos de Búsqueda</h2>
+                    </div>
+                    <div class="split-search">
+                        <!-- Búsqueda Lineal -->
+                        <div class="search-col">
+                            <span class="pattern-title" style="font-size:1rem; color:#2563eb;">🔍 Búsqueda Lineal</span>
+                            <span class="pattern-desc">La búsqueda lineal (o secuencial) <strong>recorre cada elemento</strong> de la colección comparándolo con el valor buscado hasta encontrarlo o agotar la lista. Es el algoritmo de búsqueda más simple y funciona sobre cualquier colección, <strong>independientemente de su orden</strong>.</span>
+                            <div style="margin-top:0.3rem; font-size:0.8rem; color:var(--text-muted);">
+                                <strong>Peor caso:</strong> O(n) · <strong>Promedio:</strong> O(n/2) · <strong>Mejor caso:</strong> O(1)
+                            </div>
+                            <div class="pattern-image" style="height:180px; width:100%; margin-top:auto;">
+                                <img src="busqueda_lineal.png" alt="Búsqueda Lineal en PHP">
+                            </div>
+                        </div>
+                        <!-- Búsqueda Binaria -->
+                        <div class="search-col">
+                            <span class="pattern-title" style="font-size:1rem; color:#800000;">⚡ Búsqueda Binaria</span>
+                            <span class="pattern-desc">La búsqueda binaria es un algoritmo de alta eficiencia que opera sobre colecciones <strong>previamente ordenadas</strong>. En cada paso <strong>divide el espacio de búsqueda a la mitad</strong>, comparando el elemento del centro con el valor buscado y descartando la mitad que no puede contenerlo.</span>
+                            <div style="margin-top:0.3rem; font-size:0.8rem; color:var(--text-muted);">
+                                <strong>Peor caso:</strong> O(log n) · <strong>Promedio:</strong> O(log n) · <strong>Requisito:</strong> colección ordenada
+                            </div>
+                            <div class="pattern-image" style="height:180px; width:100%; margin-top:auto;">
+                                <img src="busqueda_binaria.png" alt="Búsqueda Binaria en PHP">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 13 — API REST
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#0ea5e9,#0284c7)"></div>
+                        <h2>API REST (Representational State Transfer)</h2>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem; line-height:1.4;">REST es un <strong>estilo arquitectónico</strong> para sistemas distribuidos. No es un protocolo ni un estándar, sino un conjunto de seis restricciones de diseño que producen sistemas web altamente desacoplados, escalables e interoperables.</p>
+                    <div class="patterns-grid top-row" style="margin-bottom:0.4rem;">
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">① Cliente-Servidor</span>
+                                <span class="pattern-desc">Separa la interfaz del usuario del almacenamiento de datos para que ambos evolucionen por su cuenta de forma independiente.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">② Sin Estado (Stateless)</span>
+                                <span class="pattern-desc">Cada petición debe ser autosuficiente. En HA&KU se logra enviando la sesión PHP en cada llamada mediante <code>credentials: 'include'</code> de Fetch API.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">③ Caché</span>
+                                <span class="pattern-desc">Las respuestas indican si pueden guardarse. Se usa <code>no-cache</code> en rutas críticas para proteger datos sensibles del navegador.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="patterns-grid bottom-row" style="padding:0; grid-template-columns:repeat(3,1fr); margin-bottom:0.4rem;">
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">④ Interfaz Uniforme</span>
+                                <span class="pattern-desc">Los recursos se gestionan de forma estándar mediante <strong>URIs únicas</strong> y verbos HTTP (GET, POST, PUT, DELETE).</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">⑤ Sistema en Capas</span>
+                                <span class="pattern-desc">El cliente interactúa con la API sin importar si hay intermediarios como proxies o balanceadores en medio.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">⑥ Código Bajo Demanda</span>
+                                <span class="pattern-desc">El servidor puede mejorar la funcionalidad del cliente enviando scripts ejecutables (como <strong>JavaScript</strong>).</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rest-img-wrap">
+                        <img src="HTTP.png" alt="Diagrama HTTP REST del sistema HA&KU">
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 14 — Arquitectura del Sistema
+            ══════════════════════════════════════ -->
+            <section class="slide" style="padding:0.5rem 1.5rem;">
+                <div class="slide-content full-img-slide" style="max-width:100%; height:100%; justify-content:flex-start;">
+                    <div class="grid-header" style="width:100%; margin-bottom:0.4rem; flex-shrink:0;">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#6366f1,#4338ca)"></div>
+                        <h2 style="font-size:1.5rem; margin:0;">Diseño: Arquitectura del Sistema</h2>
+                    </div>
+                    <img src="ArquictecturaDelSistema.png" alt="Arquitectura del Sistema HA&KU"
+                         style="width:100%; flex:1; min-height:0; object-fit:contain; border-radius:8px; box-shadow:0 4px 24px rgba(0,0,0,0.18);">
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 SLIDE 15 — Conclusiones
+            ══════════════════════════════════════ -->
+            <section class="slide">
+                <div class="slide-content grid-slide">
+                    <div class="grid-header">
+                        <div class="title-accent" style="background:linear-gradient(to bottom,#800000,#600000)"></div>
+                        <h2>Conclusiones</h2>
+                    </div>
+                    <div class="patterns-grid top-row" style="margin-bottom:0.6rem;">
+                        <div class="pattern-card concl-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">① Lenguaje vs. Algoritmo</span>
+                                <span class="pattern-desc">El entorno de ejecución (PHP vs C++) afecta <strong>más al rendimiento real</strong> que la lógica del algoritmo. Un mismo algoritmo puede ser muy lento en un lenguaje interpretado, aunque su Big-O sea idéntico.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card concl-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">② Estructuras en BD</span>
+                                <span class="pattern-desc">Implementar una lista enlazada en SQL es posible, pero <strong>sacrifica eficiencia</strong> (inserciones O(n)) a cambio de persistencia de datos y atomicidad de transacciones.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card concl-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">③ Trabajo en Equipo</span>
+                                <span class="pattern-desc">El uso de <strong>MVC y una API</strong> permitió que backend y frontend avanzaran en paralelo sin conflictos, usando la API como contrato de comunicación entre integrantes.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="patterns-grid bottom-row" style="padding:0 4rem;">
+                        <div class="pattern-card concl-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">④ Seguridad</span>
+                                <span class="pattern-desc">La seguridad <strong>debe estar en el servidor</strong>. Un error demostró que validar solo en el cliente (con localStorage) no sirve, porque el usuario puede manipular el navegador. La sesión PHP en el servidor es la verdadera barrera.</span>
+                            </div>
+                        </div>
+                        <div class="pattern-card concl-card">
+                            <div class="pattern-text">
+                                <span class="pattern-title">⑤ Metodología</span>
+                                <span class="pattern-desc">Los <strong>sprints semanales</strong> y las reuniones cortas fueron clave para organizar el trabajo, adaptarse a problemas y mantener al equipo sincronizado durante todo el ciclo de desarrollo.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Controles de Navegación -->
+        <div class="controls">
+            <button id="prevBtn" class="nav-btn" aria-label="Anterior" disabled>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="slide-indicator">
+                <span id="currentSlide">1</span> / <span id="totalSlides">15</span>
+            </div>
+            <button id="nextBtn" class="nav-btn" aria-label="Siguiente">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
